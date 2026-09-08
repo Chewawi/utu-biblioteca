@@ -13,21 +13,13 @@ class Libro {
         $this->imagen = $imagen;
     }
 
-    public function getId() {
-        return $this->id;
-    }
+    // --- getters ---
+    public function getId() { return $this->id; }
+    public function getTitulo() { return $this->titulo; }
+    public function getAutor() { return $this->autor; }
+    public function getImagen() { return $this->imagen; }
 
-    public function getTitulo() {
-        return $this->titulo;
-    }
-
-    public function getAutor() {
-        return $this->autor;
-    }
-
-    public function getimagen() {
-        return $this->imagen;
-    }
+    // --- acceso a datos ---
 
     public static function listar($pdo) {
         $stmt = $pdo->prepare("SELECT * FROM libros ORDER BY titulo");
@@ -41,6 +33,13 @@ class Libro {
         return $libros;
     }
 
+    public static function buscarPorId($pdo, $id) {
+        $stmt = $pdo->prepare("SELECT * FROM libros WHERE id = ?");
+        $stmt->execute([$id]);
+        $f = $stmt->fetch();
+        return $f ? new Libro($f['id'], $f['titulo'], $f['autor'], $f['imagen']) : null;
+    }
+
     public static function crear($pdo, $titulo, $autor, $imagen) {
         $stmt = $pdo->prepare(
             "INSERT INTO libros (titulo, autor, imagen) VALUES (?, ?, ?)"
@@ -50,20 +49,13 @@ class Libro {
 
     public static function actualizar($pdo, $id, $titulo, $autor, $imagen) {
         $stmt = $pdo->prepare(
-            "UPDATE libros SET titulo=?, autor=?, imagen=? WHERE id=?"
+            "UPDATE libros SET titulo = ?, autor = ?, imagen = ? WHERE id = ?"
         );
         return $stmt->execute([$titulo, $autor, $imagen, $id]);
     }
 
     public static function eliminar($pdo, $id) {
-        $stmt = $pdo->prepare("DELETE FROM libros WHERE id=?");
+        $stmt = $pdo->prepare("DELETE FROM libros WHERE id = ?");
         return $stmt->execute([$id]);
-    }
-
-    public static function buscarPorId($pdo, $id) {
-        $stmt = $pdo->prepare("SELECT * FROM libros WHERE id=?");
-        $stmt->execute([$id]);
-        $f = $stmt->fetch();
-        return $f ? new Libro($f['id'], $f['titulo'], $f['autor'], $f['imagen']) : null;
     }
 }

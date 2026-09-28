@@ -32,7 +32,7 @@ class Libro {
         }
         return $libros;
     }
-
+    
     public static function buscarPorId($pdo, $id) {
         $stmt = $pdo->prepare("SELECT * FROM libros WHERE id = ?");
         $stmt->execute([$id]);

@@ -1,6 +1,4 @@
-<?php require __DIR__ . '/../header.php'; ?> // <body> abierto
-
-// todo esto esta dentro del <body> de header.php
+<?php require __DIR__ . '/../header.php'; ?> 
 
 <h1>Libros</h1>
 <a href="index.php?accion=formCrear" class="btn btn-primary">Nuevo libro</a>
@@ -18,4 +16,4 @@
 <?php endforeach; ?>
 </table>
 
-<?php require __DIR__ . '/../footer.php'; ?> // <body> cerrado
+<?php require __DIR__ . '/../footer.php'; ?>

@@ -1,5 +1,5 @@
-</body> // aca se cierra el <body> que se abre en header.php
+</body> 
 
-<footer>
+<!-- <footer>
     <p>by Kodeko</p>
-</footer>
+</footer> -->

@@ -18,7 +18,19 @@ class Usuario {
     public function getEmail() { return $this->email; }
     public function getPass() { return $this->pass; }
    
+    public static function buscarPorId($pdo, $id) {
+        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE id = ?");
+        $stmt->execute([$id]);
+        $f = $stmt->fetch();
+        return $f ? new Usuario($f['id'], $f['rol'], $f['email'], $f['pass']) : null;
+    }
 
+    public static function buscarPorEmail($pdo, $email) {
+        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ?");
+        $stmt->execute([$email]);
+        $f = $stmt->fetch();
+        return $f ? new Usuario($f['id'], $f['rol'], $f['email'], $f['pass']) : null;
+    }
 
     public static function crear($pdo, $rol, $email, $pass) {
         $stmt = $pdo->prepare(

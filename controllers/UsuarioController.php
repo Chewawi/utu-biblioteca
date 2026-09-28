@@ -3,12 +3,13 @@
 require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../conexion.php'; // expone $pdo
 
-function formLogin() {
+function formLogin()
+{
     global $pdo;
 
     $email = trim($_POST['email'] ?? '');
     $pass  = trim($_POST['pass'] ?? '');
-    
+
     $usuario = Usuario::buscarPorEmail($pdo, $email);
 
     if ($usuario && password_verify($pass, $usuario->getPass())) {
@@ -23,7 +24,8 @@ function formLogin() {
     }
 }
 
-function formEditarUsuario() {
+function formEditarUsuario()
+{
     global $pdo;
     $usuario = Usuario::buscarPorId($pdo, $_GET['id'] ?? 0);
 
@@ -34,7 +36,8 @@ function formEditarUsuario() {
     require __DIR__ . '/../views/usuarios/form.php';
 }
 
-function editarUsuario() {
+function editarUsuario()
+{
     global $pdo;
 
     $id     = $_POST['id'] ?? 0;
@@ -54,12 +57,15 @@ function editarUsuario() {
         return;
     }
 
-    Usuario::actualizar($pdo, $id, $rol, $email, $pass, $imagen);
+    $pass = password_hash($pass, PASSWORD_DEFAULT);
+
+    Usuario::actualizar($pdo, $id, $rol, $email, $pass);
     header('Location: index.php?a=listar');
     exit;
 }
 
-function eliminarUsuario() {
+function eliminarUsuario()
+{
     global $pdo;
     Usuario::eliminar($pdo, $_GET['id'] ?? 0);
     header('Location: index.php?a=listar');

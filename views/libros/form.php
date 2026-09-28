@@ -7,9 +7,9 @@
 <?php endif; ?>
 
 <form method="POST"
-      action="index.php?accion=<?= isset($libro) ? 'editar' : 'crear' ?>"
-      enctype="multipart/form-data"
-      class="col-md-6">
+  action="index.php?a=<?= isset($libro) ? 'editar' : 'crear' ?>"
+  enctype="multipart/form-data"
+  class="col-md-6">
 
   <?php if (isset($libro)): ?>
     <input type="hidden" name="id" value="<?= $libro->getId() ?>">
@@ -18,13 +18,13 @@
   <div class="mb-3">
     <label class="form-label">Título</label>
     <input type="text" name="titulo" class="form-control"
-           value="<?= isset($libro) ? htmlspecialchars($libro->getTitulo()) : '' ?>">
+      value="<?= isset($libro) ? htmlspecialchars($libro->getTitulo()) : '' ?>">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Autor</label>
     <input type="text" name="autor" class="form-control"
-           value="<?= isset($libro) ? htmlspecialchars($libro->getAutor()) : '' ?>">
+      value="<?= isset($libro) ? htmlspecialchars($libro->getAutor()) : '' ?>">
   </div>
 
   <?php if (isset($libro)): ?>
@@ -42,7 +42,7 @@
   </div>
 
   <button type="submit" class="btn btn-primary">Guardar</button>
-  <a href="index.php?accion=listar" class="btn btn-link">Cancelar</a>
+  <a href="index.php?a=listar" class="btn btn-link">Cancelar</a>
 </form>
 
 <?php require __DIR__ . '/../footer.php'; ?>

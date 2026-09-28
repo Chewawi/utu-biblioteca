@@ -2,14 +2,16 @@
 require __DIR__ . '/../models/Libro.php';
 require __DIR__ . '/../conexion.php'; // expone $pdo
 
-function listarLibros() {
+function listarLibros()
+{
     global $pdo;
     $libros = Libro::listar($pdo);
 
     require __DIR__ . '/../views/libros/listar.php';
 }
 
-function crearLibro() {
+function crearLibro()
+{
     global $pdo;
 
     $titulo = trim($_POST['titulo'] ?? '');
@@ -29,17 +31,19 @@ function crearLibro() {
     }
 
     Libro::crear($pdo, $titulo, $autor, $imagen);
-    header('Location: index.php?accion=listar');
+    header('Location: index.php?a=listar');
 }
 
-function formEditarLibro() {
+function formEditarLibro()
+{
     global $pdo;
     $libro = Libro::buscarPorId($pdo, $_GET['id']);
     require __DIR__ . '/../views/libros/form.php';
 }
 
-function eliminarLibro() {
+function eliminarLibro()
+{
     global $pdo;
     Libro::eliminar($pdo, $_GET['id']);
-    header('Location: index.php?accion=listar');
+    header('Location: index.php?a=listar');
 }

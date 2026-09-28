@@ -9,7 +9,7 @@
 <body>
 <nav class="navbar navbar-dark bg-dark mb-4">
   <div class="container">
-    <a class="navbar-brand" href="index.php?accion=listar">📚 Biblioteca</a>
+    <a class="navbar-brand" href="index.php?a=listar">📚 Biblioteca</a>
   </div>
 </nav>
 <div class="container pb-5">

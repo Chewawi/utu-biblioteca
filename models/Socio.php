@@ -1,78 +1,94 @@
 <?php
-require_once "Usuario.php";
+require_once __DIR__ . '/Usuario.php';
 
-class Socio
-{
-    private int $id;
-    private Usuario $usuario;
-    private string $nombre;
-    private string $telefono;
-    private string $direccion;
+// ============================================================
+//  Modelo Socio
+//  Un socio es una persona que puede pedir libros prestados.
+//  Está enganchado a una cuenta de Usuario (para poder loguearse).
+// ============================================================
 
-    public function __construct(int $id, Usuario $usuario, string $nombre, string $telefono, string $direccion)
-    {
+class Socio {
+    private $id;
+    private $usuario; // objeto Usuario asociado
+    private $nombre;
+    private $direccion;
+    private $telefono;
+
+    public function __construct($id, $usuario, $nombre, $direccion, $telefono) {
         $this->id = $id;
         $this->usuario = $usuario;
         $this->nombre = $nombre;
-        $this->telefono = $telefono;
         $this->direccion = $direccion;
+        $this->telefono = $telefono;
     }
 
     // --- getters ---
-    public function getId()
-    {
-        return $this->id;
-    }
-    public function getUsuario()
-    {
-        return $this->usuario;
-    }
-    public function getNombre()
-    {
-        return $this->nombre;
-    }
-    public function getTelefono()
-    {
-        return $this->telefono;
-    }
-    public function getDireccion()
-    {
-        return $this->direccion;
-    }
+    public function getId() { return $this->id; }
+    public function getUsuario() { return $this->usuario; }
+    public function getNombre() { return $this->nombre; }
+    public function getDireccion() { return $this->direccion; }
+    public function getTelefono() { return $this->telefono; }
 
     // --- acceso a datos ---
 
-    public static function listar($pdo)
-    {
-        $stmt = $pdo->prepare("SELECT * FROM socio ORDER BY ");
-        $stmt->execute();
+    public static function listar($pdo) {
+        $stmt = $pdo->query("SELECT * FROM socios ORDER BY nombre");
         $filas = $stmt->fetchAll();
 
-        $libros = [];
+        $socios = [];
         foreach ($filas as $f) {
-            $libros[] = new Libro($f['id'], $f['titulo'], $f['autor'], $f['imagen']);
+            $usuario = Usuario::buscarPorId($pdo, $f['usuario_id']);
+            $socios[] = new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono']);
         }
-        return $libros;
+        return $socios;
     }
-    public static function buscarPorId($pdo, $id)
-    {
+
+    public static function buscarPorId($pdo, $id) {
         $stmt = $pdo->prepare("SELECT * FROM socios WHERE id = ?");
         $stmt->execute([$id]);
         $f = $stmt->fetch();
-        return $f ? new Socio($f['id'], $f['usuario_id'], $f['nombre'], $f['telefono'], $f['direccion']) : null;
+        if (!$f) {
+            return null;
+        }
+        $usuario = Usuario::buscarPorId($pdo, $f['usuario_id']);
+        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono']);
     }
 
-    public static function crear($pdo, $usuario_id, $nombre, $telefono, $direccion)
-    {
+    /** Busca el socio asociado a una cuenta de usuario (para "Mis préstamos"). */
+    public static function buscarPorUsuarioId($pdo, $usuarioId) {
+        $stmt = $pdo->prepare("SELECT * FROM socios WHERE usuario_id = ?");
+        $stmt->execute([$usuarioId]);
+        $f = $stmt->fetch();
+        if (!$f) {
+            return null;
+        }
+        $usuario = Usuario::buscarPorId($pdo, $f['usuario_id']);
+        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono']);
+    }
+
+    public static function crear($pdo, $usuarioId, $nombre, $direccion, $telefono) {
         $stmt = $pdo->prepare(
-            "INSERT INTO socios (usuario_id, nombre, telefono, direccion) VALUES (?, ?, ?, ?)"
+            "INSERT INTO socios (usuario_id, nombre, direccion, telefono) VALUES (?, ?, ?, ?)"
         );
-        return $stmt->execute([$usuario_id, $nombre, $telefono, $direccion]);
+        return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono]);
     }
 
-    public static function eliminar($pdo, $id)
-    {
+    public static function actualizar($pdo, $id, $usuarioId, $nombre, $direccion, $telefono) {
+        $stmt = $pdo->prepare(
+            "UPDATE socios SET usuario_id = ?, nombre = ?, direccion = ?, telefono = ? WHERE id = ?"
+        );
+        return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono, $id]);
+    }
+
+    public static function eliminar($pdo, $id) {
         $stmt = $pdo->prepare("DELETE FROM socios WHERE id = ?");
         return $stmt->execute([$id]);
+    }
+
+    /** true si el socio tiene algún préstamo ahora mismo. */
+    public static function tienePrestamos($pdo, $id) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM prestamos WHERE socio_id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetchColumn() > 0;
     }
 }

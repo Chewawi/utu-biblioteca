@@ -1,41 +1,116 @@
 <?php
+// ============================================================
+//  index.php — Punto de entrada único (Router)
+//  Toda petición pasa por acá. Miramos "accion" en la URL y
+//  llamamos a la función que corresponde.
+//  Ejemplo: index.php?accion=listarLibros -> listarLibros()
+// ============================================================
+
 session_start();
 
-require __DIR__ . '/controllers/LibroController.php';
-require __DIR__ . '/controllers/UsuarioController.php';
+require_once __DIR__ . '/conexion.php'; // deja $pdo listo
+require_once __DIR__ . '/helpers.php';
 
-$accion = $_GET['a'] ?? 'listar';
+require_once __DIR__ . '/controllers/LibroController.php';
+require_once __DIR__ . '/controllers/SocioController.php';
+require_once __DIR__ . '/controllers/UsuarioController.php';
+require_once __DIR__ . '/controllers/PrestamoController.php';
 
-$accionesPublicas = ['listar', 'login', 'doLogin'];
-
-if (!in_array($accion, $accionesPublicas) && !isset($_SESSION['usuario_id'])) {
-    header('Location: index.php?a=login');
-    exit;
-}
+$accion = $_GET['accion'] ?? 'listarLibros';
 
 switch ($accion) {
-    case 'listar':
-        listarLibros();
-        break;
-    case 'formCrear':
-        require __DIR__ . '/views/libros/form.php';
-        break;
-    case 'crear':
-        crearLibro();
-        break;
-    case 'formEditar':
-        formEditarLibro();
-        break;
-    case 'eliminar':
-        eliminarLibro();
-        break;
+    // --- Sesión y registro ---
     case 'login':
-        require __DIR__ . '/views/usuarios/login.php';
-        break;
-    case 'formLogin':
         formLogin();
         break;
+    case 'login':
+        login();
+        break;
+    case 'logout':
+        logout();
+        break;
+    case 'registro':
+        registro();
+        break;
+    case 'registrar':
+        registrar();
+        break;
+
+    // --- Libros ---
+    case 'listarLibros':
+        listarLibros();
+        break;
+    case 'formCrearLibro':
+        formCrearLibro();
+        break;
+    case 'crearLibro':
+        crearLibro();
+        break;
+    case 'formEditarLibro':
+        formEditarLibro();
+        break;
+    case 'editarLibro':
+        editarLibro();
+        break;
+    case 'eliminarLibro':
+        eliminarLibro();
+        break;
+
+    // --- Socios ---
+    case 'listarSocios':
+        listarSocios();
+        break;
+    case 'formCrearSocio':
+        formCrearSocio();
+        break;
+    case 'crearSocio':
+        crearSocio();
+        break;
+    case 'formEditarSocio':
+        formEditarSocio();
+        break;
+    case 'editarSocio':
+        editarSocio();
+        break;
+    case 'eliminarSocio':
+        eliminarSocio();
+        break;
+
+    // --- Usuarios ---
+    case 'listarUsuarios':
+        listarUsuarios();
+        break;
+    case 'formCrearUsuario':
+        formCrearUsuario();
+        break;
+    case 'crearUsuario':
+        crearUsuario();
+        break;
+    case 'formEditarUsuario':
+        formEditarUsuario();
+        break;
+    case 'editarUsuario':
+        editarUsuario();
+        break;
+    case 'eliminarUsuario':
+        eliminarUsuario();
+        break;
+
+    // --- Préstamos ---
+    case 'listarPrestamos':
+        listarPrestamos();
+        break;
+    case 'formCrearPrestamo':
+        formCrearPrestamo();
+        break;
+    case 'crearPrestamo':
+        crearPrestamo();
+        break;
+    case 'eliminarPrestamo':
+        eliminarPrestamo();
+        break;
+
     default:
-        http_response_code(404);
-        echo "Página no encontrada";
+        listarLibros();
+        break;
 }

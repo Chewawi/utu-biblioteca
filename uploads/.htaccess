@@ -1,0 +1,6 @@
+# Evita que se ejecute código PHP dentro de esta carpeta,
+# aunque alguien logre subir un archivo .php disfrazado de imagen.
+<FilesMatch "\.(php|phtml|php\d?)$">
+    Require all denied
+</FilesMatch>
+php_flag engine off

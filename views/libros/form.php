@@ -7,7 +7,7 @@
 <?php endif; ?>
 
 <form method="POST"
-  action="index.php?a=<?= isset($libro) ? 'editar' : 'crear' ?>"
+  action="index.php?accion=<?= isset($libro) ? 'editarLibro' : 'crearLibro' ?>"
   enctype="multipart/form-data"
   class="col-md-6">
 
@@ -17,14 +17,20 @@
 
   <div class="mb-3">
     <label class="form-label">Título</label>
-    <input type="text" name="titulo" class="form-control"
-      value="<?= isset($libro) ? htmlspecialchars($libro->getTitulo()) : '' ?>">
+    <input type="text" name="titulo" class="form-control" required
+      value="<?= isset($libro) ? htmlspecialchars($libro->getTitulo()) : htmlspecialchars($_POST['titulo'] ?? '') ?>">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Autor</label>
-    <input type="text" name="autor" class="form-control"
-      value="<?= isset($libro) ? htmlspecialchars($libro->getAutor()) : '' ?>">
+    <input type="text" name="autor" class="form-control" required
+      value="<?= isset($libro) ? htmlspecialchars($libro->getAutor()) : htmlspecialchars($_POST['autor'] ?? '') ?>">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Categoría (opcional)</label>
+    <input type="text" name="categoria" class="form-control" placeholder="Novela, Fantasía, Ensayo..."
+      value="<?= isset($libro) ? htmlspecialchars($libro->getCategoria() ?? '') : htmlspecialchars($_POST['categoria'] ?? '') ?>">
   </div>
 
   <?php if (isset($libro)): ?>
@@ -36,13 +42,14 @@
 
   <div class="mb-3">
     <label class="form-label">
-      <?= isset($libro) ? 'Reemplazar portada (opcional)' : 'Portada' ?>
+      <?= isset($libro) ? 'Reemplazar portada (opcional)' : 'Portada (opcional)' ?>
     </label>
-    <input type="file" name="imagen" class="form-control">
+    <input type="file" name="imagen" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+    <div class="form-text">JPG, PNG o WEBP. Máximo 2&nbsp;MB.</div>
   </div>
 
   <button type="submit" class="btn btn-primary">Guardar</button>
-  <a href="index.php?a=listar" class="btn btn-link">Cancelar</a>
+  <a href="index.php?accion=listarLibros" class="btn btn-link">Cancelar</a>
 </form>
 
 <?php require __DIR__ . '/../footer.php'; ?>

@@ -23,7 +23,7 @@ switch ($accion) {
     case 'login':
         formLogin();
         break;
-    case 'login':
+    case 'auth':
         login();
         break;
     case 'logout':

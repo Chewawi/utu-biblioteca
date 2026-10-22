@@ -54,7 +54,7 @@ $fotoActual = isset($socio) ? $socio->getFoto() : AVATAR_POR_DEFECTO;
     <label class="form-label d-block"><?= isset($socio) ? 'Reemplazar foto (opcional)' : 'Foto (opcional)' ?></label>
     <div class="d-flex align-items-center gap-3">
       <img id="vista-previa" src="uploads/<?= htmlspecialchars($fotoActual) ?>" alt="Foto del socio"
-        width="96" height="96" class="rounded-circle border" style="object-fit: cover;">
+        width="96" height="96" class="avatar">
       <div class="flex-grow-1">
         <input type="file" name="foto" id="foto" class="form-control" accept=".jpg,.jpeg,.png,.webp">
         <div class="form-text">JPG, PNG o WEBP. Máximo 2&nbsp;MB.</div>

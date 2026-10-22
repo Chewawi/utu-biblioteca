@@ -1,0 +1,106 @@
+/* =====================================================================
+   Bibliodeko — estilos propios
+   Se carga después de Bootstrap y Select2, así que lo de acá les gana.
+   Para rediseñar, casi todo se cambia desde las variables de :root.
+   ===================================================================== */
+
+:root {
+  /* Colores */
+  --color-primario: #2f5d8a;
+  --color-primario-oscuro: #234767;
+  --color-fondo: #f6f7f9;
+  --color-superficie: #ffffff;
+  --color-texto: #212529;
+  --color-texto-suave: #6c757d;
+  --color-borde: #dee2e6;
+  --color-barra: #1f2933;
+
+  /* Tipografía */
+  --fuente-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fuente-titulos: var(--fuente-base);
+
+  /* Formas y tamaños */
+  --radio: .375rem;
+  --alto-campo: 38px;
+  --alto-portada: 220px;
+
+  /* Bootstrap lee estas variables: las conectamos con las nuestras */
+  --bs-body-font-family: var(--fuente-base);
+  --bs-body-bg: var(--color-fondo);
+  --bs-body-color: var(--color-texto);
+  --bs-secondary-color: var(--color-texto-suave);
+  --bs-border-color: var(--color-borde);
+  --bs-border-radius: var(--radio);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--fuente-titulos);
+}
+
+/* --- Barra de navegación --- */
+.barra-principal {
+  background-color: var(--color-barra);
+}
+
+/* --- Botones, links y paginador con el color primario --- */
+.btn-primary {
+  --bs-btn-bg: var(--color-primario);
+  --bs-btn-border-color: var(--color-primario);
+  --bs-btn-hover-bg: var(--color-primario-oscuro);
+  --bs-btn-hover-border-color: var(--color-primario-oscuro);
+  --bs-btn-active-bg: var(--color-primario-oscuro);
+  --bs-btn-active-border-color: var(--color-primario-oscuro);
+}
+
+.btn-link {
+  --bs-btn-color: var(--color-primario);
+  --bs-btn-hover-color: var(--color-primario-oscuro);
+}
+
+.pagination {
+  --bs-pagination-color: var(--color-primario);
+  --bs-pagination-hover-color: var(--color-primario-oscuro);
+  --bs-pagination-active-bg: var(--color-primario);
+  --bs-pagination-active-border-color: var(--color-primario);
+}
+
+.card {
+  --bs-card-bg: var(--color-superficie);
+}
+
+/* --- Imágenes --- */
+.portada-tarjeta {
+  height: var(--alto-portada);
+  object-fit: cover;
+}
+
+/* Foto redonda de socio. El tamaño va en los atributos width/height del <img>. */
+.avatar {
+  border-radius: 50%;
+  border: 1px solid var(--color-borde);
+  object-fit: cover;
+}
+
+.columna-avatar {
+  width: 56px;
+}
+
+/* --- Select2 con el mismo alto, bordes y colores que los campos de Bootstrap --- */
+.select2-container .select2-selection--single {
+  height: var(--alto-campo);
+  border-color: var(--color-borde);
+  border-radius: var(--radio);
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered {
+  line-height: calc(var(--alto-campo) - 2px);
+  padding-left: .75rem;
+}
+
+.select2-container .select2-selection--single .select2-selection__arrow {
+  height: calc(var(--alto-campo) - 2px);
+}
+
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+  background-color: var(--color-primario);
+}

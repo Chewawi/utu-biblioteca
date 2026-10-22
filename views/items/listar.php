@@ -66,7 +66,7 @@
     <?php foreach ($items as $item): ?>
       <div class="col">
         <div class="card h-100 shadow-sm">
-          <img src="uploads/<?= htmlspecialchars($item->getImagen()) ?>" class="card-img-top" style="height:220px; object-fit:cover;">
+          <img src="uploads/<?= htmlspecialchars($item->getImagen()) ?>" class="card-img-top portada-tarjeta">
           <div class="card-body">
             <h6 class="card-title mb-1"><?= htmlspecialchars($item->getTitulo()) ?></h6>
             <p class="card-text text-muted small mb-2"><?= htmlspecialchars($item->getAutor()) ?></p>

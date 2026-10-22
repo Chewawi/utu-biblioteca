@@ -41,7 +41,6 @@
             </li>
             <li class="nav-item"><a class="nav-link" href="index.php?accion=logout">Salir</a></li>
           <?php else: ?>
-            <li class="nav-item"><a class="nav-link" href="index.php?accion=registro">Crear cuenta</a></li>
             <li class="nav-item"><a class="nav-link" href="index.php?accion=login">Iniciar sesión</a></li>
           <?php endif; ?>
         </ul>

@@ -19,7 +19,7 @@ require_once __DIR__ . '/controllers/PrestamoController.php';
 $accion = $_GET['accion'] ?? 'listarLibros';
 
 switch ($accion) {
-    // --- Sesión y registro ---
+    // --- Sesión ---
     case 'login':
         formLogin();
         break;
@@ -28,12 +28,6 @@ switch ($accion) {
         break;
     case 'logout':
         logout();
-        break;
-    case 'registro':
-        registro();
-        break;
-    case 'registrar':
-        registrar();
         break;
 
     // --- Libros ---

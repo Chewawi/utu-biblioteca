@@ -4,7 +4,7 @@ require_once __DIR__ . '/../models/Socio.php';
 
 // ============================================================
 //  Controller de Usuarios
-//  Login, logout, registro público, y gestión de cuentas (admin).
+//  Login, logout, y gestión de cuentas (admin).
 // ============================================================
 
 function formLogin() {
@@ -44,50 +44,6 @@ function logout() {
     exit;
 }
 
-// --- Registro público: cualquiera puede crearse una cuenta de socio ---
-
-function registro() {
-    if (isset($_SESSION['usuario'])) {
-        header('Location: index.php?accion=listarLibros');
-        exit;
-    }
-    require __DIR__ . '/../views/usuarios/registro.php';
-}
-
-function registrar() {
-    global $pdo;
-
-    $email     = trim($_POST['email'] ?? '');
-    $pass      = trim($_POST['pass'] ?? '');
-    $nombre    = trim($_POST['nombre'] ?? '');
-    $direccion = trim($_POST['direccion'] ?? '');
-    $telefono  = trim($_POST['telefono'] ?? '');
-
-    if ($email === '' || $pass === '' || $nombre === '' || $direccion === '' || $telefono === '') {
-        $error = 'Completa todos los campos.';
-        require __DIR__ . '/../views/usuarios/registro.php';
-        return;
-    }
-    if (strlen($pass) < 6) {
-        $error = 'La contraseña debe tener al menos 6 caracteres.';
-        require __DIR__ . '/../views/usuarios/registro.php';
-        return;
-    }
-    if (Usuario::buscarPorEmail($pdo, $email)) {
-        $error = 'Ya existe una cuenta con ese email.';
-        require __DIR__ . '/../views/usuarios/registro.php';
-        return;
-    }
-
-    // Creamos la cuenta (siempre socio) y la ficha de socio, y la logueamos.
-    $usuarioId = Usuario::crear($pdo, 'socio', $email, password_hash($pass, PASSWORD_DEFAULT));
-    Socio::crear($pdo, $usuarioId, $nombre, $direccion, $telefono);
-
-    $_SESSION['usuario'] = ['id' => $usuarioId, 'email' => $email, 'rol' => 'socio'];
-    flash('success', '¡Cuenta creada! Ya podés pedir libros prestados.');
-    header('Location: index.php?accion=listarLibros');
-    exit;
-}
 
 // --- Gestión de usuarios (solo admin) ---
 

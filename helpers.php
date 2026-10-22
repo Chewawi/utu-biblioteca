@@ -87,3 +87,20 @@ function borrarImagen($nombre) {
         unlink($ruta);
     }
 }
+
+/**
+ * Calcula la paginación de un listado con $total resultados. Si $pagina está
+ * fuera de rango la corrige: a 1 si es menor, a la última si es mayor.
+ * Devuelve la página corregida, la cantidad de páginas y desde qué fila
+ * empezar (el OFFSET del SQL).
+ */
+function calcularPaginacion($total, $pagina, $porPagina) {
+    $paginas = max(1, (int) ceil($total / $porPagina));
+    $pagina = min(max(1, (int) $pagina), $paginas);
+    return ['pagina' => $pagina, 'paginas' => $paginas, 'desde' => ($pagina - 1) * $porPagina];
+}
+
+/** URL de la página $numero del listado actual: conserva todo lo que hay en la URL (filtros incluidos). */
+function urlPagina($numero) {
+    return 'index.php?' . http_build_query(array_merge($_GET, ['p' => $numero]));
+}

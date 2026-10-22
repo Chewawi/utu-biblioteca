@@ -88,4 +88,6 @@
   </div>
 <?php endif; ?>
 
+<?php require __DIR__ . '/../paginador.php'; ?>
+
 <?php require __DIR__ . '/../footer.php'; ?>

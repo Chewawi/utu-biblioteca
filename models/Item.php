@@ -47,33 +47,61 @@ class Item {
      * subconsulta que cuenta los préstamos activos de cada item.
      */
 
-    /** Trae todos los items. Si $q no está vacío, filtra por título o autor. */
-    public static function listar($pdo, $q = '') {
-        if ($q !== '') {
-            $stmt = $pdo->prepare("
-                SELECT i.*,
-                       (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.estado = 'activo') AS prestados
-                FROM items i
-                WHERE i.titulo LIKE ? OR i.autor LIKE ?
-                ORDER BY i.titulo
-            ");
-            $stmt->execute(["%$q%", "%$q%"]);
-        } else {
-            $stmt = $pdo->prepare("
-                SELECT i.*,
-                       (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.estado = 'activo') AS prestados
-                FROM items i
-                ORDER BY i.titulo
-            ");
-            $stmt->execute();
+    /**
+     * Items del catálogo, filtrados y paginados.
+     * $filtros es un array con estas claves (todas opcionales):
+     *   q          -> texto que se busca en el título o el autor,
+     *   pagina     -> número de página (si está fuera de rango se corrige),
+     *   por_pagina -> cuántos por página; 0 o sin poner = todos, sin paginar.
+     * Devuelve ['filas' => items de esa página, 'total' => cantidad de resultados,
+     *           'pagina' => página que se muestra, 'paginas' => cantidad de páginas].
+     */
+    public static function listar($pdo, $filtros = []) {
+        $filtros = array_merge(['q' => '', 'pagina' => 1, 'por_pagina' => 0], $filtros);
+
+        $condiciones = [];
+        $parametros = [];
+        if ($filtros['q'] !== '') {
+            $condiciones[] = '(i.titulo LIKE ? OR i.autor LIKE ?)';
+            $parametros[] = '%' . $filtros['q'] . '%';
+            $parametros[] = '%' . $filtros['q'] . '%';
         }
+
+        // El FROM y el WHERE son los mismos para contar y para traer las filas.
+        $desdeDonde = ' FROM items i';
+        if (!empty($condiciones)) {
+            $desdeDonde .= ' WHERE ' . implode(' AND ', $condiciones);
+        }
+
+        $stmt = $pdo->prepare('SELECT COUNT(*)' . $desdeDonde);
+        $stmt->execute($parametros);
+        $total = (int) $stmt->fetchColumn();
+
+        $sql = "
+            SELECT i.*,
+                   (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.estado = 'activo') AS prestados
+        " . $desdeDonde . ' ORDER BY i.titulo';
+
+        $pagina = 1;
+        $paginas = 1;
+        if ($filtros['por_pagina'] > 0) {
+            $paginacion = calcularPaginacion($total, $filtros['pagina'], $filtros['por_pagina']);
+            $pagina = $paginacion['pagina'];
+            $paginas = $paginacion['paginas'];
+            // LIMIT y OFFSET son enteros que calculamos nosotros (no texto del usuario),
+            // por eso se pueden poner directo en el SQL.
+            $sql .= ' LIMIT ' . (int) $filtros['por_pagina'] . ' OFFSET ' . $paginacion['desde'];
+        }
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($parametros);
         $filas = $stmt->fetchAll();
 
         $items = [];
         foreach ($filas as $f) {
             $items[] = new Item($f['id'], $f['tipo'], $f['titulo'], $f['autor'], $f['categoria'], $f['stock'], $f['imagen'], $f['prestados']);
         }
-        return $items;
+        return ['filas' => $items, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
     }
 
     public static function buscarPorId($pdo, $id) {

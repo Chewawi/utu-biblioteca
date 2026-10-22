@@ -52,7 +52,7 @@ function listarPrestamos() {
     requerirLogin();
 
     $filtros = leerFiltrosPrestamos($_GET);
-    $items = Item::listar($pdo); // para el filtro por ítem
+    $items = Item::listar($pdo)['filas']; // todos, para el filtro por ítem
 
     if (esAdmin()) {
         $socios = Socio::listar($pdo); // para el filtro por socio
@@ -78,7 +78,7 @@ function formCrearPrestamo() {
     global $pdo;
     requerirAdmin();
     $socios = Socio::listar($pdo);
-    $items = Item::listar($pdo);
+    $items = Item::listar($pdo)['filas'];
     require __DIR__ . '/../views/prestamos/form.php';
 }
 
@@ -102,7 +102,7 @@ function crearPrestamo() {
 
     if ($error !== '') {
         $socios = Socio::listar($pdo);
-        $items = Item::listar($pdo);
+        $items = Item::listar($pdo)['filas'];
         require __DIR__ . '/../views/prestamos/form.php';
         return;
     }

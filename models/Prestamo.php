@@ -8,6 +8,9 @@
 // ============================================================
 
 class Prestamo {
+    // Tienen que coincidir con el ENUM de la columna "estado" en database.sql.
+    const ESTADOS = ['activo', 'devuelto'];
+
     private $id;
     private $socioId;
     private $itemId;
@@ -41,18 +44,29 @@ class Prestamo {
 
     // --- acceso a datos ---
 
-    /** Todos los préstamos, con el nombre del socio y el título del item. Primero los activos (en el ENUM "activo" va antes que "devuelto"). */
-    public static function listar($pdo) {
-        $stmt = $pdo->prepare("
+    /**
+     * Todos los préstamos, con el nombre del socio y el título del item.
+     * Si $estado no está vacío, trae solo los de ese estado.
+     * Primero los activos (en el ENUM "activo" va antes que "devuelto").
+     */
+    public static function listar($pdo, $estado = '') {
+        $sql = "
             SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
                    s.nombre AS socio_nombre,
                    i.titulo AS item_titulo
             FROM prestamos p
             INNER JOIN socios s ON p.socio_id = s.id
             INNER JOIN items i ON p.item_id = i.id
-            ORDER BY p.estado, p.fecha_prestamo DESC
-        ");
-        $stmt->execute();
+        ";
+        $parametros = [];
+        if ($estado !== '') {
+            $sql .= " WHERE p.estado = ?";
+            $parametros[] = $estado;
+        }
+        $sql .= " ORDER BY p.estado, p.fecha_prestamo DESC";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($parametros);
         $filas = $stmt->fetchAll();
 
         $prestamos = [];
@@ -62,9 +76,9 @@ class Prestamo {
         return $prestamos;
     }
 
-    /** Los préstamos de un solo socio (para "Mis préstamos"). Primero los activos (en el ENUM "activo" va antes que "devuelto"). */
-    public static function listarPorSocio($pdo, $socioId) {
-        $stmt = $pdo->prepare("
+    /** Igual que listar(), pero solo los de un socio (para "Mis préstamos"). */
+    public static function listarPorSocio($pdo, $socioId, $estado = '') {
+        $sql = "
             SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
                    s.nombre AS socio_nombre,
                    i.titulo AS item_titulo
@@ -72,9 +86,16 @@ class Prestamo {
             INNER JOIN socios s ON p.socio_id = s.id
             INNER JOIN items i ON p.item_id = i.id
             WHERE p.socio_id = ?
-            ORDER BY p.estado, p.fecha_prestamo DESC
-        ");
-        $stmt->execute([$socioId]);
+        ";
+        $parametros = [$socioId];
+        if ($estado !== '') {
+            $sql .= " AND p.estado = ?";
+            $parametros[] = $estado;
+        }
+        $sql .= " ORDER BY p.estado, p.fecha_prestamo DESC";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($parametros);
         $filas = $stmt->fetchAll();
 
         $prestamos = [];

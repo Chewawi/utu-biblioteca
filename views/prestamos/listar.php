@@ -7,6 +7,23 @@
   <?php endif; ?>
 </div>
 
+<form method="GET" action="index.php" class="row g-2 mb-4">
+  <input type="hidden" name="accion" value="listarPrestamos">
+  <div class="col-auto">
+    <select name="estado" class="form-select">
+      <option value="">Todos los estados</option>
+      <option value="activo" <?= $estado === 'activo' ? 'selected' : '' ?>>Activos</option>
+      <option value="devuelto" <?= $estado === 'devuelto' ? 'selected' : '' ?>>Devueltos</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
+    <?php if ($estado !== ''): ?>
+      <a href="index.php?accion=listarPrestamos" class="btn btn-link">Limpiar</a>
+    <?php endif; ?>
+  </div>
+</form>
+
 <?php if (empty($prestamos)): ?>
   <div class="alert alert-secondary">No hay préstamos para mostrar.</div>
 <?php else: ?>
@@ -15,6 +32,7 @@
       <tr>
         <?php if (esAdmin()): ?><th>Socio</th><?php endif; ?>
         <th>Ítem</th>
+        <th>Estado</th>
         <th>Fecha de préstamo</th>
         <th>Fecha de devolución</th>
         <?php if (esAdmin()): ?><th></th><?php endif; ?>
@@ -25,14 +43,15 @@
         <tr class="<?= $p->estaActivo() ? '' : 'text-muted' ?>">
           <?php if (esAdmin()): ?><td><?= htmlspecialchars($p->getSocioNombre()) ?></td><?php endif; ?>
           <td><?= htmlspecialchars($p->getItemTitulo()) ?></td>
-          <td><?= htmlspecialchars($p->getFechaPrestamo()) ?></td>
           <td>
             <?php if ($p->estaActivo()): ?>
-              <span class="badge text-bg-warning">Sin devolver</span>
+              <span class="badge text-bg-warning">Activo</span>
             <?php else: ?>
-              <?= htmlspecialchars($p->getFechaDevolucion()) ?>
+              <span class="badge text-bg-success">Devuelto</span>
             <?php endif; ?>
           </td>
+          <td><?= htmlspecialchars($p->getFechaPrestamo()) ?></td>
+          <td><?= htmlspecialchars($p->getFechaDevolucion() ?? '—') ?></td>
           <?php if (esAdmin()): ?>
             <td class="text-end">
               <?php if ($p->estaActivo()): ?>

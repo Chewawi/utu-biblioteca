@@ -13,12 +13,18 @@ function listarPrestamos() {
     global $pdo;
     requerirLogin();
 
+    // Filtro opcional por estado. Cualquier valor que no sea un estado válido = "todos".
+    $estado = $_GET['estado'] ?? '';
+    if (!in_array($estado, Prestamo::ESTADOS)) {
+        $estado = '';
+    }
+
     if (esAdmin()) {
-        $prestamos = Prestamo::listar($pdo);
+        $prestamos = Prestamo::listar($pdo, $estado);
         $titulo = 'Préstamos';
     } else {
         $socio = Socio::buscarPorUsuarioId($pdo, $_SESSION['usuario']['id']);
-        $prestamos = $socio ? Prestamo::listarPorSocio($pdo, $socio->getId()) : [];
+        $prestamos = $socio ? Prestamo::listarPorSocio($pdo, $socio->getId(), $estado) : [];
         $titulo = 'Mis préstamos';
     }
 

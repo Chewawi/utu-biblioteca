@@ -52,24 +52,26 @@ function listarPrestamos() {
     requerirLogin();
 
     $filtros = leerFiltrosPrestamos($_GET);
+    $paginacion = ['pagina' => $_GET['p'] ?? 1, 'por_pagina' => 10];
     $items = Item::listar($pdo)['filas']; // todos, para el filtro por ítem
 
     if (esAdmin()) {
-        $socios = Socio::listar($pdo); // para el filtro por socio
-        $prestamos = Prestamo::listar($pdo, $filtros);
+        $socios = Socio::listar($pdo)['filas']; // todos, para el filtro por socio
+        $resultado = Prestamo::listar($pdo, array_merge($filtros, $paginacion));
         $titulo = 'Préstamos';
     } else {
         // Un socio solo ve lo suyo: el filtro por socio no lo elige él, lo fijamos acá.
         $filtros['socio_id'] = '';
         $socio = Socio::buscarPorUsuarioId($pdo, $_SESSION['usuario']['id']);
-        $prestamos = [];
+        $resultado = ['filas' => [], 'total' => 0, 'pagina' => 1, 'paginas' => 1];
         if ($socio) {
             $filtrosDelSocio = $filtros;
             $filtrosDelSocio['socio_id'] = $socio->getId();
-            $prestamos = Prestamo::listar($pdo, $filtrosDelSocio);
+            $resultado = Prestamo::listar($pdo, array_merge($filtrosDelSocio, $paginacion));
         }
         $titulo = 'Mis préstamos';
     }
+    $prestamos = $resultado['filas'];
 
     require __DIR__ . '/../views/prestamos/listar.php';
 }
@@ -77,7 +79,7 @@ function listarPrestamos() {
 function formCrearPrestamo() {
     global $pdo;
     requerirAdmin();
-    $socios = Socio::listar($pdo);
+    $socios = Socio::listar($pdo)['filas'];
     $items = Item::listar($pdo)['filas'];
     require __DIR__ . '/../views/prestamos/form.php';
 }
@@ -101,7 +103,7 @@ function crearPrestamo() {
     }
 
     if ($error !== '') {
-        $socios = Socio::listar($pdo);
+        $socios = Socio::listar($pdo)['filas'];
         $items = Item::listar($pdo)['filas'];
         require __DIR__ . '/../views/prestamos/form.php';
         return;
@@ -123,9 +125,13 @@ function devolverPrestamo() {
         flash('warning', 'Ese préstamo ya estaba devuelto.');
     }
 
-    // Volvemos a la lista con los mismos filtros que tenía (vienen en campos ocultos).
-    // array_filter saca los vacíos, para que la URL quede corta.
-    $filtros = array_filter(leerFiltrosPrestamos($_POST));
-    header('Location: index.php?' . http_build_query(array_merge(['accion' => 'listarPrestamos'], $filtros)));
+    // Volvemos a la lista con los mismos filtros y la misma página que tenía
+    // (vienen en campos ocultos). array_filter saca los vacíos, para que la URL quede corta.
+    // Si esa página quedó vacía, el listado la corrige a la última que tenga resultados.
+    $volverA = array_filter(leerFiltrosPrestamos($_POST));
+    if (ctype_digit($_POST['p'] ?? '')) {
+        $volverA['p'] = $_POST['p'];
+    }
+    header('Location: index.php?' . http_build_query(array_merge(['accion' => 'listarPrestamos'], $volverA)));
     exit;
 }

@@ -98,12 +98,13 @@
                 <form method="POST" action="index.php?accion=devolverPrestamo" class="d-inline"
                   onsubmit="return confirm('¿Registrar la devolución de «<?= htmlspecialchars(addslashes($p->getItemTitulo())) ?>»?');">
                   <input type="hidden" name="id" value="<?= $p->getId() ?>">
-                  <?php // Mandamos también los filtros actuales, para volver a la lista tal como estaba. ?>
+                  <?php // Mandamos también los filtros y la página actuales, para volver a la lista tal como estaba. ?>
                   <?php foreach ($filtros as $clave => $valor): ?>
                     <?php if ($valor !== ''): ?>
                       <input type="hidden" name="<?= htmlspecialchars($clave) ?>" value="<?= htmlspecialchars($valor) ?>">
                     <?php endif; ?>
                   <?php endforeach; ?>
+                  <input type="hidden" name="p" value="<?= htmlspecialchars($resultado['pagina']) ?>">
                   <button type="submit" class="btn btn-sm btn-outline-success">Devolver</button>
                 </form>
               <?php endif; ?>
@@ -114,5 +115,7 @@
     </tbody>
   </table>
 <?php endif; ?>
+
+<?php require __DIR__ . '/../paginador.php'; ?>
 
 <?php require __DIR__ . '/../footer.php'; ?>

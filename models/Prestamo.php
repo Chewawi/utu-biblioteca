@@ -49,13 +49,18 @@ class Prestamo {
      * $filtros es un array con estas claves (todas opcionales; vacío = sin filtrar):
      *   item_id, socio_id, estado,
      *   desde, hasta  -> rango sobre fecha_prestamo (formato AAAA-MM-DD),
-     *   q             -> texto que se busca en el nombre del socio o el título del item.
+     *   q             -> texto que se busca en el nombre del socio o el título del item,
+     *   pagina        -> número de página (si está fuera de rango se corrige),
+     *   por_pagina    -> cuántos por página; 0 o sin poner = todos, sin paginar.
      * Primero los activos (en el ENUM "activo" va antes que "devuelto").
+     * Devuelve ['filas' => préstamos de esa página, 'total' => cantidad de resultados,
+     *           'pagina' => página que se muestra, 'paginas' => cantidad de páginas].
      */
     public static function listar($pdo, $filtros = []) {
         // Completamos las claves que no vinieron, así abajo no hay que preguntar si existen.
         $filtros = array_merge(
-            ['item_id' => '', 'socio_id' => '', 'estado' => '', 'desde' => '', 'hasta' => '', 'q' => ''],
+            ['item_id' => '', 'socio_id' => '', 'estado' => '', 'desde' => '', 'hasta' => '', 'q' => '',
+             'pagina' => 1, 'por_pagina' => 0],
             $filtros
         );
 
@@ -88,18 +93,36 @@ class Prestamo {
             $parametros[] = '%' . $filtros['q'] . '%';
         }
 
-        $sql = "
-            SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
-                   s.nombre AS socio_nombre,
-                   i.titulo AS item_titulo
+        // El FROM y el WHERE son los mismos para contar y para traer las filas.
+        $desdeDonde = '
             FROM prestamos p
             INNER JOIN socios s ON p.socio_id = s.id
             INNER JOIN items i ON p.item_id = i.id
-        ";
+        ';
         if (!empty($condiciones)) {
-            $sql .= ' WHERE ' . implode(' AND ', $condiciones);
+            $desdeDonde .= ' WHERE ' . implode(' AND ', $condiciones);
         }
-        $sql .= ' ORDER BY p.estado, p.fecha_prestamo DESC';
+
+        $stmt = $pdo->prepare('SELECT COUNT(*)' . $desdeDonde);
+        $stmt->execute($parametros);
+        $total = (int) $stmt->fetchColumn();
+
+        $sql = '
+            SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
+                   s.nombre AS socio_nombre,
+                   i.titulo AS item_titulo
+        ' . $desdeDonde . ' ORDER BY p.estado, p.fecha_prestamo DESC';
+
+        $pagina = 1;
+        $paginas = 1;
+        if ($filtros['por_pagina'] > 0) {
+            $paginacion = calcularPaginacion($total, $filtros['pagina'], $filtros['por_pagina']);
+            $pagina = $paginacion['pagina'];
+            $paginas = $paginacion['paginas'];
+            // LIMIT y OFFSET son enteros que calculamos nosotros (no texto del usuario),
+            // por eso se pueden poner directo en el SQL.
+            $sql .= ' LIMIT ' . (int) $filtros['por_pagina'] . ' OFFSET ' . $paginacion['desde'];
+        }
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($parametros);
@@ -109,7 +132,7 @@ class Prestamo {
         foreach ($filas as $f) {
             $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['item_id'], $f['fecha_prestamo'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo']);
         }
-        return $prestamos;
+        return ['filas' => $prestamos, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
     }
 
     /** INSERT simple, sin JOIN (solo guarda los ids). */

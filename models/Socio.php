@@ -37,11 +37,15 @@ class Socio {
     /**
      * Todos los socios, cada uno con su Usuario. Se resuelve en una sola
      * consulta: el JOIN trae los datos de la cuenta junto con los del socio.
-     * $filtros es un array con estas claves (opcionales; vacío = sin filtrar):
-     *   q -> texto que se busca en el nombre, el teléfono o el email.
+     * $filtros es un array con estas claves (todas opcionales):
+     *   q          -> texto que se busca en el nombre, el teléfono o el email,
+     *   pagina     -> número de página (si está fuera de rango se corrige),
+     *   por_pagina -> cuántos por página; 0 o sin poner = todos, sin paginar.
+     * Devuelve ['filas' => socios de esa página, 'total' => cantidad de resultados,
+     *           'pagina' => página que se muestra, 'paginas' => cantidad de páginas].
      */
     public static function listar($pdo, $filtros = []) {
-        $filtros = array_merge(['q' => ''], $filtros);
+        $filtros = array_merge(['q' => '', 'pagina' => 1, 'por_pagina' => 0], $filtros);
 
         $condiciones = [];
         $parametros = [];
@@ -52,15 +56,28 @@ class Socio {
             $parametros[] = '%' . $filtros['q'] . '%';
         }
 
-        $sql = "
-            SELECT s.*, u.rol, u.email, u.pass
-            FROM socios s
-            INNER JOIN usuarios u ON s.usuario_id = u.id
-        ";
+        // El FROM y el WHERE son los mismos para contar y para traer las filas.
+        $desdeDonde = ' FROM socios s INNER JOIN usuarios u ON s.usuario_id = u.id';
         if (!empty($condiciones)) {
-            $sql .= ' WHERE ' . implode(' AND ', $condiciones);
+            $desdeDonde .= ' WHERE ' . implode(' AND ', $condiciones);
         }
-        $sql .= ' ORDER BY s.nombre';
+
+        $stmt = $pdo->prepare('SELECT COUNT(*)' . $desdeDonde);
+        $stmt->execute($parametros);
+        $total = (int) $stmt->fetchColumn();
+
+        $sql = 'SELECT s.*, u.rol, u.email, u.pass' . $desdeDonde . ' ORDER BY s.nombre';
+
+        $pagina = 1;
+        $paginas = 1;
+        if ($filtros['por_pagina'] > 0) {
+            $paginacion = calcularPaginacion($total, $filtros['pagina'], $filtros['por_pagina']);
+            $pagina = $paginacion['pagina'];
+            $paginas = $paginacion['paginas'];
+            // LIMIT y OFFSET son enteros que calculamos nosotros (no texto del usuario),
+            // por eso se pueden poner directo en el SQL.
+            $sql .= ' LIMIT ' . (int) $filtros['por_pagina'] . ' OFFSET ' . $paginacion['desde'];
+        }
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($parametros);
@@ -71,7 +88,7 @@ class Socio {
             $usuario = new Usuario($f['usuario_id'], $f['rol'], $f['email'], $f['pass']);
             $socios[] = new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono'], $f['foto']);
         }
-        return $socios;
+        return ['filas' => $socios, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
     }
 
     public static function buscarPorId($pdo, $id) {

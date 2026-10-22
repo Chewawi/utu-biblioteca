@@ -121,14 +121,14 @@ class Prestamo {
     }
 
     /**
-     * Pasa el préstamo a 'devuelto' con la fecha de hoy. No se borra: queda en
+     * Pasa el préstamo a 'devuelto' con la fecha $fecha. No se borra: queda en
      * el historial. Si ya estaba devuelto no cambia nada y devuelve false.
      */
-    public static function devolver($pdo, $id) {
+    public static function devolver($pdo, $id, $fecha) {
         $stmt = $pdo->prepare(
-            "UPDATE prestamos SET estado = 'devuelto', fecha_devolucion = CURDATE() WHERE id = ? AND estado = 'activo'"
+            "UPDATE prestamos SET estado = 'devuelto', fecha_devolucion = ? WHERE id = ? AND estado = 'activo'"
         );
-        $stmt->execute([$id]);
+        $stmt->execute([$fecha, $id]);
         return $stmt->rowCount() > 0;
     }
 }

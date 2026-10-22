@@ -117,7 +117,7 @@ function devolverPrestamo() {
     global $pdo;
     requerirAdmin();
 
-    if (Prestamo::devolver($pdo, $_POST['id'])) {
+    if (Prestamo::devolver($pdo, $_POST['id'], date('Y-m-d'))) {
         flash('success', 'Devolución registrada.');
     } else {
         flash('warning', 'Ese préstamo ya estaba devuelto.');

@@ -8,8 +8,8 @@
 
 session_start();
 
-// XAMPP trae otra zona horaria en php.ini; sin esto, date() puede dar
-// un día distinto al CURDATE() de MySQL.
+// Las fechas de préstamo y devolución las calcula PHP con date(), así que
+// tiene que usar la hora de Uruguay (XAMPP trae otra zona en php.ini).
 date_default_timezone_set('America/Montevideo');
 
 require_once __DIR__ . '/conexion.php'; // deja $pdo listo

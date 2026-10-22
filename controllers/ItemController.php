@@ -8,32 +8,6 @@ require_once __DIR__ . '/../models/Item.php';
 //  guarde/lea/borre, y muestran una vista o redirigen.
 // ============================================================
 
-/** Formatos y tamaño de portada permitidos. */
-function extensionValida($nombreArchivo) {
-    $permitidas = ['jpg', 'jpeg', 'png', 'webp'];
-    $ext = strtolower(pathinfo($nombreArchivo, PATHINFO_EXTENSION));
-    return in_array($ext, $permitidas) ? $ext : false;
-}
-
-/** Guarda la portada subida y devuelve el nombre final del archivo. */
-function guardarImagenItem($archivo) {
-    if (empty($archivo['name'])) {
-        return 'default.png'; // no subieron nada, usamos la genérica
-    }
-
-    $ext = extensionValida($archivo['name']);
-    if (!$ext) {
-        return null; // formato no permitido
-    }
-    if ($archivo['size'] > 2 * 1024 * 1024) {
-        return null; // pesa más de 2 MB
-    }
-
-    $nombre = uniqid() . '.' . $ext;
-    move_uploaded_file($archivo['tmp_name'], __DIR__ . '/../uploads/' . $nombre);
-    return $nombre;
-}
-
 /** Revisa los campos del formulario. Devuelve el mensaje de error, o '' si está todo bien. */
 function validarItem($tipo, $titulo, $autor, $stock) {
     if (!in_array($tipo, Item::TIPOS)) {
@@ -78,7 +52,7 @@ function crearItem() {
         return;
     }
 
-    $imagen = guardarImagenItem($_FILES['imagen'] ?? []);
+    $imagen = guardarImagen($_FILES['imagen'] ?? []);
     if ($imagen === null) {
         $error = 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
         require __DIR__ . '/../views/items/form.php';
@@ -133,7 +107,7 @@ function editarItem() {
     // Si no suben una portada nueva, conservamos la que ya tenía.
     $imagen = $item->getImagen();
     if (!empty($_FILES['imagen']['name'])) {
-        $imagenNueva = guardarImagenItem($_FILES['imagen']);
+        $imagenNueva = guardarImagen($_FILES['imagen']);
         if ($imagenNueva === null) {
             $error = 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
             require __DIR__ . '/../views/items/form.php';
@@ -143,6 +117,9 @@ function editarItem() {
     }
 
     Item::actualizar($pdo, $id, $tipo, $titulo, $autor, $categoria, $stock, $imagen);
+    if ($imagen !== $item->getImagen()) {
+        borrarImagen($item->getImagen()); // la portada vieja ya no la usa nadie
+    }
     flash('success', 'Ítem actualizado correctamente.');
     header('Location: index.php?accion=listarItems');
     exit;
@@ -167,6 +144,7 @@ function eliminarItem() {
     }
 
     Item::eliminar($pdo, $id);
+    borrarImagen($item->getImagen());
     flash('success', 'Ítem eliminado.');
     header('Location: index.php?accion=listarItems');
     exit;

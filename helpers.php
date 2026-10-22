@@ -44,3 +44,40 @@ function mostrarFlash() {
         unset($_SESSION['flash']);
     }
 }
+
+/**
+ * Guarda una imagen subida en uploads/ y devuelve el nombre final del archivo.
+ * Si no subieron nada devuelve 'default.png'. Si el archivo no es una imagen
+ * JPG, PNG o WEBP, o pesa más de 2 MB, devuelve null.
+ */
+function guardarImagen($archivo) {
+    if (empty($archivo['name'])) {
+        return 'default.png';
+    }
+    if ($archivo['error'] !== UPLOAD_ERR_OK || $archivo['size'] > 2 * 1024 * 1024) {
+        return null;
+    }
+
+    // Miramos el contenido real del archivo, no la extensión del nombre (que
+    // cualquiera puede cambiar). getimagesize() devuelve false si no es una imagen.
+    $permitidos = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $info = getimagesize($archivo['tmp_name']);
+    if (!$info || !isset($permitidos[$info['mime']])) {
+        return null;
+    }
+
+    // La extensión del archivo guardado sale del contenido, no del nombre original.
+    $nombre = uniqid() . '.' . $permitidos[$info['mime']];
+    if (!move_uploaded_file($archivo['tmp_name'], __DIR__ . '/uploads/' . $nombre)) {
+        return null;
+    }
+    return $nombre;
+}
+
+/** Borra una imagen de uploads/, salvo default.png, que la comparten todos. */
+function borrarImagen($nombre) {
+    $ruta = __DIR__ . '/uploads/' . basename($nombre);
+    if ($nombre !== 'default.png' && is_file($ruta)) {
+        unlink($ruta);
+    }
+}

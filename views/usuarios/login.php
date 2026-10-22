@@ -20,14 +20,6 @@
       <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
     </form>
 
-    <p class="text-center mt-3">
-      ¿No tenés cuenta? <a href="index.php?accion=registro">Creá una acá</a>.
-    </p>
-
-    <p class="text-muted small mt-3 text-center">
-      Prueba con <code>admin@biblioteca.com</code> / <code>admin123</code>
-      o <code>socio@biblioteca.com</code> / <code>socio123</code>.
-    </p>
   </div>
 </div>
 

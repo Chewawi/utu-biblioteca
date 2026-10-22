@@ -10,7 +10,8 @@ require_once __DIR__ . '/../models/Usuario.php';
 function listarSocios() {
     global $pdo;
     requerirAdmin();
-    $socios = Socio::listar($pdo);
+    $filtros = ['q' => trim($_GET['q'] ?? '')];
+    $socios = Socio::listar($pdo, $filtros);
     require __DIR__ . '/../views/socios/listar.php';
 }
 

@@ -5,8 +5,23 @@
   <a href="index.php?accion=formCrearSocio" class="btn btn-primary">+ Nuevo socio</a>
 </div>
 
+<form method="GET" action="index.php" class="row g-2 align-items-end mb-4">
+  <input type="hidden" name="accion" value="listarSocios">
+  <div class="col-md-6">
+    <label class="form-label small mb-1">Buscar</label>
+    <input type="text" name="q" class="form-control" placeholder="Nombre, teléfono o email..."
+      value="<?= htmlspecialchars($filtros['q']) ?>">
+  </div>
+  <div class="col-md-auto">
+    <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
+    <a href="index.php?accion=listarSocios" class="btn btn-link">Limpiar filtros</a>
+  </div>
+</form>
+
 <?php if (empty($socios)): ?>
-  <div class="alert alert-secondary">No hay socios registrados todavía.</div>
+  <div class="alert alert-secondary">
+    <?= $filtros['q'] !== '' ? 'Ningún socio coincide con la búsqueda.' : 'No hay socios registrados todavía.' ?>
+  </div>
 <?php else: ?>
   <table class="table align-middle">
     <thead>

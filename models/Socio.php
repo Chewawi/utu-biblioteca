@@ -31,13 +31,41 @@ class Socio {
 
     // --- acceso a datos ---
 
-    public static function listar($pdo) {
-        $stmt = $pdo->query("SELECT * FROM socios ORDER BY nombre");
+    /**
+     * Todos los socios, cada uno con su Usuario. Se resuelve en una sola
+     * consulta: el JOIN trae los datos de la cuenta junto con los del socio.
+     * $filtros es un array con estas claves (opcionales; vacío = sin filtrar):
+     *   q -> texto que se busca en el nombre, el teléfono o el email.
+     */
+    public static function listar($pdo, $filtros = []) {
+        $filtros = array_merge(['q' => ''], $filtros);
+
+        $condiciones = [];
+        $parametros = [];
+        if ($filtros['q'] !== '') {
+            $condiciones[] = '(s.nombre LIKE ? OR s.telefono LIKE ? OR u.email LIKE ?)';
+            $parametros[] = '%' . $filtros['q'] . '%';
+            $parametros[] = '%' . $filtros['q'] . '%';
+            $parametros[] = '%' . $filtros['q'] . '%';
+        }
+
+        $sql = "
+            SELECT s.*, u.rol, u.email, u.pass
+            FROM socios s
+            INNER JOIN usuarios u ON s.usuario_id = u.id
+        ";
+        if (!empty($condiciones)) {
+            $sql .= ' WHERE ' . implode(' AND ', $condiciones);
+        }
+        $sql .= ' ORDER BY s.nombre';
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($parametros);
         $filas = $stmt->fetchAll();
 
         $socios = [];
         foreach ($filas as $f) {
-            $usuario = Usuario::buscarPorId($pdo, $f['usuario_id']);
+            $usuario = new Usuario($f['usuario_id'], $f['rol'], $f['email'], $f['pass']);
             $socios[] = new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono']);
         }
         return $socios;

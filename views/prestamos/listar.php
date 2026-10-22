@@ -14,7 +14,7 @@
     <thead>
       <tr>
         <?php if (esAdmin()): ?><th>Socio</th><?php endif; ?>
-        <th>Libro</th>
+        <th>Ítem</th>
         <th>Fecha de préstamo</th>
         <?php if (esAdmin()): ?><th></th><?php endif; ?>
       </tr>
@@ -23,12 +23,12 @@
       <?php foreach ($prestamos as $p): ?>
         <tr>
           <?php if (esAdmin()): ?><td><?= htmlspecialchars($p->getSocioNombre()) ?></td><?php endif; ?>
-          <td><?= htmlspecialchars($p->getLibroTitulo()) ?></td>
+          <td><?= htmlspecialchars($p->getItemTitulo()) ?></td>
           <td><?= htmlspecialchars($p->getFechaPrestamo()) ?></td>
           <?php if (esAdmin()): ?>
             <td class="text-end">
               <form method="POST" action="index.php?accion=eliminarPrestamo" class="d-inline"
-                onsubmit="return confirm('¿Registrar la devolución de «<?= htmlspecialchars(addslashes($p->getLibroTitulo())) ?>»?');">
+                onsubmit="return confirm('¿Registrar la devolución de «<?= htmlspecialchars(addslashes($p->getItemTitulo())) ?>»?');">
                 <input type="hidden" name="id" value="<?= $p->getId() ?>">
                 <button type="submit" class="btn btn-sm btn-outline-success">Devolver</button>
               </form>

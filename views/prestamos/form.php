@@ -18,11 +18,11 @@
   </div>
 
   <div class="mb-3">
-    <label class="form-label">Libro</label>
-    <select name="libro_id" class="form-select" required>
-      <option value="">-- Elegir libro --</option>
-      <?php foreach ($libros as $libro): ?>
-        <option value="<?= $libro->getId() ?>"><?= htmlspecialchars($libro->getTitulo()) ?></option>
+    <label class="form-label">Ítem</label>
+    <select name="item_id" class="form-select" required>
+      <option value="">-- Elegir ítem --</option>
+      <?php foreach ($items as $item): ?>
+        <option value="<?= $item->getId() ?>"><?= htmlspecialchars($item->getTitulo()) ?></option>
       <?php endforeach; ?>
     </select>
   </div>

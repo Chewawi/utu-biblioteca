@@ -9,7 +9,7 @@ require_once __DIR__ . '/../models/Socio.php';
 
 function formLogin() {
     if (isset($_SESSION['usuario'])) {
-        header('Location: index.php?accion=listarLibros');
+        header('Location: index.php?accion=listarItems');
         exit;
     }
     require __DIR__ . '/../views/usuarios/login.php';
@@ -29,7 +29,7 @@ function login() {
             'email' => $usuario->getEmail(),
             'rol'   => $usuario->getRol(),
         ];
-        header('Location: index.php?accion=listarLibros');
+        header('Location: index.php?accion=listarItems');
         exit;
     }
 

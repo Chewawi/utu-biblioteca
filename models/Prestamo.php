@@ -1,48 +1,48 @@
 <?php
 // ============================================================
 //  Modelo Prestamo
-//  Conecta un Socio con un Libro. No guarda el nombre del socio
-//  ni el título del libro directamente, guarda sus ids — por
-//  eso listar() hace un INNER JOIN contra socios y libros para
+//  Conecta un Socio con un Item. No guarda el nombre del socio
+//  ni el título del item directamente, guarda sus ids — por
+//  eso listar() hace un INNER JOIN contra socios e items para
 //  traer el nombre y el título ya resueltos.
 // ============================================================
 
 class Prestamo {
     private $id;
     private $socioId;
-    private $libroId;
+    private $itemId;
     private $fechaPrestamo;
     private $socioNombre;
-    private $libroTitulo;
+    private $itemTitulo;
 
-    public function __construct($id, $socioId, $libroId, $fechaPrestamo, $socioNombre, $libroTitulo) {
+    public function __construct($id, $socioId, $itemId, $fechaPrestamo, $socioNombre, $itemTitulo) {
         $this->id = $id;
         $this->socioId = $socioId;
-        $this->libroId = $libroId;
+        $this->itemId = $itemId;
         $this->fechaPrestamo = $fechaPrestamo;
         $this->socioNombre = $socioNombre;
-        $this->libroTitulo = $libroTitulo;
+        $this->itemTitulo = $itemTitulo;
     }
 
     // --- getters ---
     public function getId() { return $this->id; }
     public function getSocioId() { return $this->socioId; }
-    public function getLibroId() { return $this->libroId; }
+    public function getItemId() { return $this->itemId; }
     public function getFechaPrestamo() { return $this->fechaPrestamo; }
     public function getSocioNombre() { return $this->socioNombre; }
-    public function getLibroTitulo() { return $this->libroTitulo; }
+    public function getItemTitulo() { return $this->itemTitulo; }
 
     // --- acceso a datos ---
 
-    /** Todos los préstamos, con el nombre del socio y el título del libro. */
+    /** Todos los préstamos, con el nombre del socio y el título del item. */
     public static function listar($pdo) {
         $stmt = $pdo->prepare("
-            SELECT p.id, p.socio_id, p.libro_id, p.fecha_prestamo,
+            SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo,
                    s.nombre AS socio_nombre,
-                   l.titulo AS libro_titulo
+                   i.titulo AS item_titulo
             FROM prestamos p
             INNER JOIN socios s ON p.socio_id = s.id
-            INNER JOIN libros l ON p.libro_id = l.id
+            INNER JOIN items i ON p.item_id = i.id
             ORDER BY p.fecha_prestamo DESC
         ");
         $stmt->execute();
@@ -50,7 +50,7 @@ class Prestamo {
 
         $prestamos = [];
         foreach ($filas as $f) {
-            $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['libro_id'], $f['fecha_prestamo'], $f['socio_nombre'], $f['libro_titulo']);
+            $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['item_id'], $f['fecha_prestamo'], $f['socio_nombre'], $f['item_titulo']);
         }
         return $prestamos;
     }
@@ -58,12 +58,12 @@ class Prestamo {
     /** Los préstamos de un solo socio (para "Mis préstamos"). */
     public static function listarPorSocio($pdo, $socioId) {
         $stmt = $pdo->prepare("
-            SELECT p.id, p.socio_id, p.libro_id, p.fecha_prestamo,
+            SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo,
                    s.nombre AS socio_nombre,
-                   l.titulo AS libro_titulo
+                   i.titulo AS item_titulo
             FROM prestamos p
             INNER JOIN socios s ON p.socio_id = s.id
-            INNER JOIN libros l ON p.libro_id = l.id
+            INNER JOIN items i ON p.item_id = i.id
             WHERE p.socio_id = ?
             ORDER BY p.fecha_prestamo DESC
         ");
@@ -72,20 +72,20 @@ class Prestamo {
 
         $prestamos = [];
         foreach ($filas as $f) {
-            $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['libro_id'], $f['fecha_prestamo'], $f['socio_nombre'], $f['libro_titulo']);
+            $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['item_id'], $f['fecha_prestamo'], $f['socio_nombre'], $f['item_titulo']);
         }
         return $prestamos;
     }
 
     /** INSERT simple, sin JOIN (solo guarda los ids). */
-    public static function crear($pdo, $socioId, $libroId, $fecha) {
+    public static function crear($pdo, $socioId, $itemId, $fecha) {
         $stmt = $pdo->prepare(
-            "INSERT INTO prestamos (socio_id, libro_id, fecha_prestamo) VALUES (?, ?, ?)"
+            "INSERT INTO prestamos (socio_id, item_id, fecha_prestamo) VALUES (?, ?, ?)"
         );
-        return $stmt->execute([$socioId, $libroId, $fecha]);
+        return $stmt->execute([$socioId, $itemId, $fecha]);
     }
 
-    /** Borrar el préstamo = registrar que el libro ya se devolvió. */
+    /** Borrar el préstamo = registrar que el item ya se devolvió. */
     public static function eliminar($pdo, $id) {
         $stmt = $pdo->prepare("DELETE FROM prestamos WHERE id = ?");
         return $stmt->execute([$id]);

@@ -3,7 +3,7 @@ require_once __DIR__ . '/Usuario.php';
 
 // ============================================================
 //  Modelo Socio
-//  Un socio es una persona que puede pedir libros prestados.
+//  Un socio es una persona que puede pedir items prestados.
 //  Está enganchado a una cuenta de Usuario (para poder loguearse).
 // ============================================================
 

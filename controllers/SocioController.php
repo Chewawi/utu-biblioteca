@@ -4,7 +4,7 @@ require_once __DIR__ . '/../models/Usuario.php';
 
 // ============================================================
 //  Controller de Socios
-//  Mismo patrón que LibroController, repetido para esta entidad.
+//  Mismo patrón que ItemController, repetido para esta entidad.
 // ============================================================
 
 function listarSocios() {

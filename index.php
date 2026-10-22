@@ -3,7 +3,7 @@
 //  index.php — Punto de entrada único (Router)
 //  Toda petición pasa por acá. Miramos "accion" en la URL y
 //  llamamos a la función que corresponde.
-//  Ejemplo: index.php?accion=listarLibros -> listarLibros()
+//  Ejemplo: index.php?accion=listarItems -> listarItems()
 // ============================================================
 
 session_start();
@@ -11,12 +11,12 @@ session_start();
 require_once __DIR__ . '/conexion.php'; // deja $pdo listo
 require_once __DIR__ . '/helpers.php';
 
-require_once __DIR__ . '/controllers/LibroController.php';
+require_once __DIR__ . '/controllers/ItemController.php';
 require_once __DIR__ . '/controllers/SocioController.php';
 require_once __DIR__ . '/controllers/UsuarioController.php';
 require_once __DIR__ . '/controllers/PrestamoController.php';
 
-$accion = $_GET['accion'] ?? 'listarLibros';
+$accion = $_GET['accion'] ?? 'listarItems';
 
 switch ($accion) {
     // --- Sesión ---
@@ -30,24 +30,24 @@ switch ($accion) {
         logout();
         break;
 
-    // --- Libros ---
-    case 'listarLibros':
-        listarLibros();
+    // --- Items (catálogo) ---
+    case 'listarItems':
+        listarItems();
         break;
-    case 'formCrearLibro':
-        formCrearLibro();
+    case 'formCrearItem':
+        formCrearItem();
         break;
-    case 'crearLibro':
-        crearLibro();
+    case 'crearItem':
+        crearItem();
         break;
-    case 'formEditarLibro':
-        formEditarLibro();
+    case 'formEditarItem':
+        formEditarItem();
         break;
-    case 'editarLibro':
-        editarLibro();
+    case 'editarItem':
+        editarItem();
         break;
-    case 'eliminarLibro':
-        eliminarLibro();
+    case 'eliminarItem':
+        eliminarItem();
         break;
 
     // --- Socios ---
@@ -105,6 +105,6 @@ switch ($accion) {
         break;
 
     default:
-        listarLibros();
+        listarItems();
         break;
 }

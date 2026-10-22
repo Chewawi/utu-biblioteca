@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../models/Prestamo.php';
 require_once __DIR__ . '/../models/Socio.php';
-require_once __DIR__ . '/../models/Libro.php';
+require_once __DIR__ . '/../models/Item.php';
 
 // ============================================================
 //  Controller de Préstamos
@@ -29,7 +29,7 @@ function formCrearPrestamo() {
     global $pdo;
     requerirAdmin();
     $socios = Socio::listar($pdo);
-    $libros = Libro::listar($pdo);
+    $items = Item::listar($pdo);
     require __DIR__ . '/../views/prestamos/form.php';
 }
 
@@ -38,24 +38,24 @@ function crearPrestamo() {
     requerirAdmin();
 
     $socioId = $_POST['socio_id'] ?? '';
-    $libroId = $_POST['libro_id'] ?? '';
+    $itemId  = $_POST['item_id'] ?? '';
     $fecha   = $_POST['fecha_prestamo'] ?? '';
 
-    if ($socioId === '' || $libroId === '' || $fecha === '') {
-        $error = 'Elegí un socio, un libro, y la fecha del préstamo.';
+    if ($socioId === '' || $itemId === '' || $fecha === '') {
+        $error = 'Elegí un socio, un ítem, y la fecha del préstamo.';
         $socios = Socio::listar($pdo);
-        $libros = Libro::listar($pdo);
+        $items = Item::listar($pdo);
         require __DIR__ . '/../views/prestamos/form.php';
         return;
     }
 
-    Prestamo::crear($pdo, $socioId, $libroId, $fecha);
+    Prestamo::crear($pdo, $socioId, $itemId, $fecha);
     flash('success', 'Préstamo registrado.');
     header('Location: index.php?accion=listarPrestamos');
     exit;
 }
 
-/** "Devolver" un libro es simplemente borrar el préstamo. */
+/** "Devolver" un item es simplemente borrar el préstamo. */
 function eliminarPrestamo() {
     global $pdo;
     requerirAdmin();

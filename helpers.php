@@ -18,7 +18,7 @@ function requerirAdmin() {
     requerirLogin();
     if ($_SESSION['usuario']['rol'] !== 'admin') {
         flash('danger', 'No tenés permiso para hacer eso.');
-        header('Location: index.php?accion=listarLibros');
+        header('Location: index.php?accion=listarItems');
         exit;
     }
 }

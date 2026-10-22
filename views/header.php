@@ -13,7 +13,7 @@
   <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
     <div class="container">
       
-      <a class="navbar-brand" href="index.php?accion=listarLibros">
+      <a class="navbar-brand" href="index.php?accion=listarItems">
         <img src="views/imagenes/favicon.ico" alt="Logo" height="24" class="d-inline-block align-text-top pr-4">
         Bibliodeko
       </a>
@@ -22,7 +22,7 @@
       </button>
       <div class="collapse navbar-collapse" id="nav">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="index.php?accion=listarLibros">Libros</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.php?accion=listarItems">Catálogo</a></li>
           <?php if (isset($_SESSION['usuario'])): ?>
             <li class="nav-item"><a class="nav-link" href="index.php?accion=listarPrestamos"><?= esAdmin() ? 'Préstamos' : 'Mis préstamos' ?></a></li>
           <?php endif; ?>

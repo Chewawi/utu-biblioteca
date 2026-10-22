@@ -26,23 +26,27 @@ CREATE TABLE IF NOT EXISTS socios (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS libros (
+-- Todo lo que se puede pedir prestado. "stock" es cuántos ejemplares
+-- tiene la biblioteca de ese item.
+CREATE TABLE IF NOT EXISTS items (
     id        INT AUTO_INCREMENT PRIMARY KEY,
+    tipo      ENUM('libro', 'juego', 'proyecto') NOT NULL DEFAULT 'libro',
     titulo    VARCHAR(150) NOT NULL,
     autor     VARCHAR(100) NOT NULL,
     categoria VARCHAR(50)  NULL,
+    stock     INT UNSIGNED NOT NULL DEFAULT 1,
     imagen    VARCHAR(100) NOT NULL DEFAULT 'default.png'
 );
 
--- Un préstamo conecta un socio con un libro. Cuando se devuelve el
--- libro, se borra la fila (no queda historial de préstamos pasados).
+-- Un préstamo conecta un socio con un item. Cuando se devuelve el
+-- item, se borra la fila (no queda historial de préstamos pasados).
 CREATE TABLE IF NOT EXISTS prestamos (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     socio_id        INT  NOT NULL,
-    libro_id        INT  NOT NULL,
+    item_id         INT  NOT NULL,
     fecha_prestamo  DATE NOT NULL,
     FOREIGN KEY (socio_id) REFERENCES socios(id) ON DELETE CASCADE,
-    FOREIGN KEY (libro_id) REFERENCES libros(id) ON DELETE CASCADE
+    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
 
 -- =====================================================================
@@ -59,16 +63,20 @@ INSERT INTO socios (usuario_id, nombre, direccion, telefono) VALUES
 (2, 'Socio de Prueba',   'Av. Principal 123', '099123456'),
 (3, 'Mariana Fernández', 'Bulevar Artigas 456', '098765432');
 
-INSERT INTO libros (titulo, autor, categoria, imagen) VALUES
-('Cien años de soledad',        'Gabriel García Márquez',   'Novela',   'default.png'),
-('1984',                        'George Orwell',            'Distopía', 'default.png'),
-('El nombre del viento',        'Patrick Rothfuss',         'Fantasía', 'default.png'),
-('Rayuela',                     'Julio Cortázar',           'Novela',   'default.png'),
-('Fahrenheit 451',              'Ray Bradbury',             'Distopía', 'default.png'),
-('El principito',               'Antoine de Saint-Exupéry', 'Infantil', 'default.png'),
-('Sapiens',                     'Yuval Noah Harari',        'Ensayo',   'default.png'),
-('El señor de los anillos',     'J. R. R. Tolkien',         'Fantasía', 'default.png');
+INSERT INTO items (tipo, titulo, autor, categoria, stock, imagen) VALUES
+('libro',    'Cien años de soledad',          'Gabriel García Márquez',   'Novela',     2, 'default.png'),
+('libro',    '1984',                          'George Orwell',            'Distopía',   1, 'default.png'),
+('libro',    'El nombre del viento',          'Patrick Rothfuss',         'Fantasía',   1, 'default.png'),
+('libro',    'Rayuela',                       'Julio Cortázar',           'Novela',     1, 'default.png'),
+('libro',    'Fahrenheit 451',                'Ray Bradbury',             'Distopía',   2, 'default.png'),
+('libro',    'El principito',                 'Antoine de Saint-Exupéry', 'Infantil',   3, 'default.png'),
+('libro',    'Sapiens',                       'Yuval Noah Harari',        'Ensayo',     1, 'default.png'),
+('libro',    'El señor de los anillos',       'J. R. R. Tolkien',         'Fantasía',   1, 'default.png'),
+('juego',    'Catan',                         'Klaus Teuber',             'Estrategia', 2, 'default.png'),
+('juego',    'Dixit',                         'Jean-Louis Roubira',       'Familiar',   1, 'default.png'),
+('proyecto', 'Estación meteorológica Arduino', 'Grupo 3.º B',              'Robótica',   1, 'default.png'),
+('proyecto', 'Huerta con riego automático',   'Grupo 2.º A',              'Electrónica', 1, 'default.png');
 
-INSERT INTO prestamos (socio_id, libro_id, fecha_prestamo) VALUES
+INSERT INTO prestamos (socio_id, item_id, fecha_prestamo) VALUES
 (1, 1, CURDATE() - INTERVAL 5 DAY),
 (2, 3, CURDATE() - INTERVAL 1 DAY);

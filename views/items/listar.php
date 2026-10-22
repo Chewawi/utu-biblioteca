@@ -34,7 +34,7 @@
         <th>Título</th>
         <th>Autor</th>
         <th>Categoría</th>
-        <th>Stock</th>
+        <th>Disponibles</th>
         <th></th>
       </tr>
     </thead>
@@ -46,7 +46,7 @@
           <td><?= htmlspecialchars($item->getTitulo()) ?></td>
           <td><?= htmlspecialchars($item->getAutor()) ?></td>
           <td><?= htmlspecialchars($item->getCategoria() ?? '—') ?></td>
-          <td><?= htmlspecialchars($item->getStock()) ?></td>
+          <td><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?></td>
           <td class="text-end">
             <a href="index.php?accion=formEditarItem&id=<?= $item->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
             <form method="POST" action="index.php?accion=eliminarItem" class="d-inline"
@@ -73,6 +73,13 @@
             <span class="badge text-bg-secondary"><?= htmlspecialchars(ucfirst($item->getTipo())) ?></span>
             <?php if ($item->getCategoria()): ?>
               <span class="badge text-bg-light border"><?= htmlspecialchars($item->getCategoria()) ?></span>
+            <?php endif; ?>
+          </div>
+          <div class="card-footer small">
+            <?php if ($item->getDisponibles() > 0): ?>
+              <span class="text-success"><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?> disponibles</span>
+            <?php else: ?>
+              <span class="text-danger">Sin ejemplares disponibles</span>
             <?php endif; ?>
           </div>
         </div>

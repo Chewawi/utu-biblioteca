@@ -22,7 +22,9 @@
     <select name="item_id" class="form-select" required>
       <option value="">-- Elegir ítem --</option>
       <?php foreach ($items as $item): ?>
-        <option value="<?= $item->getId() ?>"><?= htmlspecialchars($item->getTitulo()) ?></option>
+        <option value="<?= $item->getId() ?>" <?= $item->getDisponibles() < 1 ? 'disabled' : '' ?>>
+          <?= htmlspecialchars($item->getTitulo()) ?> (<?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?> disponibles)
+        </option>
       <?php endforeach; ?>
     </select>
   </div>

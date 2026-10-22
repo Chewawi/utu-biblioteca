@@ -41,8 +41,17 @@ function crearPrestamo() {
     $itemId  = $_POST['item_id'] ?? '';
     $fecha   = $_POST['fecha_prestamo'] ?? '';
 
+    $error = '';
     if ($socioId === '' || $itemId === '' || $fecha === '') {
         $error = 'Elegí un socio, un ítem, y la fecha del préstamo.';
+    } else {
+        $item = Item::buscarPorId($pdo, $itemId);
+        if (!$item || $item->getDisponibles() < 1) {
+            $error = 'No quedan ejemplares disponibles de ese ítem.';
+        }
+    }
+
+    if ($error !== '') {
         $socios = Socio::listar($pdo);
         $items = Item::listar($pdo);
         require __DIR__ . '/../views/prestamos/form.php';

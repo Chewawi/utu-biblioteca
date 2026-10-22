@@ -122,6 +122,9 @@ function editarItem() {
     $stock     = trim($_POST['stock'] ?? '');
 
     $error = validarItem($tipo, $titulo, $autor, $stock);
+    if ($error === '' && $stock < $item->getPrestados()) {
+        $error = 'Hay ' . $item->getPrestados() . ' ejemplares prestados: el stock no puede ser menor.';
+    }
     if ($error !== '') {
         require __DIR__ . '/../views/items/form.php';
         return;
@@ -150,8 +153,14 @@ function eliminarItem() {
     requerirAdmin();
 
     $id = $_POST['id'];
+    $item = Item::buscarPorId($pdo, $id);
+    if (!$item) {
+        flash('danger', 'Ítem no encontrado.');
+        header('Location: index.php?accion=listarItems');
+        exit;
+    }
 
-    if (Item::tienePrestamos($pdo, $id)) {
+    if ($item->getPrestados() > 0) {
         flash('danger', 'No se puede eliminar: el ítem está prestado ahora mismo.');
         header('Location: index.php?accion=listarItems');
         exit;

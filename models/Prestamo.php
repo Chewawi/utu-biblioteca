@@ -45,39 +45,49 @@ class Prestamo {
     // --- acceso a datos ---
 
     /**
-     * Todos los préstamos, con el nombre del socio y el título del item.
-     * Si $estado no está vacío, trae solo los de ese estado.
+     * Préstamos con el nombre del socio y el título del item, filtrados.
+     * $filtros es un array con estas claves (todas opcionales; vacío = sin filtrar):
+     *   item_id, socio_id, estado,
+     *   desde, hasta  -> rango sobre fecha_prestamo (formato AAAA-MM-DD),
+     *   q             -> texto que se busca en el nombre del socio o el título del item.
      * Primero los activos (en el ENUM "activo" va antes que "devuelto").
      */
-    public static function listar($pdo, $estado = '') {
-        $sql = "
-            SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
-                   s.nombre AS socio_nombre,
-                   i.titulo AS item_titulo
-            FROM prestamos p
-            INNER JOIN socios s ON p.socio_id = s.id
-            INNER JOIN items i ON p.item_id = i.id
-        ";
+    public static function listar($pdo, $filtros = []) {
+        // Completamos las claves que no vinieron, así abajo no hay que preguntar si existen.
+        $filtros = array_merge(
+            ['item_id' => '', 'socio_id' => '', 'estado' => '', 'desde' => '', 'hasta' => '', 'q' => ''],
+            $filtros
+        );
+
+        // Cada filtro usado suma una condición al WHERE y su valor a $parametros.
+        $condiciones = [];
         $parametros = [];
-        if ($estado !== '') {
-            $sql .= " WHERE p.estado = ?";
-            $parametros[] = $estado;
+        if ($filtros['item_id'] !== '') {
+            $condiciones[] = 'p.item_id = ?';
+            $parametros[] = $filtros['item_id'];
         }
-        $sql .= " ORDER BY p.estado, p.fecha_prestamo DESC";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($parametros);
-        $filas = $stmt->fetchAll();
-
-        $prestamos = [];
-        foreach ($filas as $f) {
-            $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['item_id'], $f['fecha_prestamo'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo']);
+        if ($filtros['socio_id'] !== '') {
+            $condiciones[] = 'p.socio_id = ?';
+            $parametros[] = $filtros['socio_id'];
         }
-        return $prestamos;
-    }
+        if ($filtros['estado'] !== '') {
+            $condiciones[] = 'p.estado = ?';
+            $parametros[] = $filtros['estado'];
+        }
+        if ($filtros['desde'] !== '') {
+            $condiciones[] = 'p.fecha_prestamo >= ?';
+            $parametros[] = $filtros['desde'];
+        }
+        if ($filtros['hasta'] !== '') {
+            $condiciones[] = 'p.fecha_prestamo <= ?';
+            $parametros[] = $filtros['hasta'];
+        }
+        if ($filtros['q'] !== '') {
+            $condiciones[] = '(s.nombre LIKE ? OR i.titulo LIKE ?)';
+            $parametros[] = '%' . $filtros['q'] . '%';
+            $parametros[] = '%' . $filtros['q'] . '%';
+        }
 
-    /** Igual que listar(), pero solo los de un socio (para "Mis préstamos"). */
-    public static function listarPorSocio($pdo, $socioId, $estado = '') {
         $sql = "
             SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
                    s.nombre AS socio_nombre,
@@ -85,14 +95,11 @@ class Prestamo {
             FROM prestamos p
             INNER JOIN socios s ON p.socio_id = s.id
             INNER JOIN items i ON p.item_id = i.id
-            WHERE p.socio_id = ?
         ";
-        $parametros = [$socioId];
-        if ($estado !== '') {
-            $sql .= " AND p.estado = ?";
-            $parametros[] = $estado;
+        if (!empty($condiciones)) {
+            $sql .= ' WHERE ' . implode(' AND ', $condiciones);
         }
-        $sql .= " ORDER BY p.estado, p.fecha_prestamo DESC";
+        $sql .= ' ORDER BY p.estado, p.fecha_prestamo DESC';
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($parametros);

@@ -7,20 +7,60 @@
   <?php endif; ?>
 </div>
 
-<form method="GET" action="index.php" class="row g-2 mb-4">
+<form method="GET" action="index.php" class="row g-2 align-items-end mb-4">
   <input type="hidden" name="accion" value="listarPrestamos">
-  <div class="col-auto">
+
+  <div class="col-md-4">
+    <label class="form-label small mb-1">Buscar</label>
+    <input type="text" name="q" class="form-control"
+      placeholder="<?= esAdmin() ? 'Nombre del socio o título del ítem...' : 'Título del ítem...' ?>"
+      value="<?= htmlspecialchars($filtros['q']) ?>">
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label small mb-1">Estado</label>
     <select name="estado" class="form-select">
-      <option value="">Todos los estados</option>
-      <option value="activo" <?= $estado === 'activo' ? 'selected' : '' ?>>Activos</option>
-      <option value="devuelto" <?= $estado === 'devuelto' ? 'selected' : '' ?>>Devueltos</option>
+      <option value="">Todos</option>
+      <option value="activo" <?= $filtros['estado'] === 'activo' ? 'selected' : '' ?>>Activos</option>
+      <option value="devuelto" <?= $filtros['estado'] === 'devuelto' ? 'selected' : '' ?>>Devueltos</option>
     </select>
   </div>
-  <div class="col-auto">
+
+  <div class="col-md-3">
+    <label class="form-label small mb-1">Ítem</label>
+    <select name="item_id" class="form-select">
+      <option value="">Todos los ítems</option>
+      <?php foreach ($items as $item): ?>
+        <option value="<?= $item->getId() ?>" <?= $filtros['item_id'] == $item->getId() ? 'selected' : '' ?>><?= htmlspecialchars($item->getTitulo()) ?></option>
+      <?php endforeach; ?>
+    </select>
+  </div>
+
+  <?php if (esAdmin()): ?>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Socio</label>
+      <select name="socio_id" class="form-select">
+        <option value="">Todos los socios</option>
+        <?php foreach ($socios as $socio): ?>
+          <option value="<?= $socio->getId() ?>" <?= $filtros['socio_id'] == $socio->getId() ? 'selected' : '' ?>><?= htmlspecialchars($socio->getNombre()) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+  <?php endif; ?>
+
+  <div class="col-md-3">
+    <label class="form-label small mb-1">Prestado desde</label>
+    <input type="date" name="desde" class="form-control" value="<?= htmlspecialchars($filtros['desde']) ?>">
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label small mb-1">Prestado hasta</label>
+    <input type="date" name="hasta" class="form-control" value="<?= htmlspecialchars($filtros['hasta']) ?>">
+  </div>
+
+  <div class="col-md-auto">
     <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
-    <?php if ($estado !== ''): ?>
-      <a href="index.php?accion=listarPrestamos" class="btn btn-link">Limpiar</a>
-    <?php endif; ?>
+    <a href="index.php?accion=listarPrestamos" class="btn btn-link">Limpiar filtros</a>
   </div>
 </form>
 

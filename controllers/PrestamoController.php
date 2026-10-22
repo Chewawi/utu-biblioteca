@@ -9,22 +9,65 @@ require_once __DIR__ . '/../models/Item.php';
 //  Un socio logueado solo ve los suyos.
 // ============================================================
 
+/** true si $fecha es una fecha real con formato AAAA-MM-DD. */
+function fechaValida($fecha) {
+    $d = DateTime::createFromFormat('Y-m-d', $fecha);
+    return $d && $d->format('Y-m-d') === $fecha;
+}
+
+/**
+ * Lee los filtros del listado desde $datos ($_GET o $_POST) y descarta los
+ * valores inválidos. Devuelve siempre las mismas claves; '' = sin filtrar.
+ */
+function leerFiltrosPrestamos($datos) {
+    $filtros = [
+        'item_id'  => trim($datos['item_id'] ?? ''),
+        'socio_id' => trim($datos['socio_id'] ?? ''),
+        'estado'   => trim($datos['estado'] ?? ''),
+        'desde'    => trim($datos['desde'] ?? ''),
+        'hasta'    => trim($datos['hasta'] ?? ''),
+        'q'        => trim($datos['q'] ?? ''),
+    ];
+
+    if (!ctype_digit($filtros['item_id'])) {
+        $filtros['item_id'] = '';
+    }
+    if (!ctype_digit($filtros['socio_id'])) {
+        $filtros['socio_id'] = '';
+    }
+    if (!in_array($filtros['estado'], Prestamo::ESTADOS)) {
+        $filtros['estado'] = '';
+    }
+    if (!fechaValida($filtros['desde'])) {
+        $filtros['desde'] = '';
+    }
+    if (!fechaValida($filtros['hasta'])) {
+        $filtros['hasta'] = '';
+    }
+    return $filtros;
+}
+
 function listarPrestamos() {
     global $pdo;
     requerirLogin();
 
-    // Filtro opcional por estado. Cualquier valor que no sea un estado válido = "todos".
-    $estado = $_GET['estado'] ?? '';
-    if (!in_array($estado, Prestamo::ESTADOS)) {
-        $estado = '';
-    }
+    $filtros = leerFiltrosPrestamos($_GET);
+    $items = Item::listar($pdo); // para el filtro por ítem
 
     if (esAdmin()) {
-        $prestamos = Prestamo::listar($pdo, $estado);
+        $socios = Socio::listar($pdo); // para el filtro por socio
+        $prestamos = Prestamo::listar($pdo, $filtros);
         $titulo = 'Préstamos';
     } else {
+        // Un socio solo ve lo suyo: el filtro por socio no lo elige él, lo fijamos acá.
+        $filtros['socio_id'] = '';
         $socio = Socio::buscarPorUsuarioId($pdo, $_SESSION['usuario']['id']);
-        $prestamos = $socio ? Prestamo::listarPorSocio($pdo, $socio->getId(), $estado) : [];
+        $prestamos = [];
+        if ($socio) {
+            $filtrosDelSocio = $filtros;
+            $filtrosDelSocio['socio_id'] = $socio->getId();
+            $prestamos = Prestamo::listar($pdo, $filtrosDelSocio);
+        }
         $titulo = 'Mis préstamos';
     }
 

@@ -38,7 +38,7 @@ function crearSocio() {
         return;
     }
 
-    $foto = guardarImagen($_FILES['foto'] ?? []);
+    $foto = guardarImagen($_FILES['foto'] ?? [], AVATAR_POR_DEFECTO);
     if ($foto === null) {
         $error = 'La foto tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
         $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo);
@@ -94,7 +94,7 @@ function editarSocio() {
     // Si no suben una foto nueva, conservamos la que ya tenía.
     $foto = $socio->getFoto();
     if (!empty($_FILES['foto']['name'])) {
-        $fotoNueva = guardarImagen($_FILES['foto']);
+        $fotoNueva = guardarImagen($_FILES['foto'], AVATAR_POR_DEFECTO);
         if ($fotoNueva === null) {
             $error = 'La foto tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
             $usuarioActualId = $socio->getUsuario() ? $socio->getUsuario()->getId() : null;

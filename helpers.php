@@ -45,14 +45,20 @@ function mostrarFlash() {
     }
 }
 
+// Imágenes genéricas de uploads/ para quien no subió la suya. Las comparten
+// muchos registros, así que nunca se borran. Para cambiarlas alcanza con
+// reemplazar el archivo (tienen que coincidir con los DEFAULT de database.sql).
+const PORTADA_POR_DEFECTO = 'default.png';
+const AVATAR_POR_DEFECTO  = 'avatar.png';
+
 /**
  * Guarda una imagen subida en uploads/ y devuelve el nombre final del archivo.
- * Si no subieron nada devuelve 'default.png'. Si el archivo no es una imagen
+ * Si no subieron nada devuelve $porDefecto. Si el archivo no es una imagen
  * JPG, PNG o WEBP, o pesa más de 2 MB, devuelve null.
  */
-function guardarImagen($archivo) {
+function guardarImagen($archivo, $porDefecto) {
     if (empty($archivo['name'])) {
-        return 'default.png';
+        return $porDefecto;
     }
     if ($archivo['error'] !== UPLOAD_ERR_OK || $archivo['size'] > 2 * 1024 * 1024) {
         return null;
@@ -74,10 +80,10 @@ function guardarImagen($archivo) {
     return $nombre;
 }
 
-/** Borra una imagen de uploads/, salvo default.png, que la comparten todos. */
+/** Borra una imagen de uploads/, salvo las genéricas. */
 function borrarImagen($nombre) {
     $ruta = __DIR__ . '/uploads/' . basename($nombre);
-    if ($nombre !== 'default.png' && is_file($ruta)) {
+    if (!in_array($nombre, [PORTADA_POR_DEFECTO, AVATAR_POR_DEFECTO]) && is_file($ruta)) {
         unlink($ruta);
     }
 }

@@ -1,5 +1,6 @@
 uploads/*
 !uploads/default.png
+!uploads/avatar.png
 !uploads/.htaccess
 .DS_Store
 Thumbs.db

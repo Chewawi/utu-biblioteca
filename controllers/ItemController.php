@@ -52,7 +52,7 @@ function crearItem() {
         return;
     }
 
-    $imagen = guardarImagen($_FILES['imagen'] ?? []);
+    $imagen = guardarImagen($_FILES['imagen'] ?? [], PORTADA_POR_DEFECTO);
     if ($imagen === null) {
         $error = 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
         require __DIR__ . '/../views/items/form.php';
@@ -107,7 +107,7 @@ function editarItem() {
     // Si no suben una portada nueva, conservamos la que ya tenía.
     $imagen = $item->getImagen();
     if (!empty($_FILES['imagen']['name'])) {
-        $imagenNueva = guardarImagen($_FILES['imagen']);
+        $imagenNueva = guardarImagen($_FILES['imagen'], PORTADA_POR_DEFECTO);
         if ($imagenNueva === null) {
             $error = 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
             require __DIR__ . '/../views/items/form.php';

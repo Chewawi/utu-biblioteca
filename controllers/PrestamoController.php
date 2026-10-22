@@ -5,7 +5,7 @@ require_once __DIR__ . '/../models/Item.php';
 
 // ============================================================
 //  Controller de Préstamos
-//  El admin ve todos los préstamos y puede crear/eliminar.
+//  El admin ve todos los préstamos y puede crear/devolver.
 //  Un socio logueado solo ve los suyos.
 // ============================================================
 
@@ -68,8 +68,11 @@ function devolverPrestamo() {
     global $pdo;
     requerirAdmin();
 
-    Prestamo::devolver($pdo, $_POST['id']);
-    flash('success', 'Devolución registrada.');
+    if (Prestamo::devolver($pdo, $_POST['id'])) {
+        flash('success', 'Devolución registrada.');
+    } else {
+        flash('warning', 'Ese préstamo ya estaba devuelto.');
+    }
     header('Location: index.php?accion=listarPrestamos');
     exit;
 }

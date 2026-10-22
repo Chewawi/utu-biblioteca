@@ -44,7 +44,7 @@ class Item {
 
     /*
      * Las consultas de lectura traen además la columna "prestados": una
-     * subconsulta que cuenta los préstamos sin devolver de cada item.
+     * subconsulta que cuenta los préstamos activos de cada item.
      */
 
     /** Trae todos los items. Si $q no está vacío, filtra por título o autor. */
@@ -52,7 +52,7 @@ class Item {
         if ($q !== '') {
             $stmt = $pdo->prepare("
                 SELECT i.*,
-                       (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.fecha_devolucion IS NULL) AS prestados
+                       (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.estado = 'activo') AS prestados
                 FROM items i
                 WHERE i.titulo LIKE ? OR i.autor LIKE ?
                 ORDER BY i.titulo
@@ -61,7 +61,7 @@ class Item {
         } else {
             $stmt = $pdo->prepare("
                 SELECT i.*,
-                       (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.fecha_devolucion IS NULL) AS prestados
+                       (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.estado = 'activo') AS prestados
                 FROM items i
                 ORDER BY i.titulo
             ");
@@ -79,7 +79,7 @@ class Item {
     public static function buscarPorId($pdo, $id) {
         $stmt = $pdo->prepare("
             SELECT i.*,
-                   (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.fecha_devolucion IS NULL) AS prestados
+                   (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.estado = 'activo') AS prestados
             FROM items i
             WHERE i.id = ?
         ");

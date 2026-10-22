@@ -38,15 +38,17 @@ CREATE TABLE IF NOT EXISTS items (
     imagen    VARCHAR(100) NOT NULL DEFAULT 'default.png'
 );
 
--- Un préstamo conecta un socio con un item. Mientras fecha_devolucion
--- sea NULL el préstamo está activo; al devolver se guarda la fecha y la
--- fila queda como historial.
+-- Un préstamo conecta un socio con un item. "estado" dice si sigue
+-- prestado o ya se devolvió. fecha_devolucion queda vacía mientras está
+-- 'activo' y se completa al pasar a 'devuelto'. La fila no se borra:
+-- queda como historial.
 CREATE TABLE IF NOT EXISTS prestamos (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     socio_id        INT  NOT NULL,
     item_id         INT  NOT NULL,
     fecha_prestamo  DATE NOT NULL,
     fecha_devolucion DATE NULL,
+    estado          ENUM('activo', 'devuelto') NOT NULL DEFAULT 'activo',
     FOREIGN KEY (socio_id) REFERENCES socios(id) ON DELETE CASCADE,
     FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
@@ -79,8 +81,10 @@ INSERT INTO items (tipo, titulo, autor, categoria, stock, imagen) VALUES
 ('proyecto', 'Estación meteorológica Arduino', 'Grupo 3.º B',              'Robótica',   1, 'default.png'),
 ('proyecto', 'Huerta con riego automático',   'Grupo 2.º A',              'Electrónica', 1, 'default.png');
 
-INSERT INTO prestamos (socio_id, item_id, fecha_prestamo, fecha_devolucion) VALUES
-(1, 1,  CURDATE() - INTERVAL 5 DAY,  NULL),
-(2, 3,  CURDATE() - INTERVAL 1 DAY,  NULL),
-(1, 9,  CURDATE() - INTERVAL 20 DAY, CURDATE() - INTERVAL 12 DAY),
-(2, 2,  CURDATE() - INTERVAL 30 DAY, CURDATE() - INTERVAL 16 DAY);
+INSERT INTO prestamos (socio_id, item_id, fecha_prestamo, fecha_devolucion, estado) VALUES
+(1, 1,  CURDATE() - INTERVAL 5 DAY,  NULL,                         'activo'),
+(2, 3,  CURDATE() - INTERVAL 1 DAY,  NULL,                         'activo'),
+(2, 9,  CURDATE() - INTERVAL 3 DAY,  NULL,                         'activo'),
+(1, 9,  CURDATE() - INTERVAL 20 DAY, CURDATE() - INTERVAL 12 DAY,  'devuelto'),
+(2, 2,  CURDATE() - INTERVAL 30 DAY, CURDATE() - INTERVAL 16 DAY,  'devuelto'),
+(1, 6,  CURDATE() - INTERVAL 45 DAY, CURDATE() - INTERVAL 40 DAY,  'devuelto');

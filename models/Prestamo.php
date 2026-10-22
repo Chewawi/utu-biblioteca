@@ -13,15 +13,17 @@ class Prestamo {
     private $itemId;
     private $fechaPrestamo;
     private $fechaDevolucion;
+    private $estado;
     private $socioNombre;
     private $itemTitulo;
 
-    public function __construct($id, $socioId, $itemId, $fechaPrestamo, $fechaDevolucion, $socioNombre, $itemTitulo) {
+    public function __construct($id, $socioId, $itemId, $fechaPrestamo, $fechaDevolucion, $estado, $socioNombre, $itemTitulo) {
         $this->id = $id;
         $this->socioId = $socioId;
         $this->itemId = $itemId;
         $this->fechaPrestamo = $fechaPrestamo;
         $this->fechaDevolucion = $fechaDevolucion;
+        $this->estado = $estado;
         $this->socioNombre = $socioNombre;
         $this->itemTitulo = $itemTitulo;
     }
@@ -32,51 +34,52 @@ class Prestamo {
     public function getItemId() { return $this->itemId; }
     public function getFechaPrestamo() { return $this->fechaPrestamo; }
     public function getFechaDevolucion() { return $this->fechaDevolucion; }
-    public function estaActivo() { return $this->fechaDevolucion === null; }
+    public function getEstado() { return $this->estado; }
+    public function estaActivo() { return $this->estado === 'activo'; }
     public function getSocioNombre() { return $this->socioNombre; }
     public function getItemTitulo() { return $this->itemTitulo; }
 
     // --- acceso a datos ---
 
-    /** Todos los préstamos, con el nombre del socio y el título del item. Primero los activos. */
+    /** Todos los préstamos, con el nombre del socio y el título del item. Primero los activos (en el ENUM "activo" va antes que "devuelto"). */
     public static function listar($pdo) {
         $stmt = $pdo->prepare("
-            SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion,
+            SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
                    s.nombre AS socio_nombre,
                    i.titulo AS item_titulo
             FROM prestamos p
             INNER JOIN socios s ON p.socio_id = s.id
             INNER JOIN items i ON p.item_id = i.id
-            ORDER BY p.fecha_devolucion IS NULL DESC, p.fecha_prestamo DESC
+            ORDER BY p.estado, p.fecha_prestamo DESC
         ");
         $stmt->execute();
         $filas = $stmt->fetchAll();
 
         $prestamos = [];
         foreach ($filas as $f) {
-            $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['item_id'], $f['fecha_prestamo'], $f['fecha_devolucion'], $f['socio_nombre'], $f['item_titulo']);
+            $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['item_id'], $f['fecha_prestamo'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo']);
         }
         return $prestamos;
     }
 
-    /** Los préstamos de un solo socio (para "Mis préstamos"). Primero los activos. */
+    /** Los préstamos de un solo socio (para "Mis préstamos"). Primero los activos (en el ENUM "activo" va antes que "devuelto"). */
     public static function listarPorSocio($pdo, $socioId) {
         $stmt = $pdo->prepare("
-            SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion,
+            SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
                    s.nombre AS socio_nombre,
                    i.titulo AS item_titulo
             FROM prestamos p
             INNER JOIN socios s ON p.socio_id = s.id
             INNER JOIN items i ON p.item_id = i.id
             WHERE p.socio_id = ?
-            ORDER BY p.fecha_devolucion IS NULL DESC, p.fecha_prestamo DESC
+            ORDER BY p.estado, p.fecha_prestamo DESC
         ");
         $stmt->execute([$socioId]);
         $filas = $stmt->fetchAll();
 
         $prestamos = [];
         foreach ($filas as $f) {
-            $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['item_id'], $f['fecha_prestamo'], $f['fecha_devolucion'], $f['socio_nombre'], $f['item_titulo']);
+            $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['item_id'], $f['fecha_prestamo'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo']);
         }
         return $prestamos;
     }
@@ -89,11 +92,15 @@ class Prestamo {
         return $stmt->execute([$socioId, $itemId, $fecha]);
     }
 
-    /** Marca el préstamo como devuelto hoy. No se borra: queda en el historial. */
+    /**
+     * Pasa el préstamo a 'devuelto' con la fecha de hoy. No se borra: queda en
+     * el historial. Si ya estaba devuelto no cambia nada y devuelve false.
+     */
     public static function devolver($pdo, $id) {
         $stmt = $pdo->prepare(
-            "UPDATE prestamos SET fecha_devolucion = CURDATE() WHERE id = ? AND fecha_devolucion IS NULL"
+            "UPDATE prestamos SET estado = 'devuelto', fecha_devolucion = CURDATE() WHERE id = ? AND estado = 'activo'"
         );
-        return $stmt->execute([$id]);
+        $stmt->execute([$id]);
+        return $stmt->rowCount() > 0;
     }
 }

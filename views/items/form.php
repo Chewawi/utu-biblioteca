@@ -18,7 +18,7 @@
   <?php $tipoElegido = isset($item) ? $item->getTipo() : ($_POST['tipo'] ?? 'libro'); ?>
   <div class="mb-3">
     <label class="form-label">Tipo</label>
-    <select name="tipo" class="form-select" required>
+    <select name="tipo" class="form-select select2" required>
       <?php foreach (Item::TIPOS as $tipo): ?>
         <option value="<?= htmlspecialchars($tipo) ?>" <?= $tipo === $tipoElegido ? 'selected' : '' ?>><?= htmlspecialchars(ucfirst($tipo)) ?></option>
       <?php endforeach; ?>

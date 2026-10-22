@@ -25,11 +25,15 @@
 <?php else: ?>
   <table class="table align-middle">
     <thead>
-      <tr><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Email</th><th></th></tr>
+      <tr><th></th><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Email</th><th></th></tr>
     </thead>
     <tbody>
       <?php foreach ($socios as $socio): ?>
         <tr>
+          <td style="width: 56px;">
+            <img src="uploads/<?= htmlspecialchars($socio->getFoto()) ?>" alt="" width="40" height="40"
+              class="rounded-circle border" style="object-fit: cover;">
+          </td>
           <td><?= htmlspecialchars($socio->getNombre()) ?></td>
           <td><?= htmlspecialchars($socio->getDireccion()) ?></td>
           <td><?= htmlspecialchars($socio->getTelefono()) ?></td>

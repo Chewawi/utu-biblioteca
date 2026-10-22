@@ -13,13 +13,15 @@ class Socio {
     private $nombre;
     private $direccion;
     private $telefono;
+    private $foto;
 
-    public function __construct($id, $usuario, $nombre, $direccion, $telefono) {
+    public function __construct($id, $usuario, $nombre, $direccion, $telefono, $foto) {
         $this->id = $id;
         $this->usuario = $usuario;
         $this->nombre = $nombre;
         $this->direccion = $direccion;
         $this->telefono = $telefono;
+        $this->foto = $foto;
     }
 
     // --- getters ---
@@ -28,6 +30,7 @@ class Socio {
     public function getNombre() { return $this->nombre; }
     public function getDireccion() { return $this->direccion; }
     public function getTelefono() { return $this->telefono; }
+    public function getFoto() { return $this->foto; }
 
     // --- acceso a datos ---
 
@@ -66,7 +69,7 @@ class Socio {
         $socios = [];
         foreach ($filas as $f) {
             $usuario = new Usuario($f['usuario_id'], $f['rol'], $f['email'], $f['pass']);
-            $socios[] = new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono']);
+            $socios[] = new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono'], $f['foto']);
         }
         return $socios;
     }
@@ -79,7 +82,7 @@ class Socio {
             return null;
         }
         $usuario = Usuario::buscarPorId($pdo, $f['usuario_id']);
-        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono']);
+        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono'], $f['foto']);
     }
 
     /** Busca el socio asociado a una cuenta de usuario (para "Mis préstamos"). */
@@ -91,21 +94,21 @@ class Socio {
             return null;
         }
         $usuario = Usuario::buscarPorId($pdo, $f['usuario_id']);
-        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono']);
+        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono'], $f['foto']);
     }
 
-    public static function crear($pdo, $usuarioId, $nombre, $direccion, $telefono) {
+    public static function crear($pdo, $usuarioId, $nombre, $direccion, $telefono, $foto) {
         $stmt = $pdo->prepare(
-            "INSERT INTO socios (usuario_id, nombre, direccion, telefono) VALUES (?, ?, ?, ?)"
+            "INSERT INTO socios (usuario_id, nombre, direccion, telefono, foto) VALUES (?, ?, ?, ?, ?)"
         );
-        return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono]);
+        return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono, $foto]);
     }
 
-    public static function actualizar($pdo, $id, $usuarioId, $nombre, $direccion, $telefono) {
+    public static function actualizar($pdo, $id, $usuarioId, $nombre, $direccion, $telefono, $foto) {
         $stmt = $pdo->prepare(
-            "UPDATE socios SET usuario_id = ?, nombre = ?, direccion = ?, telefono = ? WHERE id = ?"
+            "UPDATE socios SET usuario_id = ?, nombre = ?, direccion = ?, telefono = ?, foto = ? WHERE id = ?"
         );
-        return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono, $id]);
+        return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono, $foto, $id]);
     }
 
     public static function eliminar($pdo, $id) {

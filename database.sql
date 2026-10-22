@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS socios (
     nombre      VARCHAR(100) NOT NULL,
     direccion   VARCHAR(255) NOT NULL,
     telefono    VARCHAR(20)  NOT NULL,
+    foto        VARCHAR(100) NOT NULL DEFAULT 'default.png',
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 

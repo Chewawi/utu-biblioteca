@@ -38,7 +38,15 @@ function crearSocio() {
         return;
     }
 
-    Socio::crear($pdo, $usuarioId, $nombre, $direccion, $telefono);
+    $foto = guardarImagen($_FILES['foto'] ?? []);
+    if ($foto === null) {
+        $error = 'La foto tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
+        $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo);
+        require __DIR__ . '/../views/socios/form.php';
+        return;
+    }
+
+    Socio::crear($pdo, $usuarioId, $nombre, $direccion, $telefono, $foto);
     flash('success', 'Socio creado correctamente.');
     header('Location: index.php?accion=listarSocios');
     exit;
@@ -83,7 +91,24 @@ function editarSocio() {
         return;
     }
 
-    Socio::actualizar($pdo, $id, $usuarioId, $nombre, $direccion, $telefono);
+    // Si no suben una foto nueva, conservamos la que ya tenía.
+    $foto = $socio->getFoto();
+    if (!empty($_FILES['foto']['name'])) {
+        $fotoNueva = guardarImagen($_FILES['foto']);
+        if ($fotoNueva === null) {
+            $error = 'La foto tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
+            $usuarioActualId = $socio->getUsuario() ? $socio->getUsuario()->getId() : null;
+            $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo, $usuarioActualId);
+            require __DIR__ . '/../views/socios/form.php';
+            return;
+        }
+        $foto = $fotoNueva;
+    }
+
+    Socio::actualizar($pdo, $id, $usuarioId, $nombre, $direccion, $telefono, $foto);
+    if ($foto !== $socio->getFoto()) {
+        borrarImagen($socio->getFoto()); // la foto vieja ya no la usa nadie
+    }
     flash('success', 'Socio actualizado correctamente.');
     header('Location: index.php?accion=listarSocios');
     exit;
@@ -94,6 +119,12 @@ function eliminarSocio() {
     requerirAdmin();
 
     $id = $_POST['id'];
+    $socio = Socio::buscarPorId($pdo, $id);
+    if (!$socio) {
+        flash('danger', 'Socio no encontrado.');
+        header('Location: index.php?accion=listarSocios');
+        exit;
+    }
 
     if (Socio::tienePrestamos($pdo, $id)) {
         flash('danger', 'No se puede eliminar: el socio tiene un préstamo activo.');
@@ -102,6 +133,7 @@ function eliminarSocio() {
     }
 
     Socio::eliminar($pdo, $id);
+    borrarImagen($socio->getFoto());
     flash('success', 'Socio eliminado.');
     header('Location: index.php?accion=listarSocios');
     exit;

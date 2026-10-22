@@ -8,6 +8,10 @@
 
 session_start();
 
+// XAMPP trae otra zona horaria en php.ini; sin esto, date() puede dar
+// un día distinto al CURDATE() de MySQL.
+date_default_timezone_set('America/Montevideo');
+
 require_once __DIR__ . '/conexion.php'; // deja $pdo listo
 require_once __DIR__ . '/helpers.php';
 

@@ -55,12 +55,11 @@ function crearPrestamo() {
     exit;
 }
 
-/** "Devolver" un item es simplemente borrar el préstamo. */
-function eliminarPrestamo() {
+function devolverPrestamo() {
     global $pdo;
     requerirAdmin();
 
-    Prestamo::eliminar($pdo, $_POST['id']);
+    Prestamo::devolver($pdo, $_POST['id']);
     flash('success', 'Devolución registrada.');
     header('Location: index.php?accion=listarPrestamos');
     exit;

@@ -38,13 +38,15 @@ CREATE TABLE IF NOT EXISTS items (
     imagen    VARCHAR(100) NOT NULL DEFAULT 'default.png'
 );
 
--- Un préstamo conecta un socio con un item. Cuando se devuelve el
--- item, se borra la fila (no queda historial de préstamos pasados).
+-- Un préstamo conecta un socio con un item. Mientras fecha_devolucion
+-- sea NULL el préstamo está activo; al devolver se guarda la fecha y la
+-- fila queda como historial.
 CREATE TABLE IF NOT EXISTS prestamos (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     socio_id        INT  NOT NULL,
     item_id         INT  NOT NULL,
     fecha_prestamo  DATE NOT NULL,
+    fecha_devolucion DATE NULL,
     FOREIGN KEY (socio_id) REFERENCES socios(id) ON DELETE CASCADE,
     FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
@@ -77,6 +79,8 @@ INSERT INTO items (tipo, titulo, autor, categoria, stock, imagen) VALUES
 ('proyecto', 'Estación meteorológica Arduino', 'Grupo 3.º B',              'Robótica',   1, 'default.png'),
 ('proyecto', 'Huerta con riego automático',   'Grupo 2.º A',              'Electrónica', 1, 'default.png');
 
-INSERT INTO prestamos (socio_id, item_id, fecha_prestamo) VALUES
-(1, 1, CURDATE() - INTERVAL 5 DAY),
-(2, 3, CURDATE() - INTERVAL 1 DAY);
+INSERT INTO prestamos (socio_id, item_id, fecha_prestamo, fecha_devolucion) VALUES
+(1, 1,  CURDATE() - INTERVAL 5 DAY,  NULL),
+(2, 3,  CURDATE() - INTERVAL 1 DAY,  NULL),
+(1, 9,  CURDATE() - INTERVAL 20 DAY, CURDATE() - INTERVAL 12 DAY),
+(2, 2,  CURDATE() - INTERVAL 30 DAY, CURDATE() - INTERVAL 16 DAY);

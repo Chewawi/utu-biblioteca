@@ -100,8 +100,8 @@ switch ($accion) {
     case 'crearPrestamo':
         crearPrestamo();
         break;
-    case 'eliminarPrestamo':
-        eliminarPrestamo();
+    case 'devolverPrestamo':
+        devolverPrestamo();
         break;
 
     default:

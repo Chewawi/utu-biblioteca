@@ -85,9 +85,9 @@ class Socio {
         return $stmt->execute([$id]);
     }
 
-    /** true si el socio tiene algún préstamo ahora mismo. */
+    /** true si el socio tiene algún préstamo sin devolver. */
     public static function tienePrestamos($pdo, $id) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM prestamos WHERE socio_id = ?");
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM prestamos WHERE socio_id = ? AND fecha_devolucion IS NULL");
         $stmt->execute([$id]);
         return $stmt->fetchColumn() > 0;
     }

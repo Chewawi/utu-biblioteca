@@ -82,9 +82,9 @@ class Item {
         return $stmt->execute([$id]);
     }
 
-    /** Cuántos préstamos tiene este item ahora mismo (sin devolver). */
+    /** true si el item tiene algún préstamo sin devolver. */
     public static function tienePrestamos($pdo, $id) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM prestamos WHERE item_id = ?");
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM prestamos WHERE item_id = ? AND fecha_devolucion IS NULL");
         $stmt->execute([$id]);
         return $stmt->fetchColumn() > 0;
     }

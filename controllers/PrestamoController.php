@@ -122,6 +122,10 @@ function devolverPrestamo() {
     } else {
         flash('warning', 'Ese préstamo ya estaba devuelto.');
     }
-    header('Location: index.php?accion=listarPrestamos');
+
+    // Volvemos a la lista con los mismos filtros que tenía (vienen en campos ocultos).
+    // array_filter saca los vacíos, para que la URL quede corta.
+    $filtros = array_filter(leerFiltrosPrestamos($_POST));
+    header('Location: index.php?' . http_build_query(array_merge(['accion' => 'listarPrestamos'], $filtros)));
     exit;
 }

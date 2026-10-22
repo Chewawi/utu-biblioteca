@@ -98,6 +98,12 @@
                 <form method="POST" action="index.php?accion=devolverPrestamo" class="d-inline"
                   onsubmit="return confirm('¿Registrar la devolución de «<?= htmlspecialchars(addslashes($p->getItemTitulo())) ?>»?');">
                   <input type="hidden" name="id" value="<?= $p->getId() ?>">
+                  <?php // Mandamos también los filtros actuales, para volver a la lista tal como estaba. ?>
+                  <?php foreach ($filtros as $clave => $valor): ?>
+                    <?php if ($valor !== ''): ?>
+                      <input type="hidden" name="<?= htmlspecialchars($clave) ?>" value="<?= htmlspecialchars($valor) ?>">
+                    <?php endif; ?>
+                  <?php endforeach; ?>
                   <button type="submit" class="btn btn-sm btn-outline-success">Devolver</button>
                 </form>
               <?php endif; ?>

@@ -6,6 +6,16 @@
   <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
 <?php endif; ?>
 
+<?php
+// Si el formulario vuelve por un error, mostramos lo que se escribió ($_POST);
+// si no, los datos guardados del ítem (al editar) o los valores iniciales (al crear).
+$tipoElegido = $_POST['tipo'] ?? (isset($item) ? $item->getTipo() : 'libro');
+$titulo      = $_POST['titulo'] ?? (isset($item) ? $item->getTitulo() : '');
+$autor       = $_POST['autor'] ?? (isset($item) ? $item->getAutor() : '');
+$categoria   = $_POST['categoria'] ?? (isset($item) ? ($item->getCategoria() ?? '') : '');
+$stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
+?>
+
 <form method="POST"
   action="index.php?accion=<?= isset($item) ? 'editarItem' : 'crearItem' ?>"
   enctype="multipart/form-data"
@@ -15,7 +25,6 @@
     <input type="hidden" name="id" value="<?= $item->getId() ?>">
   <?php endif; ?>
 
-  <?php $tipoElegido = isset($item) ? $item->getTipo() : ($_POST['tipo'] ?? 'libro'); ?>
   <div class="mb-3">
     <label class="form-label">Tipo</label>
     <select name="tipo" class="form-select select2" required>
@@ -27,26 +36,24 @@
 
   <div class="mb-3">
     <label class="form-label">Título</label>
-    <input type="text" name="titulo" class="form-control" required
-      value="<?= isset($item) ? htmlspecialchars($item->getTitulo()) : htmlspecialchars($_POST['titulo'] ?? '') ?>">
+    <input type="text" name="titulo" class="form-control" required value="<?= htmlspecialchars($titulo) ?>">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Autor</label>
-    <input type="text" name="autor" class="form-control" required
-      value="<?= isset($item) ? htmlspecialchars($item->getAutor()) : htmlspecialchars($_POST['autor'] ?? '') ?>">
+    <input type="text" name="autor" class="form-control" required value="<?= htmlspecialchars($autor) ?>">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Categoría (opcional)</label>
     <input type="text" name="categoria" class="form-control" placeholder="Novela, Estrategia, Robótica..."
-      value="<?= isset($item) ? htmlspecialchars($item->getCategoria() ?? '') : htmlspecialchars($_POST['categoria'] ?? '') ?>">
+      value="<?= htmlspecialchars($categoria) ?>">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Stock (cantidad de ejemplares)</label>
     <input type="number" name="stock" class="form-control" min="1" step="1" required
-      value="<?= isset($item) ? htmlspecialchars($item->getStock()) : htmlspecialchars($_POST['stock'] ?? '1') ?>">
+      value="<?= htmlspecialchars($stock) ?>">
   </div>
 
   <?php if (isset($item)): ?>

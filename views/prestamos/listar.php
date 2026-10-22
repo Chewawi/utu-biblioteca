@@ -28,7 +28,7 @@
 
   <div class="col-md-3">
     <label class="form-label small mb-1">Ítem</label>
-    <select name="item_id" class="form-select">
+    <select name="item_id" class="form-select select2-buscable">
       <option value="">Todos los ítems</option>
       <?php foreach ($items as $item): ?>
         <option value="<?= $item->getId() ?>" <?= $filtros['item_id'] == $item->getId() ? 'selected' : '' ?>><?= htmlspecialchars($item->getTitulo()) ?></option>
@@ -39,7 +39,7 @@
   <?php if (esAdmin()): ?>
     <div class="col-md-3">
       <label class="form-label small mb-1">Socio</label>
-      <select name="socio_id" class="form-select">
+      <select name="socio_id" class="form-select select2-buscable">
         <option value="">Todos los socios</option>
         <?php foreach ($socios as $socio): ?>
           <option value="<?= $socio->getId() ?>" <?= $filtros['socio_id'] == $socio->getId() ? 'selected' : '' ?>><?= htmlspecialchars($socio->getNombre()) ?></option>

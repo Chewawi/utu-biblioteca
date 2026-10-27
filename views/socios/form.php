@@ -9,7 +9,7 @@
 <?php
 // Si el formulario vuelve por un error, mostramos lo que se escribió ($_POST);
 // si no, los datos guardados del socio (al editar) o vacío (al crear).
-$usuarioElegido = $_POST['usuario_id'] ?? (isset($socio) && $socio->getUsuario() ? $socio->getUsuario()->getId() : '');
+$usuarioElegido = $_POST['usuario_id'] ?? (isset($socio) ? $socio->getUsuario()->getId() : '');
 $nombre    = $_POST['nombre'] ?? (isset($socio) ? $socio->getNombre() : '');
 $direccion = $_POST['direccion'] ?? (isset($socio) ? $socio->getDireccion() : '');
 $telefono  = $_POST['telefono'] ?? (isset($socio) ? $socio->getTelefono() : '');

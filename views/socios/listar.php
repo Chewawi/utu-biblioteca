@@ -37,7 +37,7 @@
           <td><?= htmlspecialchars($socio->getNombre()) ?></td>
           <td><?= htmlspecialchars($socio->getDireccion()) ?></td>
           <td><?= htmlspecialchars($socio->getTelefono()) ?></td>
-          <td><?= $socio->getUsuario() ? htmlspecialchars($socio->getUsuario()->getEmail()) : '<span class="text-muted">cuenta eliminada</span>' ?></td>
+          <td><?= htmlspecialchars($socio->getUsuario()->getEmail()) ?></td>
           <td class="text-end">
             <a href="index.php?accion=formEditarSocio&id=<?= $socio->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
             <form method="POST" action="index.php?accion=eliminarSocio" class="d-inline"

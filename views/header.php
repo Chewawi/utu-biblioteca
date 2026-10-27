@@ -16,7 +16,7 @@
     <div class="container">
       
       <a class="navbar-brand" href="index.php?accion=listarItems">
-        <img src="views/imagenes/favicon.ico" alt="Logo" height="24" class="d-inline-block align-text-top pr-4">
+        <img src="views/imagenes/favicon.ico" alt="Logo" height="24" class="d-inline-block align-text-top">
         Bibliodeko
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">

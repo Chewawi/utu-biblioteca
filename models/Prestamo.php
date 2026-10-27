@@ -12,18 +12,14 @@ class Prestamo {
     const ESTADOS = ['activo', 'devuelto'];
 
     private $id;
-    private $socioId;
-    private $itemId;
     private $fechaPrestamo;
     private $fechaDevolucion;
     private $estado;
     private $socioNombre;
     private $itemTitulo;
 
-    public function __construct($id, $socioId, $itemId, $fechaPrestamo, $fechaDevolucion, $estado, $socioNombre, $itemTitulo) {
+    public function __construct($id, $fechaPrestamo, $fechaDevolucion, $estado, $socioNombre, $itemTitulo) {
         $this->id = $id;
-        $this->socioId = $socioId;
-        $this->itemId = $itemId;
         $this->fechaPrestamo = $fechaPrestamo;
         $this->fechaDevolucion = $fechaDevolucion;
         $this->estado = $estado;
@@ -33,11 +29,8 @@ class Prestamo {
 
     // --- getters ---
     public function getId() { return $this->id; }
-    public function getSocioId() { return $this->socioId; }
-    public function getItemId() { return $this->itemId; }
     public function getFechaPrestamo() { return $this->fechaPrestamo; }
     public function getFechaDevolucion() { return $this->fechaDevolucion; }
-    public function getEstado() { return $this->estado; }
     public function estaActivo() { return $this->estado === 'activo'; }
     public function getSocioNombre() { return $this->socioNombre; }
     public function getItemTitulo() { return $this->itemTitulo; }
@@ -108,7 +101,7 @@ class Prestamo {
         $total = (int) $stmt->fetchColumn();
 
         $sql = '
-            SELECT p.id, p.socio_id, p.item_id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
+            SELECT p.id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
                    s.nombre AS socio_nombre,
                    i.titulo AS item_titulo
         ' . $desdeDonde . ' ORDER BY p.estado, p.fecha_prestamo DESC';
@@ -130,7 +123,7 @@ class Prestamo {
 
         $prestamos = [];
         foreach ($filas as $f) {
-            $prestamos[] = new Prestamo($f['id'], $f['socio_id'], $f['item_id'], $f['fecha_prestamo'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo']);
+            $prestamos[] = new Prestamo($f['id'], $f['fecha_prestamo'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo']);
         }
         return ['filas' => $prestamos, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
     }

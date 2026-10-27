@@ -85,8 +85,7 @@ function formEditarSocio() {
         header('Location: index.php?accion=listarSocios');
         exit;
     }
-    $usuarioActualId = $socio->getUsuario() ? $socio->getUsuario()->getId() : null;
-    $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo, $usuarioActualId);
+    $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo, $socio->getUsuario()->getId());
     require __DIR__ . '/../views/socios/form.php';
 }
 
@@ -107,8 +106,7 @@ function editarSocio() {
     $direccion = trim($_POST['direccion'] ?? '');
     $telefono  = trim($_POST['telefono'] ?? '');
 
-    $usuarioActualId = $socio->getUsuario() ? $socio->getUsuario()->getId() : null;
-    $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo, $usuarioActualId);
+    $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo, $socio->getUsuario()->getId());
     $error = validarSocio($usuarioId, $nombre, $direccion, $telefono, $usuariosDisponibles);
     if ($error !== '') {
         require __DIR__ . '/../views/socios/form.php';

@@ -1,7 +1,7 @@
 <?php require __DIR__ . '/../header.php'; ?>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h3 mb-0">Catálogo</h1>
+<div class="encabezado">
+  <h1 class="h3">Catálogo</h1>
   <?php if (esAdmin()): ?>
     <a href="index.php?accion=formCrearItem" class="btn btn-primary">+ Nuevo ítem</a>
   <?php endif; ?>
@@ -13,96 +13,117 @@
 $pestanas = ['' => 'Todos'] + Item::PLURALES;
 $conteo[''] = array_sum($conteo);
 ?>
-<ul class="nav nav-tabs mb-3">
+<ul class="nav nav-underline pestanas mb-4">
   <?php foreach ($pestanas as $clave => $nombre): ?>
     <?php $url = 'index.php?' . http_build_query(array_filter(['accion' => 'listarItems', 'tipo' => $clave, 'q' => $filtros['q']])); ?>
     <li class="nav-item">
-      <a class="nav-link <?= $clave === $tipo ? 'active' : '' ?>" href="<?= htmlspecialchars($url) ?>">
+      <a class="nav-link <?= $clave === $tipo ? 'active' : '' ?>" href="<?= htmlspecialchars($url) ?>"
+        <?= $clave === $tipo ? 'aria-current="page"' : '' ?>>
         <?= htmlspecialchars($nombre) ?>
-        <span class="badge text-bg-secondary"><?= htmlspecialchars($conteo[$clave]) ?></span>
+        <span class="contador"><?= htmlspecialchars($conteo[$clave]) ?></span>
       </a>
     </li>
   <?php endforeach; ?>
 </ul>
+<script>
+  // En el celular las pestañas se desplazan de costado: mostramos la elegida.
+  document.querySelector('.pestanas .active').scrollIntoView({ block: 'nearest', inline: 'nearest' });
+</script>
 
-<form method="GET" action="index.php" class="row g-2 mb-4">
+<form method="GET" action="index.php" class="d-flex align-items-center gap-2 mb-4">
   <input type="hidden" name="accion" value="listarItems">
   <?php if ($tipo !== ''): ?>
     <input type="hidden" name="tipo" value="<?= htmlspecialchars($tipo) ?>">
   <?php endif; ?>
-  <div class="col-auto flex-grow-1">
-    <input type="text" name="q" class="form-control"
+  <div class="input-group">
+    <input type="search" name="q" class="form-control" aria-label="Buscar"
       placeholder="Buscar por título o <?= htmlspecialchars(mb_strtolower(Item::etiquetaAutor($tipo))) ?>..."
       value="<?= htmlspecialchars($filtros['q']) ?>">
-  </div>
-  <div class="col-auto">
     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-    <?php if ($filtros['q'] !== ''): ?>
-      <a href="index.php?<?= htmlspecialchars(http_build_query(array_filter(['accion' => 'listarItems', 'tipo' => $tipo]))) ?>" class="btn btn-link">Limpiar</a>
-    <?php endif; ?>
   </div>
+  <?php if ($filtros['q'] !== ''): ?>
+    <a href="index.php?<?= htmlspecialchars(http_build_query(array_filter(['accion' => 'listarItems', 'tipo' => $tipo]))) ?>" class="btn btn-link">Limpiar</a>
+  <?php endif; ?>
 </form>
 
 <?php if (empty($items)): ?>
-  <div class="alert alert-secondary">No se encontraron ítems.</div>
+  <div class="card estado-vacio">
+    <p class="titulo">No se encontraron ítems.</p>
+    <p class="small mb-0">
+      <?php if ($filtros['q'] !== ''): ?>
+        Probá con otra búsqueda o en otra pestaña.
+      <?php else: ?>
+        Todavía no hay <?= htmlspecialchars(mb_strtolower($pestanas[$tipo])) ?> en el catálogo.
+      <?php endif; ?>
+    </p>
+  </div>
 
 <?php elseif (esAdmin()): ?>
   <!-- Vista admin: tabla, para gestionar rápido -->
-  <table class="table align-middle">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Tipo</th>
-        <th>Título</th>
-        <th><?= htmlspecialchars(Item::etiquetaAutor($tipo)) ?></th>
-        <th>Categoría</th>
-        <th>Disponibles</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach ($items as $item): ?>
-        <tr>
-          <td><img src="uploads/<?= htmlspecialchars($item->getImagen()) ?>" width="48" class="rounded"></td>
-          <td><?= htmlspecialchars(ucfirst($item->getTipo())) ?></td>
-          <td><?= htmlspecialchars($item->getTitulo()) ?></td>
-          <td><?= htmlspecialchars($item->getAutor()) ?></td>
-          <td><?= htmlspecialchars($item->getCategoria() ?? '—') ?></td>
-          <td><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?></td>
-          <td class="text-end">
-            <a href="index.php?accion=formEditarItem&id=<?= $item->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
-            <form method="POST" action="index.php?accion=eliminarItem" class="d-inline"
-              onsubmit="return confirm('¿Eliminar «<?= htmlspecialchars(addslashes($item->getTitulo())) ?>»?');">
-              <?= campoCsrf() ?>
-              <input type="hidden" name="id" value="<?= $item->getId() ?>">
-              <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-            </form>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th><span class="visually-hidden">Portada</span></th>
+            <th>Tipo</th>
+            <th>Título</th>
+            <th><?= htmlspecialchars(Item::etiquetaAutor($tipo)) ?></th>
+            <th>Categoría</th>
+            <th>Disponibles</th>
+            <th><span class="visually-hidden">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($items as $item): ?>
+            <tr>
+              <td><img src="uploads/<?= htmlspecialchars($item->getImagen()) ?>" alt="" class="portada-mini"></td>
+              <td><span class="badge etiqueta"><?= htmlspecialchars(ucfirst($item->getTipo())) ?></span></td>
+              <td class="fw-medium"><?= htmlspecialchars($item->getTitulo()) ?></td>
+              <td class="text-body-secondary"><?= htmlspecialchars($item->getAutor()) ?></td>
+              <td class="text-body-secondary"><?= htmlspecialchars($item->getCategoria() ?? '—') ?></td>
+              <td class="text-nowrap">
+                <span class="punto <?= $item->getDisponibles() > 0 ? 'bg-success' : 'bg-danger' ?>"></span><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?>
+              </td>
+              <td class="text-end text-nowrap">
+                <a href="index.php?accion=formEditarItem&id=<?= $item->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
+                <form method="POST" action="index.php?accion=eliminarItem" class="d-inline"
+                  data-confirmar="¿Eliminar «<?= htmlspecialchars($item->getTitulo()) ?>» del catálogo? No se puede deshacer."
+                  data-boton="Eliminar" data-color="danger">
+                  <?= campoCsrf() ?>
+                  <input type="hidden" name="id" value="<?= $item->getId() ?>">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
 <?php else: ?>
   <!-- Vista pública: tarjetas -->
-  <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+  <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 g-md-4">
     <?php foreach ($items as $item): ?>
       <div class="col">
-        <div class="card h-100 shadow-sm">
-          <img src="uploads/<?= htmlspecialchars($item->getImagen()) ?>" class="card-img-top portada-tarjeta">
+        <div class="card h-100 tarjeta-item">
+          <img src="uploads/<?= htmlspecialchars($item->getImagen()) ?>" alt="" class="card-img-top portada-tarjeta">
           <div class="card-body">
-            <h6 class="card-title mb-1"><?= htmlspecialchars($item->getTitulo()) ?></h6>
-            <p class="card-text text-muted small mb-2"><?= htmlspecialchars($item->getAutor()) ?></p>
-            <span class="badge text-bg-secondary"><?= htmlspecialchars(ucfirst($item->getTipo())) ?></span>
-            <?php if ($item->getCategoria()): ?>
-              <span class="badge text-bg-light border"><?= htmlspecialchars($item->getCategoria()) ?></span>
-            <?php endif; ?>
+            <div class="d-flex flex-wrap gap-1 mb-2">
+              <span class="badge etiqueta"><?= htmlspecialchars(ucfirst($item->getTipo())) ?></span>
+              <?php if ($item->getCategoria()): ?>
+                <span class="badge etiqueta"><?= htmlspecialchars($item->getCategoria()) ?></span>
+              <?php endif; ?>
+            </div>
+            <h2 class="h6 card-title mb-1"><?= htmlspecialchars($item->getTitulo()) ?></h2>
+            <p class="card-text text-body-secondary small mb-0"><?= htmlspecialchars($item->getAutor()) ?></p>
           </div>
-          <div class="card-footer small">
+          <div class="card-footer small text-body-secondary">
             <?php if ($item->getDisponibles() > 0): ?>
-              <span class="text-success"><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?> disponibles</span>
+              <span class="punto bg-success"></span><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?> disponibles
             <?php else: ?>
-              <span class="text-danger">Sin ejemplares disponibles</span>
+              <span class="punto bg-danger"></span>Sin ejemplares disponibles
             <?php endif; ?>
           </div>
         </div>

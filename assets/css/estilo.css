@@ -1,79 +1,335 @@
 /* =====================================================================
    Bibliodeko — estilos propios
    Se carga después de Bootstrap y Select2, así que lo de acá les gana.
-   Para rediseñar, casi todo se cambia desde las variables de :root.
+   Para rediseñar, casi todo se cambia desde las variables de abajo:
+   el primer bloque es el tema claro y el segundo el oscuro.
    ===================================================================== */
 
+/* --- Tema claro --- */
+:root,
+[data-bs-theme="light"] {
+  /* Color de acento, en R, G, B (Bootstrap lo necesita así para las transparencias) */
+  --acento-rgb: 59, 91, 219;
+  --acento-hover-rgb: 47, 74, 192;
+  --color-sobre-acento: #ffffff;  /* texto encima del acento */
+
+  /* Grises */
+  --color-fondo: #f7f7f8;         /* fondo de la página */
+  --color-superficie: #ffffff;    /* tarjetas, tablas, campos, menús */
+  --color-superficie-2: #f1f1f3;  /* encabezados de tabla, hover */
+  --color-texto: #18181b;
+  --color-texto-suave: #6b6b75;
+  --color-borde: #e4e4e7;
+
+  --sombra: 0 1px 2px rgba(24, 24, 27, .05);
+  --sombra-elevada: 0 8px 24px rgba(24, 24, 27, .08);
+}
+
+/* --- Tema oscuro --- */
+[data-bs-theme="dark"] {
+  --acento-rgb: 132, 155, 245;
+  --acento-hover-rgb: 165, 182, 248;
+  --color-sobre-acento: #10132a;
+
+  --color-fondo: #0f0f11;
+  --color-superficie: #18181b;
+  --color-superficie-2: #222226;
+  --color-texto: #f1f1f3;
+  --color-texto-suave: #a1a1aa;
+  --color-borde: #2e2e33;
+
+  --sombra: 0 1px 2px rgba(0, 0, 0, .3);
+  --sombra-elevada: 0 8px 24px rgba(0, 0, 0, .45);
+}
+
+/* --- Lo que no cambia con el tema --- */
 :root {
-  /* Colores */
-  --color-primario: #2f5d8a;
-  --color-primario-oscuro: #234767;
-  --color-fondo: #f6f7f9;
-  --color-superficie: #ffffff;
-  --color-texto: #212529;
-  --color-texto-suave: #6c757d;
-  --color-borde: #dee2e6;
-  --color-barra: #1f2933;
-
-  /* Tipografía */
   --fuente-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --fuente-titulos: var(--fuente-base);
-
-  /* Formas y tamaños */
-  --radio: .375rem;
+  --radio: .5rem;
+  --radio-grande: .75rem;
   --alto-campo: 38px;
-  --alto-portada: 220px;
+  --proporcion-portada: 3 / 4;
+}
 
-  /* Bootstrap lee estas variables: las conectamos con las nuestras */
+/* Bootstrap lee estas variables: las conectamos con las nuestras.
+   --bs-body-bg es el fondo de tarjetas, campos y menús; el de la página va en body. */
+:root,
+[data-bs-theme="light"],
+[data-bs-theme="dark"] {
+  --color-acento: rgb(var(--acento-rgb));
+  --color-acento-hover: rgb(var(--acento-hover-rgb));
+  --color-acento-suave: rgba(var(--acento-rgb), .12);
+
   --bs-body-font-family: var(--fuente-base);
-  --bs-body-bg: var(--color-fondo);
+  --bs-body-bg: var(--color-superficie);
   --bs-body-color: var(--color-texto);
+  --bs-emphasis-color: var(--color-texto);
   --bs-secondary-color: var(--color-texto-suave);
+  --bs-secondary-bg: var(--color-superficie-2);
+  --bs-tertiary-bg: var(--color-superficie-2);
   --bs-border-color: var(--color-borde);
   --bs-border-radius: var(--radio);
+  --bs-border-radius-lg: var(--radio-grande);
+  --bs-primary-rgb: var(--acento-rgb);
+  --bs-link-color-rgb: var(--acento-rgb);
+  --bs-link-hover-color-rgb: var(--acento-hover-rgb);
+  --bs-focus-ring-color: rgba(var(--acento-rgb), .25);
+}
+
+body {
+  background-color: var(--color-fondo);
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+
+a {
+  text-decoration: none;
 }
 
 /* --- Barra de navegación --- */
 .barra-principal {
-  background-color: var(--color-barra);
+  background-color: var(--color-superficie);
+  border-bottom: 1px solid var(--color-borde);
+  --bs-navbar-active-color: var(--color-texto);
 }
 
-/* --- Botones, links y paginador con el color primario --- */
+.barra-principal .navbar-brand {
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+
+.barra-principal .nav-link.active {
+  font-weight: 500;
+}
+
+/* Botón de tema: muestra la luna en el tema claro y el sol en el oscuro. */
+.boton-tema {
+  --bs-btn-color: var(--color-texto-suave);
+  --bs-btn-hover-color: var(--color-texto);
+  --bs-btn-hover-bg: var(--color-superficie-2);
+  --bs-btn-active-bg: var(--color-superficie-2);
+  --bs-btn-padding-x: .5rem;
+  line-height: 1;
+}
+
+[data-bs-theme="dark"] .icono-luna,
+[data-bs-theme="light"] .icono-sol {
+  display: none;
+}
+
+/* --- Encabezado de cada página (título + botón) --- */
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1.5rem;
+}
+
+.encabezado h1 {
+  margin-bottom: 0;
+}
+
+/* --- Botones --- */
+.btn {
+  font-weight: 500;
+}
+
 .btn-primary {
-  --bs-btn-bg: var(--color-primario);
-  --bs-btn-border-color: var(--color-primario);
-  --bs-btn-hover-bg: var(--color-primario-oscuro);
-  --bs-btn-hover-border-color: var(--color-primario-oscuro);
-  --bs-btn-active-bg: var(--color-primario-oscuro);
-  --bs-btn-active-border-color: var(--color-primario-oscuro);
+  --bs-btn-color: var(--color-sobre-acento);
+  --bs-btn-bg: var(--color-acento);
+  --bs-btn-border-color: var(--color-acento);
+  --bs-btn-hover-color: var(--color-sobre-acento);
+  --bs-btn-hover-bg: var(--color-acento-hover);
+  --bs-btn-hover-border-color: var(--color-acento-hover);
+  --bs-btn-active-color: var(--color-sobre-acento);
+  --bs-btn-active-bg: var(--color-acento-hover);
+  --bs-btn-active-border-color: var(--color-acento-hover);
+  --bs-btn-disabled-bg: var(--color-acento);
+  --bs-btn-disabled-border-color: var(--color-acento);
+  --bs-btn-focus-shadow-rgb: var(--acento-rgb);
+}
+
+/* Botón secundario neutro: borde gris, sin color propio. */
+.btn-outline-secondary {
+  --bs-btn-color: var(--color-texto);
+  --bs-btn-border-color: var(--color-borde);
+  --bs-btn-hover-color: var(--color-texto);
+  --bs-btn-hover-bg: var(--color-superficie-2);
+  --bs-btn-hover-border-color: var(--color-borde);
+  --bs-btn-active-color: var(--color-texto);
+  --bs-btn-active-bg: var(--color-superficie-2);
+  --bs-btn-active-border-color: var(--color-borde);
+  background-color: var(--color-superficie);
 }
 
 .btn-link {
-  --bs-btn-color: var(--color-primario);
-  --bs-btn-hover-color: var(--color-primario-oscuro);
+  --bs-btn-color: var(--color-texto-suave);
+  --bs-btn-hover-color: var(--color-texto);
+  --bs-btn-active-color: var(--color-texto);
+  text-decoration: none;
 }
 
-.pagination {
-  --bs-pagination-color: var(--color-primario);
-  --bs-pagination-hover-color: var(--color-primario-oscuro);
-  --bs-pagination-active-bg: var(--color-primario);
-  --bs-pagination-active-border-color: var(--color-primario);
+/* --- Campos de formulario --- */
+.form-label {
+  font-weight: 500;
+  font-size: .875rem;
+  margin-bottom: .375rem;
 }
 
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-acento);
+  box-shadow: 0 0 0 .2rem var(--bs-focus-ring-color);
+}
+
+/* --- Tarjetas (también envuelven tablas, filtros y formularios) --- */
 .card {
   --bs-card-bg: var(--color-superficie);
+  --bs-card-border-color: var(--color-borde);
+  --bs-card-border-radius: var(--radio-grande);
+  --bs-card-inner-border-radius: calc(var(--radio-grande) - 1px);
+  --bs-card-cap-bg: transparent;
+  box-shadow: var(--sombra);
 }
 
-/* --- Imágenes --- */
+/* Formularios de alta y edición (y su mensaje de error): angostos, para que se lean bien. */
+.ancho-formulario {
+  max-width: 40rem;
+}
+
+/* --- Pestañas del catálogo --- */
+.pestanas {
+  --bs-nav-link-color: var(--color-texto-suave);
+  --bs-nav-link-hover-color: var(--color-texto);
+  --bs-nav-underline-link-active-color: var(--color-texto);
+  --bs-nav-underline-gap: 1rem;
+  border-bottom: 1px solid var(--color-borde);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none; /* se desplaza igual, sin mostrar la barra */
+  white-space: nowrap;
+}
+
+@media (min-width: 576px) {
+  .pestanas {
+    --bs-nav-underline-gap: 1.5rem;
+  }
+}
+
+.pestanas .nav-link {
+  padding-bottom: .75rem;
+}
+
+.pestanas .nav-link.active {
+  border-bottom-color: var(--color-acento);
+}
+
+.contador {
+  display: inline-block;
+  min-width: 1.5rem;
+  margin-left: .25rem;
+  padding: .1rem .45rem;
+  border-radius: 999px;
+  background-color: var(--color-superficie-2);
+  color: var(--color-texto-suave);
+  font-size: .75rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.nav-link.active .contador {
+  background-color: var(--color-acento-suave);
+  color: var(--color-acento);
+}
+
+/* --- Tarjetas del catálogo --- */
+.tarjeta-item {
+  overflow: hidden;
+  transition: box-shadow .15s, transform .15s;
+}
+
+.tarjeta-item:hover {
+  box-shadow: var(--sombra-elevada);
+  transform: translateY(-2px);
+}
+
 .portada-tarjeta {
-  height: var(--alto-portada);
+  aspect-ratio: var(--proporcion-portada);
   object-fit: cover;
+  background-color: var(--color-superficie-2);
 }
 
+/* Miniatura de portada en la tabla del admin. */
+.portada-mini {
+  width: 40px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: calc(var(--radio) / 2);
+  border: 1px solid var(--color-borde);
+}
+
+/* Etiquetas (tipo, categoría, rol): grises y sin peso. */
+.badge {
+  font-weight: 500;
+}
+
+.etiqueta {
+  background-color: var(--color-superficie-2);
+  color: var(--color-texto-suave);
+  border: 1px solid var(--color-borde);
+}
+
+/* Puntito de color delante de "disponibles" / "sin ejemplares". */
+.punto {
+  display: inline-block;
+  width: .5rem;
+  height: .5rem;
+  margin-right: .375rem;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+/* --- Tablas --- */
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-hover-bg: var(--color-superficie-2);
+  --bs-table-border-color: var(--color-borde);
+  margin-bottom: 0;
+}
+
+.table > thead th {
+  background-color: var(--color-superficie-2);
+  color: var(--color-texto-suave);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table > :not(caption) > * > * {
+  padding: .75rem 1rem;
+}
+
+.table > tbody > tr:last-child > * {
+  border-bottom: 0;
+}
+
+/* Las tablas anchas se desplazan de costado en el celular.
+   position: relative hace que los textos ocultos de los encabezados
+   (visually-hidden) queden adentro y no ensanchen la página. */
+.card > .table-responsive {
+  border-radius: inherit;
+  position: relative;
+}
+
+/* --- Imágenes de socios --- */
 /* Foto redonda de socio. El tamaño va en los atributos width/height del <img>. */
 .avatar {
   border-radius: 50%;
@@ -85,22 +341,140 @@ h1, h2, h3, h4, h5, h6 {
   width: 56px;
 }
 
+/* --- Estado vacío (cuando un listado no tiene resultados) --- */
+.estado-vacio {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--color-texto-suave);
+}
+
+.estado-vacio .titulo {
+  color: var(--color-texto);
+  font-weight: 500;
+  margin-bottom: .25rem;
+}
+
+/* --- Paginador --- */
+.pagination {
+  --bs-pagination-color: var(--color-texto);
+  --bs-pagination-bg: var(--color-superficie);
+  --bs-pagination-border-color: var(--color-borde);
+  --bs-pagination-hover-color: var(--color-texto);
+  --bs-pagination-hover-bg: var(--color-superficie-2);
+  --bs-pagination-hover-border-color: var(--color-borde);
+  --bs-pagination-focus-box-shadow: 0 0 0 .2rem var(--bs-focus-ring-color);
+  --bs-pagination-active-color: var(--color-sobre-acento);
+  --bs-pagination-active-bg: var(--color-acento);
+  --bs-pagination-active-border-color: var(--color-acento);
+  --bs-pagination-disabled-color: var(--color-texto-suave);
+  --bs-pagination-disabled-bg: var(--color-superficie);
+  --bs-pagination-disabled-border-color: var(--color-borde);
+  gap: .25rem;
+}
+
+/* Botones sueltos en vez de una tira pegada. */
+.pagination .page-link {
+  border-radius: var(--radio) !important;
+  margin-left: 0 !important;
+  min-width: 2.25rem;
+  text-align: center;
+}
+
+/* --- Mensajes, modal y menús --- */
+.alert {
+  border-radius: var(--radio);
+}
+
+.modal {
+  --bs-modal-border-color: var(--color-borde);
+  --bs-modal-border-radius: var(--radio-grande);
+  --bs-modal-header-border-width: 0;
+  --bs-modal-footer-border-width: 0;
+}
+
+.dropdown-menu {
+  --bs-dropdown-border-color: var(--color-borde);
+  --bs-dropdown-link-active-bg: var(--color-acento);
+  --bs-dropdown-link-active-color: var(--color-sobre-acento);
+  box-shadow: var(--sombra-elevada);
+}
+
+/* --- Login --- */
+.card-login {
+  max-width: 24rem;
+  margin: 2rem auto;
+}
+
+/* --- Pie --- */
+.pie {
+  border-top: 1px solid var(--color-borde);
+  color: var(--color-texto-suave);
+}
+
 /* --- Select2 con el mismo alto, bordes y colores que los campos de Bootstrap --- */
-.select2-container .select2-selection--single {
+.select2-container--default .select2-selection--single {
   height: var(--alto-campo);
+  background-color: var(--color-superficie);
   border-color: var(--color-borde);
   border-radius: var(--radio);
 }
 
-.select2-container .select2-selection--single .select2-selection__rendered {
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  color: var(--color-texto);
   line-height: calc(var(--alto-campo) - 2px);
   padding-left: .75rem;
 }
 
-.select2-container .select2-selection--single .select2-selection__arrow {
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+  color: var(--color-texto-suave);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
   height: calc(var(--alto-campo) - 2px);
+  right: .375rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+  border-top-color: var(--color-texto-suave);
+}
+
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+  border-bottom-color: var(--color-texto-suave);
+}
+
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--single {
+  border-color: var(--color-acento);
+  box-shadow: 0 0 0 .2rem var(--bs-focus-ring-color);
+}
+
+.select2-dropdown {
+  background-color: var(--color-superficie);
+  border-color: var(--color-borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-elevada);
+  color: var(--color-texto);
+  overflow: hidden;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+  background-color: var(--color-superficie);
+  border-color: var(--color-borde);
+  border-radius: calc(var(--radio) / 1.5);
+  color: var(--color-texto);
+  outline: 0;
+}
+
+.select2-container--default .select2-results__option--selected {
+  background-color: var(--color-superficie-2);
 }
 
 .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
-  background-color: var(--color-primario);
+  background-color: var(--color-acento);
+  color: var(--color-sobre-acento);
+}
+
+.select2-container--default .select2-results__option--disabled {
+  color: var(--color-texto-suave);
+  opacity: .6;
 }

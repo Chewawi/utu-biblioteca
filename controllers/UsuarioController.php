@@ -124,27 +124,29 @@ function editarUsuario() {
         exit;
     }
 
+    $otro = Usuario::buscarPorEmail($pdo, $email);
+    $error = '';
     if (($rol !== 'admin' && $rol !== 'socio') || $email === '') {
         $error = 'Completa el email y elegí un rol válido.';
-        require __DIR__ . '/../views/usuarios/form.php';
-        return;
-    }
-    if (mb_strlen($email) > 100) {
+    } elseif (mb_strlen($email) > 100) {
         $error = 'El email admite hasta 100 caracteres.';
+    } elseif ($otro && $otro->getId() != $id) {
+        $error = 'Ya existe otro usuario con ese email.';
+    } elseif ($id == $_SESSION['usuario']['id'] && $rol !== 'admin') {
+        // Así siempre queda al menos un administrador: el que está editando.
+        $error = 'No podés quitarte a vos mismo el rol de administrador.';
+    } elseif ($rol === 'admin' && Socio::buscarPorUsuarioId($pdo, $id)) {
+        $error = 'Este usuario tiene un socio asociado: no puede ser administrador.';
+    } elseif ($pass !== '' && strlen($pass) < 6) {
+        $error = 'La contraseña debe tener al menos 6 caracteres.';
+    }
+    if ($error !== '') {
         require __DIR__ . '/../views/usuarios/form.php';
         return;
     }
 
     // Si dejan la contraseña vacía, no la tocamos.
-    $hash = $usuario->getPass();
-    if ($pass !== '') {
-        if (strlen($pass) < 6) {
-            $error = 'La contraseña debe tener al menos 6 caracteres.';
-            require __DIR__ . '/../views/usuarios/form.php';
-            return;
-        }
-        $hash = password_hash($pass, PASSWORD_DEFAULT);
-    }
+    $hash = $pass !== '' ? password_hash($pass, PASSWORD_DEFAULT) : $usuario->getPass();
 
     Usuario::actualizar($pdo, $id, $rol, $email, $hash);
 

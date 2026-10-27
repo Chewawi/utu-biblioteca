@@ -7,6 +7,7 @@
 <?php endif; ?>
 
 <form method="POST" action="index.php?accion=crearPrestamo" class="col-md-6">
+  <?= campoCsrf() ?>
   <div class="mb-3">
     <label class="form-label">Socio</label>
     <select name="socio_id" class="form-select select2-buscable" required>

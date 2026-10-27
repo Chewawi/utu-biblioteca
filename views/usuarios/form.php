@@ -7,6 +7,7 @@
 <?php endif; ?>
 
 <form method="POST" action="index.php?accion=<?= isset($usuario) ? 'editarUsuario' : 'crearUsuario' ?>" class="col-md-6">
+  <?= campoCsrf() ?>
   <?php if (isset($usuario)): ?>
     <input type="hidden" name="id" value="<?= $usuario->getId() ?>">
   <?php endif; ?>

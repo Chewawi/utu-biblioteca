@@ -51,6 +51,7 @@
             <a href="index.php?accion=formEditarItem&id=<?= $item->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
             <form method="POST" action="index.php?accion=eliminarItem" class="d-inline"
               onsubmit="return confirm('¿Eliminar «<?= htmlspecialchars(addslashes($item->getTitulo())) ?>»?');">
+              <?= campoCsrf() ?>
               <input type="hidden" name="id" value="<?= $item->getId() ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
             </form>

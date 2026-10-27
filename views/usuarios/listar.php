@@ -19,6 +19,7 @@
           <?php if ($usuario->getId() != $_SESSION['usuario']['id']): ?>
             <form method="POST" action="index.php?accion=eliminarUsuario" class="d-inline"
               onsubmit="return confirm('¿Eliminar el usuario «<?= htmlspecialchars(addslashes($usuario->getEmail())) ?>»?');">
+              <?= campoCsrf() ?>
               <input type="hidden" name="id" value="<?= $usuario->getId() ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
             </form>

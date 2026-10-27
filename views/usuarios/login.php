@@ -9,6 +9,7 @@
     <?php endif; ?>
 
     <form method="POST" action="index.php?accion=auth">
+      <?= campoCsrf() ?>
       <div class="mb-3">
         <label class="form-label">Correo electrónico</label>
         <input type="email" name="email" class="form-control" required autofocus>

@@ -23,6 +23,11 @@ require_once __DIR__ . '/controllers/SocioController.php';
 require_once __DIR__ . '/controllers/UsuarioController.php';
 require_once __DIR__ . '/controllers/PrestamoController.php';
 
+// Todo formulario POST tiene que traer el token CSRF (ver helpers.php).
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verificarCsrf();
+}
+
 $accion = $_GET['accion'] ?? 'listarItems';
 
 switch ($accion) {

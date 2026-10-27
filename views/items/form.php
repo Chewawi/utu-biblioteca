@@ -20,6 +20,7 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
   action="index.php?accion=<?= isset($item) ? 'editarItem' : 'crearItem' ?>"
   enctype="multipart/form-data"
   class="col-md-6">
+  <?= campoCsrf() ?>
 
   <?php if (isset($item)): ?>
     <input type="hidden" name="id" value="<?= $item->getId() ?>">

@@ -97,6 +97,7 @@
               <?php if ($p->estaActivo()): ?>
                 <form method="POST" action="index.php?accion=devolverPrestamo" class="d-inline"
                   onsubmit="return confirm('¿Registrar la devolución de «<?= htmlspecialchars(addslashes($p->getItemTitulo())) ?>»?');">
+                  <?= campoCsrf() ?>
                   <input type="hidden" name="id" value="<?= $p->getId() ?>">
                   <?php // Mandamos también los filtros y la página actuales, para volver a la lista tal como estaba. ?>
                   <?php foreach ($filtros as $clave => $valor): ?>

@@ -18,6 +18,7 @@ $fotoActual = isset($socio) ? $socio->getFoto() : AVATAR_POR_DEFECTO;
 
 <form method="POST" action="index.php?accion=<?= isset($socio) ? 'editarSocio' : 'crearSocio' ?>"
   enctype="multipart/form-data" class="col-md-6">
+  <?= campoCsrf() ?>
   <?php if (isset($socio)): ?>
     <input type="hidden" name="id" value="<?= $socio->getId() ?>">
   <?php endif; ?>

@@ -42,6 +42,7 @@
             <a href="index.php?accion=formEditarSocio&id=<?= $socio->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
             <form method="POST" action="index.php?accion=eliminarSocio" class="d-inline"
               onsubmit="return confirm('¿Eliminar al socio «<?= htmlspecialchars(addslashes($socio->getNombre())) ?>»?');">
+              <?= campoCsrf() ?>
               <input type="hidden" name="id" value="<?= $socio->getId() ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
             </form>

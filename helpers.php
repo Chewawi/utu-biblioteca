@@ -28,6 +28,29 @@ function esAdmin() {
     return isset($_SESSION['usuario']) && $_SESSION['usuario']['rol'] === 'admin';
 }
 
+// --- Protección CSRF ---
+// Cada sesión tiene un token secreto. Todo formulario POST lo manda en un campo
+// oculto e index.php lo compara antes de hacer nada: un formulario armado en
+// otro sitio no conoce el token, así que se rechaza.
+
+/** Campo oculto con el token. Va dentro de cada <form method="POST">. */
+function campoCsrf() {
+    if (!isset($_SESSION['csrf'])) {
+        $_SESSION['csrf'] = bin2hex(random_bytes(32));
+    }
+    return '<input type="hidden" name="csrf" value="' . htmlspecialchars($_SESSION['csrf']) . '">';
+}
+
+/** Corta el pedido si el token que llegó no es el de la sesión. */
+function verificarCsrf() {
+    $enviado = $_POST['csrf'] ?? '';
+    if (!isset($_SESSION['csrf']) || !is_string($enviado) || !hash_equals($_SESSION['csrf'], $enviado)) {
+        flash('danger', 'El formulario venció o no es válido. Volvé a intentarlo.');
+        header('Location: index.php');
+        exit;
+    }
+}
+
 // Mensajes flash (un avisito que se muestra una sola vez) 
 function flash($tipo, $mensaje) {
     $_SESSION['flash'] = ['tipo' => $tipo, 'mensaje' => $mensaje];

@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS items (
 -- Un préstamo conecta un socio con un item. "estado" dice si sigue
 -- prestado o ya se devolvió. fecha_devolucion queda vacía mientras está
 -- 'activo' y se completa al pasar a 'devuelto'. La fila no se borra:
--- queda como historial.
+-- queda como historial. Por eso, ON DELETE RESTRICT: no se puede borrar
+-- un socio o un item que tenga préstamos registrados.
 CREATE TABLE IF NOT EXISTS prestamos (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     socio_id        INT  NOT NULL,
@@ -50,8 +51,8 @@ CREATE TABLE IF NOT EXISTS prestamos (
     fecha_prestamo  DATE NOT NULL,
     fecha_devolucion DATE NULL,
     estado          ENUM('activo', 'devuelto') NOT NULL DEFAULT 'activo',
-    FOREIGN KEY (socio_id) REFERENCES socios(id) ON DELETE CASCADE,
-    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
+    FOREIGN KEY (socio_id) REFERENCES socios(id) ON DELETE RESTRICT,
+    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE RESTRICT
 );
 
 -- =====================================================================

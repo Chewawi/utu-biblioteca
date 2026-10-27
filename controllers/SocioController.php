@@ -149,7 +149,7 @@ function eliminarSocio() {
     }
 
     if (Socio::tienePrestamos($pdo, $id)) {
-        flash('danger', 'No se puede eliminar: el socio tiene un préstamo activo.');
+        flash('danger', 'No se puede eliminar: el socio tiene préstamos registrados y se perdería el historial.');
         header('Location: index.php?accion=listarSocios');
         exit;
     }

@@ -148,8 +148,8 @@ function eliminarItem() {
         exit;
     }
 
-    if ($item->getPrestados() > 0) {
-        flash('danger', 'No se puede eliminar: el ítem está prestado ahora mismo.');
+    if (Item::tienePrestamos($pdo, $id)) {
+        flash('danger', 'No se puede eliminar: el ítem tiene préstamos registrados y se perdería el historial.');
         header('Location: index.php?accion=listarItems');
         exit;
     }

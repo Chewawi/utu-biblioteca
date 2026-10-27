@@ -134,4 +134,11 @@ class Item {
         $stmt = $pdo->prepare("DELETE FROM items WHERE id = ?");
         return $stmt->execute([$id]);
     }
+
+    /** true si el item tiene préstamos, activos o ya devueltos (historial). */
+    public static function tienePrestamos($pdo, $id) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM prestamos WHERE item_id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetchColumn() > 0;
+    }
 }

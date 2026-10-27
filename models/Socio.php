@@ -133,9 +133,9 @@ class Socio {
         return $stmt->execute([$id]);
     }
 
-    /** true si el socio tiene algún préstamo activo. */
+    /** true si el socio tiene préstamos, activos o ya devueltos (historial). */
     public static function tienePrestamos($pdo, $id) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM prestamos WHERE socio_id = ? AND estado = 'activo'");
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM prestamos WHERE socio_id = ?");
         $stmt->execute([$id]);
         return $stmt->fetchColumn() > 0;
     }

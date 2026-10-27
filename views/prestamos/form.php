@@ -35,7 +35,7 @@
 
   <div class="mb-3">
     <label class="form-label">Fecha de préstamo</label>
-    <input type="date" name="fecha_prestamo" class="form-control" value="<?= htmlspecialchars($_POST['fecha_prestamo'] ?? date('Y-m-d')) ?>" required>
+    <input type="date" name="fecha_prestamo" class="form-control" max="<?= date('Y-m-d') ?>" value="<?= htmlspecialchars($_POST['fecha_prestamo'] ?? date('Y-m-d')) ?>" required>
   </div>
 
   <button type="submit" class="btn btn-primary">Registrar préstamo</button>

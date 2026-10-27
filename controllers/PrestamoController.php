@@ -95,6 +95,11 @@ function crearPrestamo() {
     $error = '';
     if ($socioId === '' || $itemId === '' || $fecha === '') {
         $error = 'Elegí un socio, un ítem, y la fecha del préstamo.';
+    } elseif (!fechaValida($fecha) || $fecha > date('Y-m-d')) {
+        // Las fechas AAAA-MM-DD se pueden comparar como texto.
+        $error = 'La fecha del préstamo tiene que ser válida y no posterior a hoy.';
+    } elseif (!Socio::buscarPorId($pdo, $socioId)) {
+        $error = 'Elegí un socio de la lista.';
     } else {
         $item = Item::buscarPorId($pdo, $itemId);
         if (!$item || $item->getDisponibles() < 1) {

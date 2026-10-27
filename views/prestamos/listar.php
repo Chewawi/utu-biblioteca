@@ -90,8 +90,8 @@
               <span class="badge text-bg-success">Devuelto</span>
             <?php endif; ?>
           </td>
-          <td><?= htmlspecialchars($p->getFechaPrestamo()) ?></td>
-          <td><?= htmlspecialchars($p->getFechaDevolucion() ?? '—') ?></td>
+          <td><?= htmlspecialchars(formatoFecha($p->getFechaPrestamo())) ?></td>
+          <td><?= htmlspecialchars(formatoFecha($p->getFechaDevolucion())) ?></td>
           <?php if (esAdmin()): ?>
             <td class="text-end">
               <?php if ($p->estaActivo()): ?>

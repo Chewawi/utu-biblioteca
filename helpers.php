@@ -123,6 +123,14 @@ function calcularPaginacion($total, $pagina, $porPagina) {
     return ['pagina' => $pagina, 'paginas' => $paginas, 'desde' => ($pagina - 1) * $porPagina];
 }
 
+/** Fecha de la base (AAAA-MM-DD) como día/mes/año: 27/10/2026. Si está vacía, un guion largo. */
+function formatoFecha($fecha) {
+    if (empty($fecha)) {
+        return '—';
+    }
+    return date('d/m/Y', strtotime($fecha));
+}
+
 /** URL de la página $numero del listado actual: conserva todo lo que hay en la URL (filtros incluidos). */
 function urlPagina($numero) {
     return 'index.php?' . http_build_query(array_merge($_GET, ['p' => $numero]));

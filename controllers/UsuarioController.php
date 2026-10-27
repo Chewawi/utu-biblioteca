@@ -40,7 +40,7 @@ function login() {
 function logout() {
     $_SESSION = [];
     session_destroy();
-    header('Location: index.php?accion=auth');
+    header('Location: index.php?accion=login');
     exit;
 }
 

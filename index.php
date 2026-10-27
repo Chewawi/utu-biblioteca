@@ -6,6 +6,9 @@
 //  Ejemplo: index.php?accion=listarItems -> listarItems()
 // ============================================================
 
+// La cookie de sesión no se puede leer desde JavaScript (httponly) y el
+// navegador no la manda en formularios que llegan desde otros sitios (Lax).
+session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
 session_start();
 
 // Las fechas de préstamo y devolución las calcula PHP con date(), así que

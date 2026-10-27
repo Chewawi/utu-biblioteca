@@ -24,6 +24,8 @@ function login() {
     $usuario = Usuario::buscarPorEmail($pdo, $email);
 
     if ($usuario && password_verify($pass, $usuario->getPass())) {
+        // Id de sesión nuevo al entrar: así no sirve uno que alguien conociera de antes.
+        session_regenerate_id(true);
         $_SESSION['usuario'] = [
             'id'    => $usuario->getId(),
             'email' => $usuario->getEmail(),

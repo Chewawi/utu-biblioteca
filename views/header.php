@@ -24,7 +24,15 @@
       </button>
       <div class="collapse navbar-collapse" id="nav">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="index.php?accion=listarItems">Catálogo</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Catálogo</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="index.php?accion=listarItems">Todos</a></li>
+              <?php foreach (Item::PLURALES as $tipoMenu => $nombreMenu): ?>
+                <li><a class="dropdown-item" href="index.php?accion=listarItems&amp;tipo=<?= htmlspecialchars($tipoMenu) ?>"><?= htmlspecialchars($nombreMenu) ?></a></li>
+              <?php endforeach; ?>
+            </ul>
+          </li>
           <?php if (isset($_SESSION['usuario'])): ?>
             <li class="nav-item"><a class="nav-link" href="index.php?accion=listarPrestamos"><?= esAdmin() ? 'Préstamos' : 'Mis préstamos' ?></a></li>
           <?php endif; ?>

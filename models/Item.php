@@ -9,6 +9,9 @@ class Item {
     // Tienen que coincidir con el ENUM de la columna "tipo" en database.sql.
     const TIPOS = ['libro', 'juego', 'proyecto'];
 
+    // Nombre de cada tipo en plural, para las pestañas del catálogo.
+    const PLURALES = ['libro' => 'Libros', 'juego' => 'Juegos', 'proyecto' => 'Proyectos'];
+
     private $id;
     private $tipo;
     private $titulo;
@@ -40,6 +43,14 @@ class Item {
     public function getPrestados() { return $this->prestados; }
     public function getDisponibles() { return $this->stock - $this->prestados; }
 
+    /** Cómo se llama el campo "autor" según el tipo: un libro tiene autor, el resto un creador. '' = todos los tipos. */
+    public static function etiquetaAutor($tipo) {
+        if ($tipo === 'libro') {
+            return 'Autor';
+        }
+        return $tipo === '' ? 'Autor o creador' : 'Creador';
+    }
+
     // --- acceso a datos ---
 
     /*
@@ -51,13 +62,14 @@ class Item {
      * Items del catálogo, filtrados y paginados.
      * $filtros es un array con estas claves (todas opcionales):
      *   q          -> texto que se busca en el título o el autor,
+     *   tipo       -> uno de TIPOS; '' = todos,
      *   pagina     -> número de página (si está fuera de rango se corrige),
      *   por_pagina -> cuántos por página; 0 o sin poner = todos, sin paginar.
      * Devuelve ['filas' => items de esa página, 'total' => cantidad de resultados,
      *           'pagina' => página que se muestra, 'paginas' => cantidad de páginas].
      */
     public static function listar($pdo, $filtros = []) {
-        $filtros = array_merge(['q' => '', 'pagina' => 1, 'por_pagina' => 0], $filtros);
+        $filtros = array_merge(['q' => '', 'tipo' => '', 'pagina' => 1, 'por_pagina' => 0], $filtros);
 
         $condiciones = [];
         $parametros = [];
@@ -65,6 +77,10 @@ class Item {
             $condiciones[] = '(i.titulo LIKE ? OR i.autor LIKE ?)';
             $parametros[] = '%' . $filtros['q'] . '%';
             $parametros[] = '%' . $filtros['q'] . '%';
+        }
+        if ($filtros['tipo'] !== '') {
+            $condiciones[] = 'i.tipo = ?';
+            $parametros[] = $filtros['tipo'];
         }
 
         // El FROM y el WHERE son los mismos para contar y para traer las filas.
@@ -102,6 +118,27 @@ class Item {
             $items[] = new Item($f['id'], $f['tipo'], $f['titulo'], $f['autor'], $f['categoria'], $f['stock'], $f['imagen'], $f['prestados']);
         }
         return ['filas' => $items, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
+    }
+
+    /**
+     * Cuántos items de cada tipo coinciden con la búsqueda $q (para los
+     * contadores de las pestañas). Devuelve, por ejemplo, ['libro' => 8, 'juego' => 2, 'proyecto' => 0].
+     */
+    public static function contarPorTipo($pdo, $q = '') {
+        $conteo = array_fill_keys(self::TIPOS, 0); // los tipos sin items quedan en 0
+
+        $sql = 'SELECT tipo, COUNT(*) AS cantidad FROM items';
+        $parametros = [];
+        if ($q !== '') {
+            $sql .= ' WHERE (titulo LIKE ? OR autor LIKE ?)';
+            $parametros = ['%' . $q . '%', '%' . $q . '%'];
+        }
+        $stmt = $pdo->prepare($sql . ' GROUP BY tipo');
+        $stmt->execute($parametros);
+        foreach ($stmt->fetchAll() as $f) {
+            $conteo[$f['tipo']] = (int) $f['cantidad'];
+        }
+        return $conteo;
     }
 
     public static function buscarPorId($pdo, $id) {

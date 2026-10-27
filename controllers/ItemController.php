@@ -29,16 +29,25 @@ function validarItem($tipo, $titulo, $autor, $categoria, $stock) {
     return '';
 }
 
-/** Catálogo de items. Página pública, no requiere login. */
+/**
+ * Catálogo de items. Página pública, no requiere login.
+ * Tiene una pestaña por tipo (?tipo=libro, ...) y "Todos" (sin tipo).
+ */
 function listarItems() {
     global $pdo;
+    $tipo = $_GET['tipo'] ?? '';
+    if (!in_array($tipo, Item::TIPOS)) {
+        $tipo = '';
+    }
     $filtros = [
         'q'          => trim($_GET['q'] ?? ''),
+        'tipo'       => $tipo,
         'pagina'     => $_GET['p'] ?? 1,
         'por_pagina' => 12, // 12 entra justo en la grilla de tarjetas (3 o 4 por fila)
     ];
     $resultado = Item::listar($pdo, $filtros);
     $items = $resultado['filas'];
+    $conteo = Item::contarPorTipo($pdo, $filtros['q']);
     require __DIR__ . '/../views/items/listar.php';
 }
 

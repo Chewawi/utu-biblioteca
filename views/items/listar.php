@@ -7,16 +7,38 @@
   <?php endif; ?>
 </div>
 
+<?php
+// Pestañas: "Todos" (sin tipo) y una por cada tipo, con su contador.
+// Conservan la búsqueda pero no la página: cada pestaña arranca en la 1.
+$pestanas = ['' => 'Todos'] + Item::PLURALES;
+$conteo[''] = array_sum($conteo);
+?>
+<ul class="nav nav-tabs mb-3">
+  <?php foreach ($pestanas as $clave => $nombre): ?>
+    <?php $url = 'index.php?' . http_build_query(array_filter(['accion' => 'listarItems', 'tipo' => $clave, 'q' => $filtros['q']])); ?>
+    <li class="nav-item">
+      <a class="nav-link <?= $clave === $tipo ? 'active' : '' ?>" href="<?= htmlspecialchars($url) ?>">
+        <?= htmlspecialchars($nombre) ?>
+        <span class="badge text-bg-secondary"><?= htmlspecialchars($conteo[$clave]) ?></span>
+      </a>
+    </li>
+  <?php endforeach; ?>
+</ul>
+
 <form method="GET" action="index.php" class="row g-2 mb-4">
   <input type="hidden" name="accion" value="listarItems">
+  <?php if ($tipo !== ''): ?>
+    <input type="hidden" name="tipo" value="<?= htmlspecialchars($tipo) ?>">
+  <?php endif; ?>
   <div class="col-auto flex-grow-1">
-    <input type="text" name="q" class="form-control" placeholder="Buscar por título o autor..."
-      value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
+    <input type="text" name="q" class="form-control"
+      placeholder="Buscar por título o <?= htmlspecialchars(mb_strtolower(Item::etiquetaAutor($tipo))) ?>..."
+      value="<?= htmlspecialchars($filtros['q']) ?>">
   </div>
   <div class="col-auto">
     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-    <?php if (!empty($_GET['q'])): ?>
-      <a href="index.php?accion=listarItems" class="btn btn-link">Limpiar</a>
+    <?php if ($filtros['q'] !== ''): ?>
+      <a href="index.php?<?= htmlspecialchars(http_build_query(array_filter(['accion' => 'listarItems', 'tipo' => $tipo]))) ?>" class="btn btn-link">Limpiar</a>
     <?php endif; ?>
   </div>
 </form>
@@ -32,7 +54,7 @@
         <th></th>
         <th>Tipo</th>
         <th>Título</th>
-        <th>Autor</th>
+        <th><?= htmlspecialchars(Item::etiquetaAutor($tipo)) ?></th>
         <th>Categoría</th>
         <th>Disponibles</th>
         <th></th>

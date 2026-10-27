@@ -41,7 +41,7 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
   </div>
 
   <div class="mb-3">
-    <label class="form-label">Autor</label>
+    <label class="form-label" id="etiqueta-autor"><?= htmlspecialchars(Item::etiquetaAutor($tipoElegido)) ?></label>
     <input type="text" name="autor" class="form-control" required maxlength="100" value="<?= htmlspecialchars($autor) ?>">
   </div>
 
@@ -75,5 +75,16 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
   <button type="submit" class="btn btn-primary">Guardar</button>
   <a href="index.php?accion=listarItems" class="btn btn-link">Cancelar</a>
 </form>
+
+<script>
+  // Al cambiar el tipo, el campo "Autor" pasa a llamarse "Creador" (y al revés).
+  // Select2 avisa el cambio con un evento de jQuery, que se carga en el footer:
+  // por eso esperamos a que la página termine de cargar.
+  document.addEventListener('DOMContentLoaded', function () {
+    $('select[name="tipo"]').on('change', function () {
+      document.getElementById('etiqueta-autor').textContent = this.value === 'libro' ? 'Autor' : 'Creador';
+    });
+  });
+</script>
 
 <?php require __DIR__ . '/../footer.php'; ?>

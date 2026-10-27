@@ -11,14 +11,20 @@ require_once __DIR__ . '/../models/Usuario.php';
  * Revisa los campos del formulario. Devuelve el mensaje de error, o '' si está todo bien.
  * Los largos máximos son los de las columnas en database.sql.
  */
-function validarSocio($usuarioId, $nombre, $direccion, $telefono) {
+function validarSocio($usuarioId, $nombre, $direccion, $telefono, $usuariosDisponibles) {
     if ($usuarioId === '' || $nombre === '' || $direccion === '' || $telefono === '') {
         return 'Completa todos los campos y elegí un usuario.';
     }
     if (mb_strlen($nombre) > 100 || mb_strlen($direccion) > 255 || mb_strlen($telefono) > 20) {
         return 'El nombre admite hasta 100 caracteres, la dirección 255 y el teléfono 20.';
     }
-    return '';
+    // El usuario tiene que ser uno de la lista: rol socio y sin otro socio asociado.
+    foreach ($usuariosDisponibles as $u) {
+        if ($u->getId() == $usuarioId) {
+            return '';
+        }
+    }
+    return 'Elegí un usuario de la lista.';
 }
 
 function listarSocios() {
@@ -50,9 +56,9 @@ function crearSocio() {
     $direccion = trim($_POST['direccion'] ?? '');
     $telefono  = trim($_POST['telefono'] ?? '');
 
-    $error = validarSocio($usuarioId, $nombre, $direccion, $telefono);
+    $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo);
+    $error = validarSocio($usuarioId, $nombre, $direccion, $telefono, $usuariosDisponibles);
     if ($error !== '') {
-        $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo);
         require __DIR__ . '/../views/socios/form.php';
         return;
     }
@@ -60,7 +66,6 @@ function crearSocio() {
     $foto = guardarImagen($_FILES['foto'] ?? [], AVATAR_POR_DEFECTO);
     if ($foto === null) {
         $error = 'La foto tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
-        $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo);
         require __DIR__ . '/../views/socios/form.php';
         return;
     }
@@ -102,10 +107,10 @@ function editarSocio() {
     $direccion = trim($_POST['direccion'] ?? '');
     $telefono  = trim($_POST['telefono'] ?? '');
 
-    $error = validarSocio($usuarioId, $nombre, $direccion, $telefono);
+    $usuarioActualId = $socio->getUsuario() ? $socio->getUsuario()->getId() : null;
+    $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo, $usuarioActualId);
+    $error = validarSocio($usuarioId, $nombre, $direccion, $telefono, $usuariosDisponibles);
     if ($error !== '') {
-        $usuarioActualId = $socio->getUsuario() ? $socio->getUsuario()->getId() : null;
-        $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo, $usuarioActualId);
         require __DIR__ . '/../views/socios/form.php';
         return;
     }
@@ -116,8 +121,6 @@ function editarSocio() {
         $fotoNueva = guardarImagen($_FILES['foto'], AVATAR_POR_DEFECTO);
         if ($fotoNueva === null) {
             $error = 'La foto tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
-            $usuarioActualId = $socio->getUsuario() ? $socio->getUsuario()->getId() : null;
-            $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo, $usuarioActualId);
             require __DIR__ . '/../views/socios/form.php';
             return;
         }

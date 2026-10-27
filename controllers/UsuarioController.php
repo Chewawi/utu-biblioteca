@@ -74,6 +74,11 @@ function crearUsuario() {
         require __DIR__ . '/../views/usuarios/form.php';
         return;
     }
+    if (mb_strlen($email) > 100) {
+        $error = 'El email admite hasta 100 caracteres.';
+        require __DIR__ . '/../views/usuarios/form.php';
+        return;
+    }
     if (Usuario::buscarPorEmail($pdo, $email)) {
         $error = 'Ya existe un usuario con ese email.';
         require __DIR__ . '/../views/usuarios/form.php';
@@ -121,6 +126,11 @@ function editarUsuario() {
 
     if (($rol !== 'admin' && $rol !== 'socio') || $email === '') {
         $error = 'Completa el email y elegí un rol válido.';
+        require __DIR__ . '/../views/usuarios/form.php';
+        return;
+    }
+    if (mb_strlen($email) > 100) {
+        $error = 'El email admite hasta 100 caracteres.';
         require __DIR__ . '/../views/usuarios/form.php';
         return;
     }

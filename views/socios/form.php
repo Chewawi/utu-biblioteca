@@ -38,17 +38,17 @@ $fotoActual = isset($socio) ? $socio->getFoto() : AVATAR_POR_DEFECTO;
 
   <div class="mb-3">
     <label class="form-label">Nombre</label>
-    <input type="text" name="nombre" class="form-control" required value="<?= htmlspecialchars($nombre) ?>">
+    <input type="text" name="nombre" class="form-control" required maxlength="100" value="<?= htmlspecialchars($nombre) ?>">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Dirección</label>
-    <input type="text" name="direccion" class="form-control" required value="<?= htmlspecialchars($direccion) ?>">
+    <input type="text" name="direccion" class="form-control" required maxlength="255" value="<?= htmlspecialchars($direccion) ?>">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Teléfono</label>
-    <input type="text" name="telefono" class="form-control" required value="<?= htmlspecialchars($telefono) ?>">
+    <input type="text" name="telefono" class="form-control" required maxlength="20" value="<?= htmlspecialchars($telefono) ?>">
   </div>
 
   <div class="mb-3">

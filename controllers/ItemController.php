@@ -8,17 +8,23 @@ require_once __DIR__ . '/../models/Item.php';
 //  guarde/lea/borre, y muestran una vista o redirigen.
 // ============================================================
 
-/** Revisa los campos del formulario. Devuelve el mensaje de error, o '' si está todo bien. */
-function validarItem($tipo, $titulo, $autor, $stock) {
+/**
+ * Revisa los campos del formulario. Devuelve el mensaje de error, o '' si está todo bien.
+ * Los largos máximos son los de las columnas en database.sql.
+ */
+function validarItem($tipo, $titulo, $autor, $categoria, $stock) {
     if (!in_array($tipo, Item::TIPOS)) {
         return 'Elegí un tipo válido.';
     }
     if ($titulo === '' || $autor === '') {
         return 'Título y autor son obligatorios.';
     }
+    if (mb_strlen($titulo) > 150 || mb_strlen($autor) > 100 || mb_strlen($categoria) > 50) {
+        return 'El título admite hasta 150 caracteres, el autor 100 y la categoría 50.';
+    }
     // ctype_digit: solo dígitos, así descartamos negativos, decimales y texto.
-    if (!ctype_digit($stock) || $stock < 1) {
-        return 'El stock tiene que ser un número entero mayor que 0.';
+    if (!ctype_digit($stock) || $stock < 1 || $stock > 9999) {
+        return 'El stock tiene que ser un número entero entre 1 y 9999.';
     }
     return '';
 }
@@ -51,7 +57,7 @@ function crearItem() {
     $categoria = trim($_POST['categoria'] ?? '');
     $stock     = trim($_POST['stock'] ?? '');
 
-    $error = validarItem($tipo, $titulo, $autor, $stock);
+    $error = validarItem($tipo, $titulo, $autor, $categoria, $stock);
     if ($error !== '') {
         require __DIR__ . '/../views/items/form.php';
         return;
@@ -100,7 +106,7 @@ function editarItem() {
     $categoria = trim($_POST['categoria'] ?? '');
     $stock     = trim($_POST['stock'] ?? '');
 
-    $error = validarItem($tipo, $titulo, $autor, $stock);
+    $error = validarItem($tipo, $titulo, $autor, $categoria, $stock);
     if ($error === '' && $stock < $item->getPrestados()) {
         $error = 'Hay ' . $item->getPrestados() . ' ejemplares prestados: el stock no puede ser menor.';
     }

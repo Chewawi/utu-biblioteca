@@ -14,7 +14,7 @@
 
   <div class="mb-3">
     <label class="form-label">Correo electrónico</label>
-    <input type="email" name="email" class="form-control" required
+    <input type="email" name="email" class="form-control" required maxlength="100"
       value="<?= isset($usuario) ? htmlspecialchars($usuario->getEmail()) : htmlspecialchars($_POST['email'] ?? '') ?>">
   </div>
 

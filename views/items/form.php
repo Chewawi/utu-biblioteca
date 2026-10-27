@@ -37,23 +37,23 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
 
   <div class="mb-3">
     <label class="form-label">Título</label>
-    <input type="text" name="titulo" class="form-control" required value="<?= htmlspecialchars($titulo) ?>">
+    <input type="text" name="titulo" class="form-control" required maxlength="150" value="<?= htmlspecialchars($titulo) ?>">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Autor</label>
-    <input type="text" name="autor" class="form-control" required value="<?= htmlspecialchars($autor) ?>">
+    <input type="text" name="autor" class="form-control" required maxlength="100" value="<?= htmlspecialchars($autor) ?>">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Categoría (opcional)</label>
-    <input type="text" name="categoria" class="form-control" placeholder="Novela, Estrategia, Robótica..."
+    <input type="text" name="categoria" class="form-control" maxlength="50" placeholder="Novela, Estrategia, Robótica..."
       value="<?= htmlspecialchars($categoria) ?>">
   </div>
 
   <div class="mb-3">
     <label class="form-label">Stock (cantidad de ejemplares)</label>
-    <input type="number" name="stock" class="form-control" min="1" step="1" required
+    <input type="number" name="stock" class="form-control" min="1" max="9999" step="1" required
       value="<?= htmlspecialchars($stock) ?>">
   </div>
 

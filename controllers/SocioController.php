@@ -7,6 +7,20 @@ require_once __DIR__ . '/../models/Usuario.php';
 //  Mismo patrón que ItemController, repetido para esta entidad.
 // ============================================================
 
+/**
+ * Revisa los campos del formulario. Devuelve el mensaje de error, o '' si está todo bien.
+ * Los largos máximos son los de las columnas en database.sql.
+ */
+function validarSocio($usuarioId, $nombre, $direccion, $telefono) {
+    if ($usuarioId === '' || $nombre === '' || $direccion === '' || $telefono === '') {
+        return 'Completa todos los campos y elegí un usuario.';
+    }
+    if (mb_strlen($nombre) > 100 || mb_strlen($direccion) > 255 || mb_strlen($telefono) > 20) {
+        return 'El nombre admite hasta 100 caracteres, la dirección 255 y el teléfono 20.';
+    }
+    return '';
+}
+
 function listarSocios() {
     global $pdo;
     requerirAdmin();
@@ -36,8 +50,8 @@ function crearSocio() {
     $direccion = trim($_POST['direccion'] ?? '');
     $telefono  = trim($_POST['telefono'] ?? '');
 
-    if ($usuarioId === '' || $nombre === '' || $direccion === '' || $telefono === '') {
-        $error = 'Completa todos los campos y elegí un usuario.';
+    $error = validarSocio($usuarioId, $nombre, $direccion, $telefono);
+    if ($error !== '') {
         $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo);
         require __DIR__ . '/../views/socios/form.php';
         return;
@@ -88,8 +102,8 @@ function editarSocio() {
     $direccion = trim($_POST['direccion'] ?? '');
     $telefono  = trim($_POST['telefono'] ?? '');
 
-    if ($usuarioId === '' || $nombre === '' || $direccion === '' || $telefono === '') {
-        $error = 'Completa todos los campos y elegí un usuario.';
+    $error = validarSocio($usuarioId, $nombre, $direccion, $telefono);
+    if ($error !== '') {
         $usuarioActualId = $socio->getUsuario() ? $socio->getUsuario()->getId() : null;
         $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo, $usuarioActualId);
         require __DIR__ . '/../views/socios/form.php';

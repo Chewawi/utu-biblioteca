@@ -29,6 +29,8 @@ function verAnaliticas() {
     $itemsPorTipo = Analitica::itemsPorTipo($pdo);
     $totalSocios = Analitica::totalSocios($pdo);
     $menosDisponibles = Analitica::itemsConMenosDisponibilidad($pdo);
+    // Sin fechas: los préstamos activos y vencidos de hoy, para las tarjetas de arriba.
+    $estadosHoy = Analitica::prestamosPorEstado($pdo, '', '');
 
     $estados = Analitica::prestamosPorEstado($pdo, $desde, $hasta);
     $porMes = Analitica::prestamosPorMes($pdo, $desde, $hasta);

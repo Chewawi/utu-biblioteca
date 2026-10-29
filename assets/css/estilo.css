@@ -23,6 +23,11 @@
 
   --sombra: 0 1px 2px rgba(24, 24, 27, .05);
   --sombra-elevada: 0 8px 24px rgba(24, 24, 27, .08);
+
+  /* Gráficos de analíticas (el principal usa el acento) */
+  --grafico-devuelto: #8fa3ec;
+  --grafico-vencido: #dc2626;
+  --grafico-tarde: #e0a100;
 }
 
 /* --- Tema oscuro --- */
@@ -40,6 +45,10 @@
 
   --sombra: 0 1px 2px rgba(0, 0, 0, .3);
   --sombra-elevada: 0 8px 24px rgba(0, 0, 0, .45);
+
+  --grafico-devuelto: #4a5fbf;
+  --grafico-vencido: #f0706a;
+  --grafico-tarde: #e5a823;
 }
 
 /* --- Lo que no cambia con el tema --- */
@@ -355,15 +364,6 @@ a {
 }
 
 /* --- Analíticas --- */
-.titulo-seccion {
-  color: var(--color-texto-suave);
-  font-size: .75rem;
-  font-weight: 600;
-  letter-spacing: .03em;
-  text-transform: uppercase;
-  margin-bottom: .75rem;
-}
-
 /* Un número grande con su nombre arriba y una aclaración abajo. */
 .indicador p {
   margin-bottom: 0;
@@ -376,10 +376,10 @@ a {
 }
 
 .indicador .valor {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 600;
   letter-spacing: -.02em;
-  line-height: 1.3;
+  line-height: 1.25;
   font-variant-numeric: tabular-nums;
 }
 
@@ -388,51 +388,35 @@ a {
   font-size: .8125rem;
 }
 
-/* Barras: finas, con el color de acento sobre un gris. */
-.progress,
-.progress-stacked {
-  --bs-progress-height: .5rem;
-  --bs-progress-bg: var(--color-superficie-2);
-  --bs-progress-bar-bg: var(--color-acento);
-  --bs-progress-border-radius: 999px;
+/* Chart.js necesita un contenedor con alto fijo y position: relative. */
+.grafico {
+  position: relative;
+  height: 260px;
 }
 
-/* En la barra apilada cada parte queda separada por una rayita del color de la tarjeta. */
-.barra-apilada {
-  --bs-progress-height: .75rem;
-  gap: 2px;
-  background-color: transparent;
+/* Este ocupa todo el alto que le sobra a la tarjeta (sin bajar de 260px).
+   flex-basis 0: el alto no depende del dibujo, si no Chart.js lo agrandaría sin fin. */
+.grafico-crece {
+  flex: 1 1 0;
+  min-height: 260px;
+  height: auto;
 }
 
-/* Barra y número en la misma celda de la tabla. */
-.celda-barra {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
+/* Cuadradito de color de la leyenda. Vencidos y tarde llevan rayas, igual que en
+   la dona, para distinguirlos sin depender solo del color. */
+.muestra {
+  display: inline-block;
+  width: .75rem;
+  height: .75rem;
+  margin-right: .375rem;
+  border-radius: 3px;
+  vertical-align: -.05em;
 }
 
-.celda-barra .progress {
-  flex-grow: 1;
-}
-
-.celda-barra .cantidad {
-  min-width: 2ch;
-  text-align: end;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-/* La tabla de meses no crece sin fin: se desplaza adentro de la tarjeta. */
-.tabla-con-scroll {
-  max-height: 24rem;
-  overflow-y: auto;
-}
-
-.tabla-con-scroll thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
+.muestra-al-dia { background-color: var(--color-acento); }
+.muestra-devuelto { background-color: var(--grafico-devuelto); }
+.muestra-vencido { background: repeating-linear-gradient(135deg, var(--grafico-vencido) 0 3px, var(--color-superficie) 3px 4.5px); }
+.muestra-tarde { background: repeating-linear-gradient(135deg, var(--grafico-tarde) 0 3px, var(--color-superficie) 3px 4.5px); }
 
 /* --- Paginador --- */
 .pagination {

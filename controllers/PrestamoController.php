@@ -9,12 +9,6 @@ require_once __DIR__ . '/../models/Item.php';
 //  Un socio logueado solo ve los suyos.
 // ============================================================
 
-/** true si $fecha es una fecha real con formato AAAA-MM-DD. */
-function fechaValida($fecha) {
-    $d = DateTime::createFromFormat('Y-m-d', $fecha);
-    return $d && $d->format('Y-m-d') === $fecha;
-}
-
 /**
  * Lee los filtros del listado desde $datos ($_GET o $_POST) y descarta los
  * valores inválidos. Devuelve siempre las mismas claves; '' = sin filtrar.

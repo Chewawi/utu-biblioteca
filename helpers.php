@@ -123,6 +123,12 @@ function calcularPaginacion($total, $pagina, $porPagina) {
     return ['pagina' => $pagina, 'paginas' => $paginas, 'desde' => ($pagina - 1) * $porPagina];
 }
 
+/** true si $fecha es una fecha real con formato AAAA-MM-DD. */
+function fechaValida($fecha) {
+    $d = DateTime::createFromFormat('Y-m-d', $fecha);
+    return $d && $d->format('Y-m-d') === $fecha;
+}
+
 /** Fecha de la base (AAAA-MM-DD) como día/mes/año: 27/10/2026. Si está vacía, un guion largo. */
 function formatoFecha($fecha) {
     if (empty($fecha)) {

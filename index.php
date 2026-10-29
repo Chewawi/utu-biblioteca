@@ -23,6 +23,7 @@ require_once __DIR__ . '/controllers/SocioController.php';
 require_once __DIR__ . '/controllers/UsuarioController.php';
 require_once __DIR__ . '/controllers/PrestamoController.php';
 require_once __DIR__ . '/controllers/AnaliticaController.php';
+require_once __DIR__ . '/controllers/InformeController.php';
 
 // Todo formulario POST tiene que traer el token CSRF (ver helpers.php).
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -120,6 +121,11 @@ switch ($accion) {
     // --- Analíticas ---
     case 'verAnaliticas':
         verAnaliticas();
+        break;
+
+    // --- Informes ---
+    case 'verInforme':
+        verInforme();
         break;
 
     default:

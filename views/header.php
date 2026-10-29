@@ -66,6 +66,7 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEd
           <?php if (esAdmin()): ?>
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarSocios' ? 'active' : '' ?>" href="index.php?accion=listarSocios">Socios</a></li>
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarUsuarios' ? 'active' : '' ?>" href="index.php?accion=listarUsuarios">Usuarios</a></li>
+            <li class="nav-item"><a class="nav-link <?= $accionActual === 'verAnaliticas' ? 'active' : '' ?>" href="index.php?accion=verAnaliticas">Analíticas</a></li>
           <?php endif; ?>
         </ul>
         <ul class="navbar-nav align-items-md-center">

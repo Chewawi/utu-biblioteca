@@ -66,11 +66,15 @@ CREATE TABLE IF NOT EXISTS prestamos (
 INSERT INTO usuarios (rol, email, pass) VALUES
 ('admin', 'admin@biblioteca.com',  '$2y$10$dn/kb6Lk2jVpYS1rgSVjSe.RYf7TBZdNb9/Ffz5uq1C7sci7Qk1ce'),
 ('socio', 'socio@biblioteca.com',  '$2y$10$A3IkphAkjzxSq/ubkgnUtudItqnp3gYoRHZC2TvyONLddJlLJP7jC'),
-('socio', 'mariana@biblioteca.com','$2y$10$A3IkphAkjzxSq/ubkgnUtudItqnp3gYoRHZC2TvyONLddJlLJP7jC');
+('socio', 'mariana@biblioteca.com','$2y$10$A3IkphAkjzxSq/ubkgnUtudItqnp3gYoRHZC2TvyONLddJlLJP7jC'),
+('socio', 'lucia@biblioteca.com',  '$2y$10$A3IkphAkjzxSq/ubkgnUtudItqnp3gYoRHZC2TvyONLddJlLJP7jC'),
+('socio', 'martin@biblioteca.com', '$2y$10$A3IkphAkjzxSq/ubkgnUtudItqnp3gYoRHZC2TvyONLddJlLJP7jC');
 
 INSERT INTO socios (usuario_id, nombre, direccion, telefono) VALUES
 (2, 'Socio de Prueba',   'Av. Principal 123', '099123456'),
-(3, 'Mariana Fernández', 'Bulevar Artigas 456', '098765432');
+(3, 'Mariana Fernández', 'Bulevar Artigas 456', '098765432'),
+(4, 'Lucía Pereira',     'Av. Italia 2890',     '091234567'),
+(5, 'Martín Silva',      '18 de Julio 1520',    '094555123');
 
 INSERT INTO items (tipo, titulo, autor, categoria, stock, imagen) VALUES
 ('libro',    'Cien años de soledad',          'Gabriel García Márquez',   'Novela',     2, 'default.png'),
@@ -86,10 +90,31 @@ INSERT INTO items (tipo, titulo, autor, categoria, stock, imagen) VALUES
 ('proyecto', 'Estación meteorológica Arduino', 'Grupo 3.º B',              'Robótica',   1, 'default.png'),
 ('proyecto', 'Huerta con riego automático',   'Grupo 2.º A',              'Electrónica', 1, 'default.png');
 
+-- Las fechas son relativas al día en que se importa, así siempre hay préstamos
+-- al día, vencidos (activos con la fecha límite pasada) y devueltos, algunos
+-- de ellos tarde (fecha_devolucion posterior a fecha_limite).
 INSERT INTO prestamos (socio_id, item_id, fecha_prestamo, fecha_limite, fecha_devolucion, estado) VALUES
-(1, 1,  CURDATE() - INTERVAL 5 DAY,  CURDATE() + INTERVAL 9 DAY,  NULL,                         'activo'),
-(2, 3,  CURDATE() - INTERVAL 1 DAY,  CURDATE() + INTERVAL 13 DAY, NULL,                         'activo'),
-(2, 9,  CURDATE() - INTERVAL 3 DAY,  CURDATE() + INTERVAL 11 DAY, NULL,                         'activo'),
-(1, 9,  CURDATE() - INTERVAL 20 DAY, CURDATE() - INTERVAL 6 DAY,  CURDATE() - INTERVAL 12 DAY,  'devuelto'),
-(2, 2,  CURDATE() - INTERVAL 30 DAY, CURDATE() - INTERVAL 16 DAY, CURDATE() - INTERVAL 16 DAY,  'devuelto'),
-(1, 6,  CURDATE() - INTERVAL 45 DAY, CURDATE() - INTERVAL 31 DAY, CURDATE() - INTERVAL 40 DAY,  'devuelto');
+-- activos, al día
+(1, 1,  CURDATE() - INTERVAL 5 DAY,   CURDATE() + INTERVAL 9 DAY,   NULL,                          'activo'),
+(2, 3,  CURDATE() - INTERVAL 1 DAY,   CURDATE() + INTERVAL 13 DAY,  NULL,                          'activo'),
+(3, 9,  CURDATE() - INTERVAL 3 DAY,   CURDATE() + INTERVAL 11 DAY,  NULL,                          'activo'),
+(4, 6,  CURDATE() - INTERVAL 2 DAY,   CURDATE() + INTERVAL 12 DAY,  NULL,                          'activo'),
+-- activos, vencidos
+(2, 2,  CURDATE() - INTERVAL 20 DAY,  CURDATE() - INTERVAL 6 DAY,   NULL,                          'activo'),
+(4, 11, CURDATE() - INTERVAL 25 DAY,  CURDATE() - INTERVAL 11 DAY,  NULL,                          'activo'),
+(3, 5,  CURDATE() - INTERVAL 16 DAY,  CURDATE() - INTERVAL 2 DAY,   NULL,                          'activo'),
+-- devueltos a tiempo
+(1, 9,  CURDATE() - INTERVAL 40 DAY,  CURDATE() - INTERVAL 26 DAY,  CURDATE() - INTERVAL 32 DAY,   'devuelto'),
+(2, 7,  CURDATE() - INTERVAL 35 DAY,  CURDATE() - INTERVAL 21 DAY,  CURDATE() - INTERVAL 22 DAY,   'devuelto'),
+(2, 6,  CURDATE() - INTERVAL 60 DAY,  CURDATE() - INTERVAL 46 DAY,  CURDATE() - INTERVAL 50 DAY,   'devuelto'),
+(3, 1,  CURDATE() - INTERVAL 75 DAY,  CURDATE() - INTERVAL 61 DAY,  CURDATE() - INTERVAL 63 DAY,   'devuelto'),
+(4, 8,  CURDATE() - INTERVAL 95 DAY,  CURDATE() - INTERVAL 81 DAY,  CURDATE() - INTERVAL 85 DAY,   'devuelto'),
+(1, 10, CURDATE() - INTERVAL 110 DAY, CURDATE() - INTERVAL 96 DAY,  CURDATE() - INTERVAL 100 DAY,  'devuelto'),
+(1, 4,  CURDATE() - INTERVAL 125 DAY, CURDATE() - INTERVAL 111 DAY, CURDATE() - INTERVAL 112 DAY,  'devuelto'),
+(2, 3,  CURDATE() - INTERVAL 130 DAY, CURDATE() - INTERVAL 116 DAY, CURDATE() - INTERVAL 120 DAY,  'devuelto'),
+(3, 2,  CURDATE() - INTERVAL 150 DAY, CURDATE() - INTERVAL 136 DAY, CURDATE() - INTERVAL 140 DAY,  'devuelto'),
+-- devueltos tarde
+(1, 2,  CURDATE() - INTERVAL 50 DAY,  CURDATE() - INTERVAL 36 DAY,  CURDATE() - INTERVAL 30 DAY,   'devuelto'),
+(4, 9,  CURDATE() - INTERVAL 70 DAY,  CURDATE() - INTERVAL 56 DAY,  CURDATE() - INTERVAL 49 DAY,   'devuelto'),
+(2, 12, CURDATE() - INTERVAL 100 DAY, CURDATE() - INTERVAL 86 DAY,  CURDATE() - INTERVAL 80 DAY,   'devuelto'),
+(3, 6,  CURDATE() - INTERVAL 170 DAY, CURDATE() - INTERVAL 156 DAY, CURDATE() - INTERVAL 150 DAY,  'devuelto');

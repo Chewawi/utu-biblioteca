@@ -137,6 +137,20 @@ function formatoFecha($fecha) {
     return date('d/m/Y', strtotime($fecha));
 }
 
+/** Texto de un período (fechas AAAA-MM-DD, '' = sin límite): "Del 01/10/2026 al 29/10/2026", "Todo el historial"... */
+function textoPeriodo($desde, $hasta) {
+    if ($desde !== '' && $hasta !== '') {
+        return 'Del ' . formatoFecha($desde) . ' al ' . formatoFecha($hasta);
+    }
+    if ($desde !== '') {
+        return 'Desde el ' . formatoFecha($desde);
+    }
+    if ($hasta !== '') {
+        return 'Hasta el ' . formatoFecha($hasta);
+    }
+    return 'Todo el historial';
+}
+
 /** URL de la página $numero del listado actual: conserva todo lo que hay en la URL (filtros incluidos). */
 function urlPagina($numero) {
     return 'index.php?' . http_build_query(array_merge($_GET, ['p' => $numero]));

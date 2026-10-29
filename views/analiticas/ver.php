@@ -2,15 +2,7 @@
 
 <?php
 // Texto del período elegido, para el título de la parte de actividad.
-if ($desde !== '' && $hasta !== '') {
-    $periodo = 'Del ' . formatoFecha($desde) . ' al ' . formatoFecha($hasta);
-} elseif ($desde !== '') {
-    $periodo = 'Desde el ' . formatoFecha($desde);
-} elseif ($hasta !== '') {
-    $periodo = 'Hasta el ' . formatoFecha($hasta);
-} else {
-    $periodo = 'Todo el historial';
-}
+$periodo = textoPeriodo($desde, $hasta);
 
 $totalTitulos = array_sum(array_column($itemsPorTipo, 'titulos'));
 $resumenTipos = [];

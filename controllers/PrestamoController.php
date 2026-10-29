@@ -85,13 +85,16 @@ function crearPrestamo() {
     $socioId = $_POST['socio_id'] ?? '';
     $itemId  = $_POST['item_id'] ?? '';
     $fecha   = $_POST['fecha_prestamo'] ?? '';
+    $fechaLimite = $_POST['fecha_limite'] ?? '';
 
     $error = '';
-    if ($socioId === '' || $itemId === '' || $fecha === '') {
-        $error = 'Elegí un socio, un ítem, y la fecha del préstamo.';
+    if ($socioId === '' || $itemId === '' || $fecha === '' || $fechaLimite === '') {
+        $error = 'Elegí un socio, un ítem, la fecha del préstamo y la fecha límite.';
     } elseif (!fechaValida($fecha) || $fecha > date('Y-m-d')) {
         // Las fechas AAAA-MM-DD se pueden comparar como texto.
         $error = 'La fecha del préstamo tiene que ser válida y no posterior a hoy.';
+    } elseif (!fechaValida($fechaLimite) || $fechaLimite <= $fecha) {
+        $error = 'La fecha límite tiene que ser posterior a la fecha del préstamo.';
     } elseif (!Socio::buscarPorId($pdo, $socioId)) {
         $error = 'Elegí un socio de la lista.';
     } else {
@@ -108,7 +111,7 @@ function crearPrestamo() {
         return;
     }
 
-    Prestamo::crear($pdo, $socioId, $itemId, $fecha);
+    Prestamo::crear($pdo, $socioId, $itemId, $fecha, $fechaLimite);
     flash('success', 'Préstamo registrado.');
     header('Location: index.php?accion=listarPrestamos');
     exit;

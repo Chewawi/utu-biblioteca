@@ -40,8 +40,10 @@ CREATE TABLE IF NOT EXISTS items (
 );
 
 -- Un préstamo conecta un socio con un item. "estado" dice si sigue
--- prestado o ya se devolvió. fecha_devolucion queda vacía mientras está
--- 'activo' y se completa al pasar a 'devuelto'. La fila no se borra:
+-- prestado o ya se devolvió. fecha_limite es hasta cuándo lo puede tener
+-- (un préstamo activo con la fecha límite pasada está vencido; eso no se
+-- guarda, se calcula). fecha_devolucion es el día en que lo devolvió:
+-- queda vacía mientras está 'activo'. La fila no se borra:
 -- queda como historial. Por eso, ON DELETE RESTRICT: no se puede borrar
 -- un socio o un item que tenga préstamos registrados.
 CREATE TABLE IF NOT EXISTS prestamos (
@@ -49,6 +51,7 @@ CREATE TABLE IF NOT EXISTS prestamos (
     socio_id        INT  NOT NULL,
     item_id         INT  NOT NULL,
     fecha_prestamo  DATE NOT NULL,
+    fecha_limite    DATE NOT NULL,
     fecha_devolucion DATE NULL,
     estado          ENUM('activo', 'devuelto') NOT NULL DEFAULT 'activo',
     FOREIGN KEY (socio_id) REFERENCES socios(id) ON DELETE RESTRICT,
@@ -83,10 +86,10 @@ INSERT INTO items (tipo, titulo, autor, categoria, stock, imagen) VALUES
 ('proyecto', 'Estación meteorológica Arduino', 'Grupo 3.º B',              'Robótica',   1, 'default.png'),
 ('proyecto', 'Huerta con riego automático',   'Grupo 2.º A',              'Electrónica', 1, 'default.png');
 
-INSERT INTO prestamos (socio_id, item_id, fecha_prestamo, fecha_devolucion, estado) VALUES
-(1, 1,  CURDATE() - INTERVAL 5 DAY,  NULL,                         'activo'),
-(2, 3,  CURDATE() - INTERVAL 1 DAY,  NULL,                         'activo'),
-(2, 9,  CURDATE() - INTERVAL 3 DAY,  NULL,                         'activo'),
-(1, 9,  CURDATE() - INTERVAL 20 DAY, CURDATE() - INTERVAL 12 DAY,  'devuelto'),
-(2, 2,  CURDATE() - INTERVAL 30 DAY, CURDATE() - INTERVAL 16 DAY,  'devuelto'),
-(1, 6,  CURDATE() - INTERVAL 45 DAY, CURDATE() - INTERVAL 40 DAY,  'devuelto');
+INSERT INTO prestamos (socio_id, item_id, fecha_prestamo, fecha_limite, fecha_devolucion, estado) VALUES
+(1, 1,  CURDATE() - INTERVAL 5 DAY,  CURDATE() + INTERVAL 9 DAY,  NULL,                         'activo'),
+(2, 3,  CURDATE() - INTERVAL 1 DAY,  CURDATE() + INTERVAL 13 DAY, NULL,                         'activo'),
+(2, 9,  CURDATE() - INTERVAL 3 DAY,  CURDATE() + INTERVAL 11 DAY, NULL,                         'activo'),
+(1, 9,  CURDATE() - INTERVAL 20 DAY, CURDATE() - INTERVAL 6 DAY,  CURDATE() - INTERVAL 12 DAY,  'devuelto'),
+(2, 2,  CURDATE() - INTERVAL 30 DAY, CURDATE() - INTERVAL 16 DAY, CURDATE() - INTERVAL 16 DAY,  'devuelto'),
+(1, 6,  CURDATE() - INTERVAL 45 DAY, CURDATE() - INTERVAL 31 DAY, CURDATE() - INTERVAL 40 DAY,  'devuelto');

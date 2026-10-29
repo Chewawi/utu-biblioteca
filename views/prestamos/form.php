@@ -42,6 +42,13 @@
         <input type="date" name="fecha_prestamo" class="form-control" max="<?= date('Y-m-d') ?>" value="<?= htmlspecialchars($_POST['fecha_prestamo'] ?? date('Y-m-d')) ?>" required>
       </div>
 
+      <div class="mb-3">
+        <label class="form-label">Fecha límite de devolución</label>
+        <?php // Por defecto, dos semanas desde hoy. ?>
+        <input type="date" name="fecha_limite" class="form-control" value="<?= htmlspecialchars($_POST['fecha_limite'] ?? date('Y-m-d', strtotime('+14 days'))) ?>" required>
+        <div class="form-text">Tiene que ser posterior a la fecha de préstamo.</div>
+      </div>
+
       <div class="d-flex gap-2 pt-2">
         <button type="submit" class="btn btn-primary">Registrar préstamo</button>
         <a href="index.php?accion=listarPrestamos" class="btn btn-link">Cancelar</a>

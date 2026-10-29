@@ -13,14 +13,16 @@ class Prestamo {
 
     private $id;
     private $fechaPrestamo;
+    private $fechaLimite;
     private $fechaDevolucion;
     private $estado;
     private $socioNombre;
     private $itemTitulo;
 
-    public function __construct($id, $fechaPrestamo, $fechaDevolucion, $estado, $socioNombre, $itemTitulo) {
+    public function __construct($id, $fechaPrestamo, $fechaLimite, $fechaDevolucion, $estado, $socioNombre, $itemTitulo) {
         $this->id = $id;
         $this->fechaPrestamo = $fechaPrestamo;
+        $this->fechaLimite = $fechaLimite;
         $this->fechaDevolucion = $fechaDevolucion;
         $this->estado = $estado;
         $this->socioNombre = $socioNombre;
@@ -30,6 +32,7 @@ class Prestamo {
     // --- getters ---
     public function getId() { return $this->id; }
     public function getFechaPrestamo() { return $this->fechaPrestamo; }
+    public function getFechaLimite() { return $this->fechaLimite; }
     public function getFechaDevolucion() { return $this->fechaDevolucion; }
     public function estaActivo() { return $this->estado === 'activo'; }
     public function getSocioNombre() { return $this->socioNombre; }
@@ -101,7 +104,7 @@ class Prestamo {
         $total = (int) $stmt->fetchColumn();
 
         $sql = '
-            SELECT p.id, p.fecha_prestamo, p.fecha_devolucion, p.estado,
+            SELECT p.id, p.fecha_prestamo, p.fecha_limite, p.fecha_devolucion, p.estado,
                    s.nombre AS socio_nombre,
                    i.titulo AS item_titulo
         ' . $desdeDonde . ' ORDER BY p.estado, p.fecha_prestamo DESC';
@@ -123,17 +126,17 @@ class Prestamo {
 
         $prestamos = [];
         foreach ($filas as $f) {
-            $prestamos[] = new Prestamo($f['id'], $f['fecha_prestamo'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo']);
+            $prestamos[] = new Prestamo($f['id'], $f['fecha_prestamo'], $f['fecha_limite'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo']);
         }
         return ['filas' => $prestamos, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
     }
 
     /** INSERT simple, sin JOIN (solo guarda los ids). */
-    public static function crear($pdo, $socioId, $itemId, $fecha) {
+    public static function crear($pdo, $socioId, $itemId, $fecha, $fechaLimite) {
         $stmt = $pdo->prepare(
-            "INSERT INTO prestamos (socio_id, item_id, fecha_prestamo) VALUES (?, ?, ?)"
+            "INSERT INTO prestamos (socio_id, item_id, fecha_prestamo, fecha_limite) VALUES (?, ?, ?, ?)"
         );
-        return $stmt->execute([$socioId, $itemId, $fecha]);
+        return $stmt->execute([$socioId, $itemId, $fecha, $fechaLimite]);
     }
 
     /**

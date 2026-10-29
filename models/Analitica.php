@@ -14,8 +14,9 @@ class Analitica {
     /**
      * Condiciones del WHERE para el período, más las $condiciones que se
      * pasen. Devuelve [el WHERE armado (o '' si no hay nada), sus parámetros].
+     * Con $palabra = ' ON ' arma en cambio el ON de un JOIN.
      */
-    private static function filtrarPeriodo($desde, $hasta, $condiciones = []) {
+    private static function filtrarPeriodo($desde, $hasta, $condiciones = [], $palabra = ' WHERE ') {
         $parametros = [];
         if ($desde !== '') {
             $condiciones[] = 'p.fecha_prestamo >= ?';
@@ -25,7 +26,7 @@ class Analitica {
             $condiciones[] = 'p.fecha_prestamo <= ?';
             $parametros[] = $hasta;
         }
-        $where = empty($condiciones) ? '' : ' WHERE ' . implode(' AND ', $condiciones);
+        $where = empty($condiciones) ? '' : $palabra . implode(' AND ', $condiciones);
         return [$where, $parametros];
     }
 
@@ -161,5 +162,32 @@ class Analitica {
         ' . $where);
         $stmt->execute($parametros);
         return array_map('intval', $stmt->fetch());
+    }
+
+    /**
+     * Préstamos de cada socio en el período, del que más tiene al que menos.
+     * Aparecen todos los socios, también los que no pidieron nada (con 0).
+     * Cada fila: nombre, telefono, prestamos, activos, vencidos, devueltos,
+     * tardias (devueltos tarde) y ultimo (fecha del último préstamo, o null).
+     */
+    public static function actividadSocios($pdo, $desde, $hasta) {
+        // LEFT JOIN para no perder a los socios sin préstamos. Por eso el período
+        // va en el ON y no en el WHERE: el WHERE los sacaría.
+        [$on, $parametros] = self::filtrarPeriodo($desde, $hasta, ['p.socio_id = s.id'], ' ON ');
+        $stmt = $pdo->prepare("
+            SELECT s.nombre, s.telefono,
+                   COUNT(p.id) AS prestamos,
+                   COALESCE(SUM(p.estado = 'activo'), 0) AS activos,
+                   COALESCE(SUM(p.estado = 'activo' AND p.fecha_limite < ?), 0) AS vencidos,
+                   COALESCE(SUM(p.estado = 'devuelto'), 0) AS devueltos,
+                   COALESCE(SUM(p.fecha_devolucion > p.fecha_limite), 0) AS tardias,
+                   MAX(p.fecha_prestamo) AS ultimo
+            FROM socios s
+            LEFT JOIN prestamos p" . $on . '
+            GROUP BY s.id, s.nombre, s.telefono
+            ORDER BY prestamos DESC, s.nombre
+        ');
+        $stmt->execute(array_merge([date('Y-m-d')], $parametros));
+        return $stmt->fetchAll();
     }
 }

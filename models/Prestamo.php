@@ -22,8 +22,9 @@ class Prestamo {
     private $estado;
     private $socioNombre;
     private $itemTitulo;
+    private $socioTelefono;
 
-    public function __construct($id, $fechaPrestamo, $fechaLimite, $fechaDevolucion, $estado, $socioNombre, $itemTitulo) {
+    public function __construct($id, $fechaPrestamo, $fechaLimite, $fechaDevolucion, $estado, $socioNombre, $itemTitulo, $socioTelefono) {
         $this->id = $id;
         $this->fechaPrestamo = $fechaPrestamo;
         $this->fechaLimite = $fechaLimite;
@@ -31,6 +32,7 @@ class Prestamo {
         $this->estado = $estado;
         $this->socioNombre = $socioNombre;
         $this->itemTitulo = $itemTitulo;
+        $this->socioTelefono = $socioTelefono;
     }
 
     // --- getters ---
@@ -43,6 +45,23 @@ class Prestamo {
     public function estaVencido() { return $this->estaActivo() && $this->fechaLimite < date('Y-m-d'); }
     public function getSocioNombre() { return $this->socioNombre; }
     public function getItemTitulo() { return $this->itemTitulo; }
+    public function getSocioTelefono() { return $this->socioTelefono; }
+
+    /** 'Vencido', 'Activo' o 'Devuelto', para mostrar. */
+    public function getEstadoTexto() {
+        if ($this->estaVencido()) {
+            return 'Vencido';
+        }
+        return $this->estaActivo() ? 'Activo' : 'Devuelto';
+    }
+
+    /** Días que pasaron desde la fecha límite. 0 si no está vencido. */
+    public function getDiasDeAtraso() {
+        if (!$this->estaVencido()) {
+            return 0;
+        }
+        return (new DateTime($this->fechaLimite))->diff(new DateTime(date('Y-m-d')))->days;
+    }
 
     // --- acceso a datos ---
 
@@ -115,7 +134,7 @@ class Prestamo {
 
         $sql = '
             SELECT p.id, p.fecha_prestamo, p.fecha_limite, p.fecha_devolucion, p.estado,
-                   s.nombre AS socio_nombre,
+                   s.nombre AS socio_nombre, s.telefono AS socio_telefono,
                    i.titulo AS item_titulo
         ' . $desdeDonde . ' ORDER BY p.estado, p.fecha_prestamo DESC';
 
@@ -136,7 +155,7 @@ class Prestamo {
 
         $prestamos = [];
         foreach ($filas as $f) {
-            $prestamos[] = new Prestamo($f['id'], $f['fecha_prestamo'], $f['fecha_limite'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo']);
+            $prestamos[] = new Prestamo($f['id'], $f['fecha_prestamo'], $f['fecha_limite'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo'], $f['socio_telefono']);
         }
         return ['filas' => $prestamos, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
     }

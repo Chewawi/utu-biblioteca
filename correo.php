@@ -75,9 +75,21 @@ function htmlCorreo($saludo, $parrafos, $lista = []) {
 
 /** Arma la versión en texto simple del mismo correo. */
 function textoCorreo($saludo, $parrafos, $lista = []) {
-    $texto = $saludo . "\n\n" . implode("\n\n", $parrafos) . "\n\n";
-    foreach ($lista as $linea) {
-        $texto .= '- ' . $linea . "\n";
+    $bloques = array_merge([$saludo], $parrafos);
+    if (!empty($lista)) {
+        $bloques[] = '- ' . implode("\n- ", $lista);
     }
-    return $texto . "\nBiblioteca — este es un mensaje automático.\n";
+    $bloques[] = 'Biblioteca — este es un mensaje automático.';
+    return implode("\n\n", $bloques) . "\n";
+}
+
+/** Le avisa al socio que se registró su préstamo y hasta cuándo lo tiene. */
+function enviarConfirmacionPrestamo($email, $nombre, $titulo, $fechaPrestamo, $fechaLimite) {
+    $saludo = 'Hola, ' . $nombre . ':';
+    $parrafos = [
+        'Registramos tu préstamo de «' . $titulo . '» el ' . formatoFecha($fechaPrestamo) . '.',
+        'Tenés que devolverlo hasta el ' . formatoFecha($fechaLimite) . '.',
+    ];
+    return enviarCorreo($email, $nombre, 'Préstamo registrado: ' . $titulo,
+        textoCorreo($saludo, $parrafos), htmlCorreo($saludo, $parrafos));
 }

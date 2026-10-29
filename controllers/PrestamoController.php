@@ -127,7 +127,16 @@ function crearPrestamo() {
     }
 
     Prestamo::crear($pdo, $socioId, $itemId, $fecha, $fechaLimite);
-    flash('success', 'Préstamo registrado.');
+
+    // El correo es un extra: si no está configurado o falla, el préstamo ya quedó guardado.
+    $socio = Socio::buscarPorId($pdo, $socioId);
+    if (!correoConfigurado()) {
+        flash('success', 'Préstamo registrado.');
+    } elseif (enviarConfirmacionPrestamo($socio->getUsuario()->getEmail(), $socio->getNombre(), $item->getTitulo(), $fecha, $fechaLimite)) {
+        flash('success', 'Préstamo registrado. Le avisamos al socio por correo.');
+    } else {
+        flash('warning', 'Préstamo registrado, pero no se pudo enviar el correo al socio.');
+    }
     header('Location: index.php?accion=listarPrestamos');
     exit;
 }

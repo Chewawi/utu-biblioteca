@@ -17,6 +17,7 @@ date_default_timezone_set('America/Montevideo');
 
 require_once __DIR__ . '/conexion.php'; // deja $pdo listo
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/correo.php';
 
 require_once __DIR__ . '/controllers/ItemController.php';
 require_once __DIR__ . '/controllers/SocioController.php';

@@ -25,7 +25,7 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEd
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-md barra-principal sticky-top mb-4">
+  <nav class="navbar navbar-expand-lg barra-principal sticky-top mb-4">
     <div class="container">
 
       <a class="navbar-brand d-flex align-items-center gap-2" href="index.php?accion=listarItems">
@@ -34,7 +34,7 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEd
       </a>
 
       <?php // El botón de tema queda afuera del menú plegable, así en el celular siempre está a mano. ?>
-      <div class="d-flex align-items-center gap-1 order-md-last ms-auto ms-md-3">
+      <div class="d-flex align-items-center gap-1 order-lg-last ms-auto ms-lg-3">
         <button type="button" class="btn boton-tema" id="cambiar-tema" title="Cambiar entre tema claro y oscuro" aria-label="Cambiar entre tema claro y oscuro">
           <svg class="icono-luna" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
@@ -69,10 +69,10 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEd
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'verAnaliticas' ? 'active' : '' ?>" href="index.php?accion=verAnaliticas">Analíticas</a></li>
           <?php endif; ?>
         </ul>
-        <ul class="navbar-nav align-items-md-center">
+        <ul class="navbar-nav align-items-lg-center">
           <?php if (isset($_SESSION['usuario'])): ?>
             <li class="nav-item">
-              <span class="navbar-text d-inline-flex align-items-center gap-2 me-md-3 small">
+              <span class="navbar-text d-inline-flex align-items-center gap-2 me-lg-3 small">
                 <?= htmlspecialchars($_SESSION['usuario']['email']) ?>
                 <span class="badge etiqueta"><?= htmlspecialchars($_SESSION['usuario']['rol']) ?></span>
               </span>

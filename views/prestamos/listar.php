@@ -7,66 +7,32 @@
   <?php endif; ?>
 </div>
 
-<form method="GET" action="index.php" class="card mb-4">
-  <div class="card-body">
-    <input type="hidden" name="accion" value="listarPrestamos">
-    <div class="row g-3 align-items-end">
-      <div class="col-md-4">
-        <label class="form-label">Buscar</label>
-        <input type="search" name="q" class="form-control"
-          placeholder="<?= esAdmin() ? 'Nombre del socio o título del ítem...' : 'Título del ítem...' ?>"
-          value="<?= htmlspecialchars($filtros['q']) ?>">
-      </div>
+<?php
+// Filtros: pestañas de estado y buscador a la vista; socio (solo el admin), ítem y fechas en "Más filtros".
+$campos = [];
+if (esAdmin()) {
+    $campos[] = ['nombre' => 'socio_id', 'etiqueta' => 'Socio', 'opciones' => $opcionesSocios];
+}
+$campos[] = ['nombre' => 'item_id', 'etiqueta' => 'Ítem', 'opciones' => $opcionesItems];
+$campos[] = ['nombre' => 'desde', 'etiqueta' => 'Prestado desde', 'tipo' => 'date'];
+$campos[] = ['nombre' => 'hasta', 'etiqueta' => 'Prestado hasta', 'tipo' => 'date'];
 
-      <div class="col-md-2">
-        <label class="form-label">Estado</label>
-        <select name="estado" class="form-select">
-          <option value="">Todos</option>
-          <option value="activo" <?= $filtros['estado'] === 'activo' ? 'selected' : '' ?>>Activos</option>
-          <option value="vencido" <?= $filtros['estado'] === 'vencido' ? 'selected' : '' ?>>Vencidos</option>
-          <option value="devuelto" <?= $filtros['estado'] === 'devuelto' ? 'selected' : '' ?>>Devueltos</option>
-        </select>
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label">Ítem</label>
-        <select name="item_id" class="form-select select2-buscable">
-          <option value="">Todos los ítems</option>
-          <?php foreach ($items as $item): ?>
-            <option value="<?= $item->getId() ?>" <?= $filtros['item_id'] == $item->getId() ? 'selected' : '' ?>><?= htmlspecialchars($item->getTitulo()) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <?php if (esAdmin()): ?>
-        <div class="col-md-3">
-          <label class="form-label">Socio</label>
-          <select name="socio_id" class="form-select select2-buscable">
-            <option value="">Todos los socios</option>
-            <?php foreach ($socios as $socio): ?>
-              <option value="<?= $socio->getId() ?>" <?= $filtros['socio_id'] == $socio->getId() ? 'selected' : '' ?>><?= htmlspecialchars($socio->getNombre()) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-      <?php endif; ?>
-
-      <div class="col-6 col-md-3">
-        <label class="form-label">Prestado desde</label>
-        <input type="date" name="desde" class="form-control" value="<?= htmlspecialchars($filtros['desde']) ?>">
-      </div>
-
-      <div class="col-6 col-md-3">
-        <label class="form-label">Prestado hasta</label>
-        <input type="date" name="hasta" class="form-control" value="<?= htmlspecialchars($filtros['hasta']) ?>">
-      </div>
-
-      <div class="col-md-auto d-flex gap-2">
-        <button class="btn btn-outline-secondary" type="submit">Filtrar</button>
-        <a href="index.php?accion=listarPrestamos" class="btn btn-link">Limpiar filtros</a>
-      </div>
-    </div>
-  </div>
-</form>
+$barra = [
+    'accion'   => 'listarPrestamos',
+    'pestanas' => [
+        'nombre'   => 'estado',
+        'opciones' => ['' => 'Todos', 'activo' => 'Activos', 'vencido' => 'Vencidos', 'devuelto' => 'Devueltos'],
+        'conteo'   => $conteo,
+    ],
+    'buscar'   => [
+        'nombre'      => 'q',
+        'placeholder' => esAdmin() ? 'Buscar por socio o ítem...' : 'Buscar por ítem...',
+    ],
+    'campos'   => $campos,
+    'valores'  => $filtros,
+];
+require __DIR__ . '/../filtros.php';
+?>
 
 <?php if (empty($prestamos)): ?>
   <div class="card estado-vacio">

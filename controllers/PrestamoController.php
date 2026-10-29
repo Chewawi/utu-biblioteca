@@ -47,21 +47,36 @@ function listarPrestamos() {
 
     $filtros = leerFiltrosPrestamos($_GET);
     $paginacion = ['pagina' => $_GET['p'] ?? 1, 'por_pagina' => 10];
-    $items = Item::listar($pdo)['filas']; // todos, para el filtro por ítem
+    // Opciones de los desplegables de "Más filtros": [id => texto].
+    $opcionesItems = [];
+    $opcionesSocios = [];
 
     if (esAdmin()) {
-        $socios = Socio::listar($pdo)['filas']; // todos, para el filtro por socio
+        foreach (Item::listar($pdo)['filas'] as $item) {
+            $opcionesItems[$item->getId()] = $item->getTitulo();
+        }
+        foreach (Socio::listar($pdo)['filas'] as $socio) {
+            $opcionesSocios[$socio->getId()] = $socio->getNombre();
+        }
         $resultado = Prestamo::listar($pdo, array_merge($filtros, $paginacion));
+        $conteo = Prestamo::contarPorEstado($pdo, $filtros);
         $titulo = 'Préstamos';
     } else {
         // Un socio solo ve lo suyo: el filtro por socio no lo elige él, lo fijamos acá.
         $filtros['socio_id'] = '';
         $socio = Socio::buscarPorUsuarioId($pdo, $_SESSION['usuario']['id']);
         $resultado = ['filas' => [], 'total' => 0, 'pagina' => 1, 'paginas' => 1];
+        $conteo = ['' => 0, 'activo' => 0, 'vencido' => 0, 'devuelto' => 0];
         if ($socio) {
+            // En el filtro por ítem, solo los que pidió alguna vez.
+            $opcionesItems = Prestamo::itemsDelSocio($pdo, $socio->getId());
+            if (!isset($opcionesItems[$filtros['item_id']])) {
+                $filtros['item_id'] = '';
+            }
             $filtrosDelSocio = $filtros;
             $filtrosDelSocio['socio_id'] = $socio->getId();
             $resultado = Prestamo::listar($pdo, array_merge($filtrosDelSocio, $paginacion));
+            $conteo = Prestamo::contarPorEstado($pdo, $filtrosDelSocio);
         }
         $titulo = 'Mis préstamos';
     }

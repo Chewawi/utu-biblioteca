@@ -66,23 +66,14 @@ class Prestamo {
     // --- acceso a datos ---
 
     /**
-     * Préstamos con el nombre del socio y el título del item, filtrados.
-     * $filtros es un array con estas claves (todas opcionales; vacío = sin filtrar):
-     *   item_id, socio_id,
-     *   estado        -> uno de FILTROS_ESTADO,
-     *   desde, hasta  -> rango sobre fecha_prestamo (formato AAAA-MM-DD),
-     *   q             -> texto que se busca en el nombre del socio o el título del item,
-     *   pagina        -> número de página (si está fuera de rango se corrige),
-     *   por_pagina    -> cuántos por página; 0 o sin poner = todos, sin paginar.
-     * Primero los activos (en el ENUM "activo" va antes que "devuelto").
-     * Devuelve ['filas' => préstamos de esa página, 'total' => cantidad de resultados,
-     *           'pagina' => página que se muestra, 'paginas' => cantidad de páginas].
+     * El FROM y el WHERE para los $filtros (las mismas claves que listar()),
+     * con los valores de cada "?". Lo usan listar() y contarPorEstado().
+     * Devuelve [el FROM ... WHERE armado, sus parámetros].
      */
-    public static function listar($pdo, $filtros = []) {
+    private static function armarFiltros($filtros) {
         // Completamos las claves que no vinieron, así abajo no hay que preguntar si existen.
         $filtros = array_merge(
-            ['item_id' => '', 'socio_id' => '', 'estado' => '', 'desde' => '', 'hasta' => '', 'q' => '',
-             'pagina' => 1, 'por_pagina' => 0],
+            ['item_id' => '', 'socio_id' => '', 'estado' => '', 'desde' => '', 'hasta' => '', 'q' => ''],
             $filtros
         );
 
@@ -118,7 +109,6 @@ class Prestamo {
             $parametros[] = '%' . $filtros['q'] . '%';
         }
 
-        // El FROM y el WHERE son los mismos para contar y para traer las filas.
         $desdeDonde = '
             FROM prestamos p
             INNER JOIN socios s ON p.socio_id = s.id
@@ -127,6 +117,49 @@ class Prestamo {
         if (!empty($condiciones)) {
             $desdeDonde .= ' WHERE ' . implode(' AND ', $condiciones);
         }
+
+        return [$desdeDonde, $parametros];
+    }
+
+    /**
+     * Cuántos préstamos hay en cada estado con los demás $filtros (el estado
+     * que venga se ignora), para los contadores de las pestañas. Los vencidos
+     * también cuentan como activos, igual que al filtrar.
+     * Devuelve ['' => total, 'activo' => ..., 'vencido' => ..., 'devuelto' => ...].
+     */
+    public static function contarPorEstado($pdo, $filtros) {
+        $filtros['estado'] = '';
+        [$desdeDonde, $parametros] = self::armarFiltros($filtros);
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*),
+                   COALESCE(SUM(p.estado = 'activo'), 0),
+                   COALESCE(SUM(p.estado = 'activo' AND p.fecha_limite < ?), 0),
+                   COALESCE(SUM(p.estado = 'devuelto'), 0)
+        " . $desdeDonde);
+        // El "?" de la fecha está en el SELECT, antes que los del WHERE.
+        $stmt->execute(array_merge([date('Y-m-d')], $parametros));
+        $fila = array_map('intval', $stmt->fetch(PDO::FETCH_NUM));
+        return array_combine(['', 'activo', 'vencido', 'devuelto'], $fila);
+    }
+
+    /**
+     * Préstamos con el nombre del socio y el título del item, filtrados.
+     * $filtros es un array con estas claves (todas opcionales; vacío = sin filtrar):
+     *   item_id, socio_id,
+     *   estado        -> uno de FILTROS_ESTADO,
+     *   desde, hasta  -> rango sobre fecha_prestamo (formato AAAA-MM-DD),
+     *   q             -> texto que se busca en el nombre del socio o el título del item,
+     *   pagina        -> número de página (si está fuera de rango se corrige),
+     *   por_pagina    -> cuántos por página; 0 o sin poner = todos, sin paginar.
+     * Primero los activos (en el ENUM "activo" va antes que "devuelto").
+     * Devuelve ['filas' => préstamos de esa página, 'total' => cantidad de resultados,
+     *           'pagina' => página que se muestra, 'paginas' => cantidad de páginas].
+     */
+    public static function listar($pdo, $filtros = []) {
+        $filtros = array_merge(['pagina' => 1, 'por_pagina' => 0], $filtros);
+
+        // El FROM y el WHERE son los mismos para contar y para traer las filas.
+        [$desdeDonde, $parametros] = self::armarFiltros($filtros);
 
         $stmt = $pdo->prepare('SELECT COUNT(*)' . $desdeDonde);
         $stmt->execute($parametros);
@@ -158,6 +191,19 @@ class Prestamo {
             $prestamos[] = new Prestamo($f['id'], $f['fecha_prestamo'], $f['fecha_limite'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo'], $f['socio_telefono']);
         }
         return ['filas' => $prestamos, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
+    }
+
+    /** Los items que pidió alguna vez el socio $socioId, para su filtro por ítem: [id => título]. */
+    public static function itemsDelSocio($pdo, $socioId) {
+        $stmt = $pdo->prepare('
+            SELECT DISTINCT i.id, i.titulo
+            FROM prestamos p
+            INNER JOIN items i ON p.item_id = i.id
+            WHERE p.socio_id = ?
+            ORDER BY i.titulo
+        ');
+        $stmt->execute([$socioId]);
+        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
     /** INSERT simple, sin JOIN (solo guarda los ids). */

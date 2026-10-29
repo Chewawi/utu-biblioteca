@@ -257,6 +257,22 @@ a {
   color: var(--color-acento);
 }
 
+/* Buscador y categoría del catálogo: en una fila, y uno abajo del otro en el celular. */
+.filtros-catalogo .input-group {
+  flex: 1 1 18rem;
+  width: auto;
+}
+
+.filtros-catalogo .form-select {
+  flex: 1 1 12rem;
+}
+
+@media (min-width: 576px) {
+  .filtros-catalogo .form-select {
+    max-width: 15rem;
+  }
+}
+
 /* --- Tarjetas del catálogo --- */
 .tarjeta-item {
   overflow: hidden;

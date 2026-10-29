@@ -32,6 +32,7 @@ function validarItem($tipo, $titulo, $autor, $categoria, $stock) {
 /**
  * Catálogo de items. Página pública, no requiere login.
  * Tiene una pestaña por tipo (?tipo=libro, ...) y "Todos" (sin tipo).
+ * Se puede filtrar además por categoría (?categoria=Novela) y buscar (?q=...).
  */
 function listarItems() {
     global $pdo;
@@ -39,15 +40,21 @@ function listarItems() {
     if (!in_array($tipo, Item::TIPOS)) {
         $tipo = '';
     }
+    $categorias = Item::categorias($pdo); // para el selector de género
+    $categoria = $_GET['categoria'] ?? '';
+    if (!in_array($categoria, $categorias, true)) {
+        $categoria = '';
+    }
     $filtros = [
         'q'          => trim($_GET['q'] ?? ''),
         'tipo'       => $tipo,
+        'categoria'  => $categoria,
         'pagina'     => $_GET['p'] ?? 1,
         'por_pagina' => 12, // 12 entra justo en la grilla de tarjetas (3 o 4 por fila)
     ];
     $resultado = Item::listar($pdo, $filtros);
     $items = $resultado['filas'];
-    $conteo = Item::contarPorTipo($pdo, $filtros['q']);
+    $conteo = Item::contarPorTipo($pdo, $filtros['q'], $categoria);
     require __DIR__ . '/../views/items/listar.php';
 }
 

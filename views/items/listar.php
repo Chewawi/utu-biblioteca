@@ -9,13 +9,14 @@
 
 <?php
 // Pestañas: "Todos" (sin tipo) y una por cada tipo, con su contador.
-// Conservan la búsqueda pero no la página: cada pestaña arranca en la 1.
+// Conservan la búsqueda y la categoría pero no la página: cada pestaña arranca en la 1.
 $pestanas = ['' => 'Todos'] + Item::PLURALES;
 $conteo[''] = array_sum($conteo);
+$hayFiltros = $filtros['q'] !== '' || $categoria !== '';
 ?>
 <ul class="nav nav-underline pestanas mb-4">
   <?php foreach ($pestanas as $clave => $nombre): ?>
-    <?php $url = 'index.php?' . http_build_query(array_filter(['accion' => 'listarItems', 'tipo' => $clave, 'q' => $filtros['q']])); ?>
+    <?php $url = 'index.php?' . http_build_query(array_filter(['accion' => 'listarItems', 'tipo' => $clave, 'q' => $filtros['q'], 'categoria' => $categoria])); ?>
     <li class="nav-item">
       <a class="nav-link <?= $clave === $tipo ? 'active' : '' ?>" href="<?= htmlspecialchars($url) ?>"
         <?= $clave === $tipo ? 'aria-current="page"' : '' ?>>
@@ -30,7 +31,7 @@ $conteo[''] = array_sum($conteo);
   document.querySelector('.pestanas .active').scrollIntoView({ block: 'nearest', inline: 'nearest' });
 </script>
 
-<form method="GET" action="index.php" class="d-flex align-items-center gap-2 mb-4">
+<form method="GET" action="index.php" class="filtros-catalogo d-flex flex-wrap align-items-center gap-2 mb-4">
   <input type="hidden" name="accion" value="listarItems">
   <?php if ($tipo !== ''): ?>
     <input type="hidden" name="tipo" value="<?= htmlspecialchars($tipo) ?>">
@@ -41,7 +42,14 @@ $conteo[''] = array_sum($conteo);
       value="<?= htmlspecialchars($filtros['q']) ?>">
     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
   </div>
-  <?php if ($filtros['q'] !== ''): ?>
+  <?php // Al elegir una categoría se filtra enseguida, sin apretar "Buscar". ?>
+  <select name="categoria" class="form-select" aria-label="Categoría" onchange="this.form.submit()">
+    <option value="">Todas las categorías</option>
+    <?php foreach ($categorias as $nombreCategoria): ?>
+      <option value="<?= htmlspecialchars($nombreCategoria) ?>" <?= $nombreCategoria === $categoria ? 'selected' : '' ?>><?= htmlspecialchars($nombreCategoria) ?></option>
+    <?php endforeach; ?>
+  </select>
+  <?php if ($hayFiltros): ?>
     <a href="index.php?<?= htmlspecialchars(http_build_query(array_filter(['accion' => 'listarItems', 'tipo' => $tipo]))) ?>" class="btn btn-link">Limpiar</a>
   <?php endif; ?>
 </form>
@@ -50,8 +58,8 @@ $conteo[''] = array_sum($conteo);
   <div class="card estado-vacio">
     <p class="titulo">No se encontraron ítems.</p>
     <p class="small mb-0">
-      <?php if ($filtros['q'] !== ''): ?>
-        Probá con otra búsqueda o en otra pestaña.
+      <?php if ($hayFiltros): ?>
+        Probá con otra búsqueda, otra categoría o en otra pestaña.
       <?php else: ?>
         Todavía no hay <?= htmlspecialchars(mb_strtolower($pestanas[$tipo])) ?> en el catálogo.
       <?php endif; ?>

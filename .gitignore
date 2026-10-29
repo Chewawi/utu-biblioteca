@@ -4,3 +4,5 @@ uploads/*
 !uploads/.htaccess
 .DS_Store
 Thumbs.db
+# Dependencias de Composer (se instalan con "composer install")
+vendor/

@@ -74,7 +74,7 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEd
           <?php if (isset($_SESSION['usuario'])): ?>
             <li class="nav-item">
               <span class="navbar-text d-inline-flex align-items-center gap-2 me-lg-3 small">
-                <?= htmlspecialchars($_SESSION['usuario']['email']) ?>
+                <span class="email-usuario text-truncate" title="<?= htmlspecialchars($_SESSION['usuario']['email']) ?>"><?= htmlspecialchars($_SESSION['usuario']['email']) ?></span>
                 <span class="badge etiqueta"><?= htmlspecialchars($_SESSION['usuario']['rol']) ?></span>
               </span>
             </li>

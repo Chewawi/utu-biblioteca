@@ -115,6 +115,18 @@ a {
   font-weight: 500;
 }
 
+/* El email del usuario, recortado si es largo. Entre 992 y 1200px la barra
+   ya está desplegada pero no hay lugar para él: queda solo el rol. */
+.email-usuario {
+  max-width: 14rem;
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .email-usuario {
+    display: none;
+  }
+}
+
 /* Botón de tema: muestra la luna en el tema claro y el sol en el oscuro. */
 .boton-tema {
   --bs-btn-color: var(--color-texto-suave);

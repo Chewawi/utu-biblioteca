@@ -63,13 +63,14 @@ class Item {
      * $filtros es un array con estas claves (todas opcionales):
      *   q          -> texto que se busca en el título o el autor,
      *   tipo       -> uno de TIPOS; '' = todos,
+     *   categoria  -> una categoría (el género); '' = todas,
      *   pagina     -> número de página (si está fuera de rango se corrige),
      *   por_pagina -> cuántos por página; 0 o sin poner = todos, sin paginar.
      * Devuelve ['filas' => items de esa página, 'total' => cantidad de resultados,
      *           'pagina' => página que se muestra, 'paginas' => cantidad de páginas].
      */
     public static function listar($pdo, $filtros = []) {
-        $filtros = array_merge(['q' => '', 'tipo' => '', 'pagina' => 1, 'por_pagina' => 0], $filtros);
+        $filtros = array_merge(['q' => '', 'tipo' => '', 'categoria' => '', 'pagina' => 1, 'por_pagina' => 0], $filtros);
 
         $condiciones = [];
         $parametros = [];
@@ -81,6 +82,10 @@ class Item {
         if ($filtros['tipo'] !== '') {
             $condiciones[] = 'i.tipo = ?';
             $parametros[] = $filtros['tipo'];
+        }
+        if ($filtros['categoria'] !== '') {
+            $condiciones[] = 'i.categoria = ?';
+            $parametros[] = $filtros['categoria'];
         }
 
         // El FROM y el WHERE son los mismos para contar y para traer las filas.
@@ -121,17 +126,27 @@ class Item {
     }
 
     /**
-     * Cuántos items de cada tipo coinciden con la búsqueda $q (para los
-     * contadores de las pestañas). Devuelve, por ejemplo, ['libro' => 8, 'juego' => 2, 'proyecto' => 0].
+     * Cuántos items de cada tipo coinciden con la búsqueda $q y la categoría
+     * $categoria (para los contadores de las pestañas). Devuelve, por ejemplo,
+     * ['libro' => 8, 'juego' => 2, 'proyecto' => 0].
      */
-    public static function contarPorTipo($pdo, $q = '') {
+    public static function contarPorTipo($pdo, $q = '', $categoria = '') {
         $conteo = array_fill_keys(self::TIPOS, 0); // los tipos sin items quedan en 0
 
-        $sql = 'SELECT tipo, COUNT(*) AS cantidad FROM items';
+        $condiciones = [];
         $parametros = [];
         if ($q !== '') {
-            $sql .= ' WHERE (titulo LIKE ? OR autor LIKE ?)';
-            $parametros = ['%' . $q . '%', '%' . $q . '%'];
+            $condiciones[] = '(titulo LIKE ? OR autor LIKE ?)';
+            $parametros[] = '%' . $q . '%';
+            $parametros[] = '%' . $q . '%';
+        }
+        if ($categoria !== '') {
+            $condiciones[] = 'categoria = ?';
+            $parametros[] = $categoria;
+        }
+        $sql = 'SELECT tipo, COUNT(*) AS cantidad FROM items';
+        if (!empty($condiciones)) {
+            $sql .= ' WHERE ' . implode(' AND ', $condiciones);
         }
         $stmt = $pdo->prepare($sql . ' GROUP BY tipo');
         $stmt->execute($parametros);
@@ -139,6 +154,16 @@ class Item {
             $conteo[$f['tipo']] = (int) $f['cantidad'];
         }
         return $conteo;
+    }
+
+    /**
+     * Las categorías (géneros) que ya usa algún item, en orden alfabético y sin
+     * repetir. La comparación de MySQL no distingue mayúsculas ni tildes, así
+     * que "novela" y "Novela" cuentan como una sola.
+     */
+    public static function categorias($pdo) {
+        $sql = "SELECT MIN(categoria) FROM items WHERE categoria <> '' GROUP BY categoria ORDER BY categoria";
+        return $pdo->query($sql)->fetchAll(PDO::FETCH_COLUMN);
     }
 
     public static function buscarPorId($pdo, $id) {

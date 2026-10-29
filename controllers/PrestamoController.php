@@ -29,7 +29,7 @@ function leerFiltrosPrestamos($datos) {
     if (!ctype_digit($filtros['socio_id'])) {
         $filtros['socio_id'] = '';
     }
-    if (!in_array($filtros['estado'], Prestamo::ESTADOS)) {
+    if (!in_array($filtros['estado'], Prestamo::FILTROS_ESTADO)) {
         $filtros['estado'] = '';
     }
     if (!fechaValida($filtros['desde'])) {

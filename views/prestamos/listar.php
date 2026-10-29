@@ -23,6 +23,7 @@
         <select name="estado" class="form-select">
           <option value="">Todos</option>
           <option value="activo" <?= $filtros['estado'] === 'activo' ? 'selected' : '' ?>>Activos</option>
+          <option value="vencido" <?= $filtros['estado'] === 'vencido' ? 'selected' : '' ?>>Vencidos</option>
           <option value="devuelto" <?= $filtros['estado'] === 'devuelto' ? 'selected' : '' ?>>Devueltos</option>
         </select>
       </div>
@@ -82,6 +83,7 @@
             <th>Ítem</th>
             <th>Estado</th>
             <th>Fecha de préstamo</th>
+            <th>Fecha límite</th>
             <th>Fecha de devolución</th>
             <?php if (esAdmin()): ?><th><span class="visually-hidden">Acciones</span></th><?php endif; ?>
           </tr>
@@ -92,13 +94,16 @@
               <?php if (esAdmin()): ?><td class="fw-medium"><?= htmlspecialchars($p->getSocioNombre()) ?></td><?php endif; ?>
               <td><?= htmlspecialchars($p->getItemTitulo()) ?></td>
               <td>
-                <?php if ($p->estaActivo()): ?>
+                <?php if ($p->estaVencido()): ?>
+                  <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis">Vencido</span>
+                <?php elseif ($p->estaActivo()): ?>
                   <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis">Activo</span>
                 <?php else: ?>
                   <span class="badge rounded-pill bg-success-subtle text-success-emphasis">Devuelto</span>
                 <?php endif; ?>
               </td>
               <td class="text-nowrap"><?= htmlspecialchars(formatoFecha($p->getFechaPrestamo())) ?></td>
+              <td class="text-nowrap <?= $p->estaVencido() ? 'text-danger-emphasis fw-medium' : '' ?>"><?= htmlspecialchars(formatoFecha($p->getFechaLimite())) ?></td>
               <td class="text-nowrap"><?= htmlspecialchars(formatoFecha($p->getFechaDevolucion())) ?></td>
               <?php if (esAdmin()): ?>
                 <td class="text-end">

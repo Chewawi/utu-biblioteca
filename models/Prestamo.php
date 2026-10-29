@@ -11,6 +11,10 @@ class Prestamo {
     // Tienen que coincidir con el ENUM de la columna "estado" en database.sql.
     const ESTADOS = ['activo', 'devuelto'];
 
+    // Opciones del filtro de estado: las de la columna más 'vencido', que no se
+    // guarda: es un préstamo activo con la fecha límite pasada.
+    const FILTROS_ESTADO = ['activo', 'vencido', 'devuelto'];
+
     private $id;
     private $fechaPrestamo;
     private $fechaLimite;
@@ -35,6 +39,8 @@ class Prestamo {
     public function getFechaLimite() { return $this->fechaLimite; }
     public function getFechaDevolucion() { return $this->fechaDevolucion; }
     public function estaActivo() { return $this->estado === 'activo'; }
+    // Hoy sale de PHP (date), el mismo reloj que se usa para registrar la devolución.
+    public function estaVencido() { return $this->estaActivo() && $this->fechaLimite < date('Y-m-d'); }
     public function getSocioNombre() { return $this->socioNombre; }
     public function getItemTitulo() { return $this->itemTitulo; }
 
@@ -43,7 +49,8 @@ class Prestamo {
     /**
      * Préstamos con el nombre del socio y el título del item, filtrados.
      * $filtros es un array con estas claves (todas opcionales; vacío = sin filtrar):
-     *   item_id, socio_id, estado,
+     *   item_id, socio_id,
+     *   estado        -> uno de FILTROS_ESTADO,
      *   desde, hasta  -> rango sobre fecha_prestamo (formato AAAA-MM-DD),
      *   q             -> texto que se busca en el nombre del socio o el título del item,
      *   pagina        -> número de página (si está fuera de rango se corrige),
@@ -71,7 +78,10 @@ class Prestamo {
             $condiciones[] = 'p.socio_id = ?';
             $parametros[] = $filtros['socio_id'];
         }
-        if ($filtros['estado'] !== '') {
+        if ($filtros['estado'] === 'vencido') {
+            $condiciones[] = "p.estado = 'activo' AND p.fecha_limite < ?";
+            $parametros[] = date('Y-m-d');
+        } elseif ($filtros['estado'] !== '') {
             $condiciones[] = 'p.estado = ?';
             $parametros[] = $filtros['estado'];
         }

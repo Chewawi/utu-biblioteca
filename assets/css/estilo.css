@@ -273,6 +273,42 @@ a {
   }
 }
 
+/* --- Barra de filtros (views/filtros.php) --- */
+/* Con filtros activos, el contador de "Más filtros" va con el color de acento. */
+.boton-mas-filtros .contador {
+  background-color: var(--color-acento);
+  color: var(--color-sobre-acento);
+}
+
+/* Etiqueta de un filtro activo; la × la quita. */
+.etiqueta-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  max-width: 100%;
+  padding: .2rem .35rem .2rem .65rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  font-size: .8125rem;
+}
+
+.etiqueta-filtro span {
+  display: inline-grid;
+  place-items: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 50%;
+  color: var(--color-texto-suave);
+  line-height: 1;
+}
+
+.etiqueta-filtro:hover span {
+  background-color: var(--color-superficie-2);
+  color: var(--color-texto);
+}
+
 /* --- Tarjetas del catálogo --- */
 .tarjeta-item {
   overflow: hidden;

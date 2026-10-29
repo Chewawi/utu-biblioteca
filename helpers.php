@@ -155,3 +155,15 @@ function textoPeriodo($desde, $hasta) {
 function urlPagina($numero) {
     return 'index.php?' . http_build_query(array_merge($_GET, ['p' => $numero]));
 }
+
+/**
+ * URL de un listado con los parámetros $base ([nombre => valor]) cambiados por
+ * $cambios. Saca los vacíos, para que la URL quede corta, y no lleva la página:
+ * al cambiar un filtro se vuelve a la 1.
+ */
+function urlFiltros($base, $cambios = []) {
+    $parametros = array_filter(array_merge($base, $cambios), function ($valor) {
+        return $valor !== '';
+    });
+    return 'index.php?' . http_build_query($parametros);
+}

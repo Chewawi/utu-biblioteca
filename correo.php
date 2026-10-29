@@ -8,6 +8,8 @@
 
 use PHPMailer\PHPMailer\PHPMailer;
 
+require_once __DIR__ . '/models/Prestamo.php';
+
 /** true si hay configuración de SMTP y PHPMailer está instalado. */
 function correoConfigurado() {
     return is_file(__DIR__ . '/config/correo.php') && is_file(__DIR__ . '/vendor/autoload.php');
@@ -92,4 +94,32 @@ function enviarConfirmacionPrestamo($email, $nombre, $titulo, $fechaPrestamo, $f
     ];
     return enviarCorreo($email, $nombre, 'Préstamo registrado: ' . $titulo,
         textoCorreo($saludo, $parrafos), htmlCorreo($saludo, $parrafos));
+}
+
+/**
+ * Manda un recordatorio a cada socio que tenga préstamos vencidos: un solo
+ * correo por socio, con todos sus ítems atrasados. Lo usan el botón
+ * "Avisar vencidos" y scripts/avisar_vencidos.php.
+ * Devuelve ['enviados' => cantidad, 'fallidos' => cantidad].
+ */
+function enviarRecordatoriosVencidos($pdo) {
+    // Agrupamos por socio: [socio_id => ['nombre' => ..., 'email' => ..., 'items' => [...]]].
+    $porSocio = [];
+    foreach (Prestamo::vencidosConEmail($pdo) as $f) {
+        $porSocio[$f['socio_id']]['nombre'] = $f['socio_nombre'];
+        $porSocio[$f['socio_id']]['email'] = $f['email'];
+        $porSocio[$f['socio_id']]['items'][] = '«' . $f['item_titulo'] . '»: vencía el ' . formatoFecha($f['fecha_limite']);
+    }
+
+    $resultado = ['enviados' => 0, 'fallidos' => 0];
+    foreach ($porSocio as $socio) {
+        $saludo = 'Hola, ' . $socio['nombre'] . ':';
+        $parrafos = [count($socio['items']) === 1
+            ? 'Este préstamo ya pasó su fecha límite. Por favor, devolvelo lo antes posible en la biblioteca:'
+            : 'Estos préstamos ya pasaron su fecha límite. Por favor, devolvelos lo antes posible en la biblioteca:'];
+        $enviado = enviarCorreo($socio['email'], $socio['nombre'], 'Recordatorio: tenés préstamos vencidos',
+            textoCorreo($saludo, $parrafos, $socio['items']), htmlCorreo($saludo, $parrafos, $socio['items']));
+        $resultado[$enviado ? 'enviados' : 'fallidos']++;
+    }
+    return $resultado;
 }

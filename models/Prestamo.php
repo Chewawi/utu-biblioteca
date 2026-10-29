@@ -206,6 +206,26 @@ class Prestamo {
         return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
+    /**
+     * Préstamos vencidos con el nombre y el email del socio, para mandar los
+     * recordatorios. Ordenados por socio, así quedan juntos los de cada uno.
+     * Devuelve filas con socio_id, socio_nombre, email, item_titulo y fecha_limite.
+     */
+    public static function vencidosConEmail($pdo) {
+        $stmt = $pdo->prepare("
+            SELECT s.id AS socio_id, s.nombre AS socio_nombre, u.email,
+                   i.titulo AS item_titulo, p.fecha_limite
+            FROM prestamos p
+            INNER JOIN socios s ON p.socio_id = s.id
+            INNER JOIN usuarios u ON s.usuario_id = u.id
+            INNER JOIN items i ON p.item_id = i.id
+            WHERE p.estado = 'activo' AND p.fecha_limite < ?
+            ORDER BY s.id, p.fecha_limite
+        ");
+        $stmt->execute([date('Y-m-d')]);
+        return $stmt->fetchAll();
+    }
+
     /** INSERT simple, sin JOIN (solo guarda los ids). */
     public static function crear($pdo, $socioId, $itemId, $fecha, $fechaLimite) {
         $stmt = $pdo->prepare(

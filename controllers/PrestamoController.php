@@ -141,6 +141,27 @@ function crearPrestamo() {
     exit;
 }
 
+/** Botón "Avisar vencidos": manda los recordatorios por correo y vuelve a los vencidos. */
+function avisarVencidos() {
+    global $pdo;
+    requerirAdmin();
+
+    if (!correoConfigurado()) {
+        flash('warning', 'El envío de correos no está configurado.');
+    } else {
+        $r = enviarRecordatoriosVencidos($pdo);
+        if ($r['enviados'] + $r['fallidos'] === 0) {
+            flash('info', 'No hay préstamos vencidos.');
+        } elseif ($r['fallidos'] === 0) {
+            flash('success', 'Recordatorios enviados: ' . $r['enviados'] . '.');
+        } else {
+            flash('warning', 'Recordatorios enviados: ' . $r['enviados'] . '. No se pudieron enviar: ' . $r['fallidos'] . '.');
+        }
+    }
+    header('Location: index.php?accion=listarPrestamos&estado=vencido');
+    exit;
+}
+
 function devolverPrestamo() {
     global $pdo;
     requerirAdmin();

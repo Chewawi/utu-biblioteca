@@ -3,7 +3,18 @@
 <div class="encabezado">
   <h1 class="h3"><?= htmlspecialchars($titulo) ?></h1>
   <?php if (esAdmin()): ?>
-    <a href="index.php?accion=formCrearPrestamo" class="btn btn-primary">+ Nuevo préstamo</a>
+    <div class="d-flex flex-wrap gap-2">
+      <?php // Sin correo configurado el botón no aparece: no tendría nada que hacer. ?>
+      <?php if (correoConfigurado()): ?>
+        <form method="POST" action="index.php?accion=avisarVencidos"
+          data-confirmar="¿Mandar un recordatorio por correo a cada socio con préstamos vencidos?"
+          data-boton="Avisar" data-color="primary">
+          <?= campoCsrf() ?>
+          <button type="submit" class="btn btn-outline-secondary">Avisar vencidos</button>
+        </form>
+      <?php endif; ?>
+      <a href="index.php?accion=formCrearPrestamo" class="btn btn-primary">+ Nuevo préstamo</a>
+    </div>
   <?php endif; ?>
 </div>
 

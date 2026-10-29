@@ -118,6 +118,9 @@ switch ($accion) {
     case 'devolverPrestamo':
         devolverPrestamo();
         break;
+    case 'avisarVencidos':
+        avisarVencidos();
+        break;
 
     // --- Analíticas ---
     case 'verAnaliticas':

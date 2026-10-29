@@ -434,6 +434,13 @@ a {
 .muestra-vencido { background: repeating-linear-gradient(135deg, var(--grafico-vencido) 0 3px, var(--color-superficie) 3px 4.5px); }
 .muestra-tarde { background: repeating-linear-gradient(135deg, var(--grafico-tarde) 0 3px, var(--color-superficie) 3px 4.5px); }
 
+/* --- Informes --- */
+.tabla-informe > tfoot td {
+  font-weight: 600;
+  border-top: 2px solid var(--color-borde);
+  border-bottom: 0;
+}
+
 /* --- Paginador --- */
 .pagination {
   --bs-pagination-color: var(--color-texto);
@@ -557,4 +564,50 @@ a {
 .select2-container--default .select2-results__option--disabled {
   color: var(--color-texto-suave);
   opacity: .6;
+}
+
+/* --- Impresión (informes) ---
+   Siempre en claro, sin sombras ni fondo, aunque se esté usando el tema oscuro.
+   La barra, el pie y los botones llevan d-print-none y no salen. */
+@media print {
+  [data-bs-theme] {
+    color-scheme: light;
+    --color-fondo: #ffffff;
+    --color-superficie: #ffffff;
+    --color-superficie-2: #f1f1f3;
+    --color-texto: #000000;
+    --color-texto-suave: #444444;
+    --color-borde: #bbbbbb;
+    --sombra: none;
+  }
+
+  main.container {
+    max-width: none;
+    padding: 0;
+  }
+
+  .card {
+    border: 0;
+  }
+
+  /* En papel la tabla no se desplaza: tiene que entrar entera. */
+  .card > .table-responsive {
+    overflow: visible;
+  }
+
+  .tabla-informe {
+    font-size: 9pt;
+  }
+
+  .tabla-informe > :not(caption) > * > * {
+    padding: .3rem .5rem;
+  }
+
+  .tabla-informe tr {
+    break-inside: avoid;
+  }
+}
+
+@page {
+  margin: 1.5cm;
 }

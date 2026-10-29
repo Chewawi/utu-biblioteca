@@ -1,5 +1,5 @@
 </main>
-<footer class="pie text-center py-4">
+<footer class="pie text-center py-4 d-print-none">
   <small>Bibliodeko &mdash; Proyecto del curso</small>
 </footer>
 

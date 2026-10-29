@@ -25,7 +25,7 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEd
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg barra-principal sticky-top mb-4">
+  <nav class="navbar navbar-expand-lg barra-principal sticky-top mb-4 d-print-none">
     <div class="container">
 
       <a class="navbar-brand d-flex align-items-center gap-2" href="index.php?accion=listarItems">
@@ -67,6 +67,7 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEd
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarSocios' ? 'active' : '' ?>" href="index.php?accion=listarSocios">Socios</a></li>
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarUsuarios' ? 'active' : '' ?>" href="index.php?accion=listarUsuarios">Usuarios</a></li>
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'verAnaliticas' ? 'active' : '' ?>" href="index.php?accion=verAnaliticas">Analíticas</a></li>
+            <li class="nav-item"><a class="nav-link <?= $accionActual === 'verInforme' ? 'active' : '' ?>" href="index.php?accion=verInforme">Informes</a></li>
           <?php endif; ?>
         </ul>
         <ul class="navbar-nav align-items-lg-center">

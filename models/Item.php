@@ -166,6 +166,22 @@ class Item {
         return $pdo->query($sql)->fetchAll(PDO::FETCH_COLUMN);
     }
 
+    /**
+     * Si otro item ya usa la categoría $categoria escrita de otra forma
+     * ("novela" o "Novéla" en vez de "Novela"), devuelve esa forma, para no
+     * guardar variantes del mismo nombre. Si no, la devuelve tal cual.
+     * $id es el item que se está editando (null al crear): no se compara consigo mismo.
+     */
+    public static function unificarCategoria($pdo, $categoria, $id = null) {
+        if ($categoria === '') {
+            return '';
+        }
+        $stmt = $pdo->prepare('SELECT categoria FROM items WHERE categoria = ? AND id <> ? LIMIT 1');
+        $stmt->execute([$categoria, $id ?? 0]);
+        $existente = $stmt->fetchColumn();
+        return $existente === false ? $categoria : $existente;
+    }
+
     public static function buscarPorId($pdo, $id) {
         $stmt = $pdo->prepare("
             SELECT i.*,

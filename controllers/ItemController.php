@@ -30,6 +30,16 @@ function validarItem($tipo, $titulo, $autor, $categoria, $stock) {
 }
 
 /**
+ * Muestra el formulario de alta o edición. $item es el que se edita (null al
+ * crear) y $error el mensaje a mostrar, si hubo uno.
+ */
+function mostrarFormItem($item = null, $error = null) {
+    global $pdo;
+    $categorias = Item::categorias($pdo); // sugerencias para el campo categoría
+    require __DIR__ . '/../views/items/form.php';
+}
+
+/**
  * Catálogo de items. Página pública, no requiere login.
  * Tiene una pestaña por tipo (?tipo=libro, ...) y "Todos" (sin tipo).
  * Se puede filtrar además por categoría (?categoria=Novela) y buscar (?q=...).
@@ -60,7 +70,7 @@ function listarItems() {
 
 function formCrearItem() {
     requerirAdmin();
-    require __DIR__ . '/../views/items/form.php';
+    mostrarFormItem();
 }
 
 function crearItem() {
@@ -75,17 +85,17 @@ function crearItem() {
 
     $error = validarItem($tipo, $titulo, $autor, $categoria, $stock);
     if ($error !== '') {
-        require __DIR__ . '/../views/items/form.php';
+        mostrarFormItem(null, $error);
         return;
     }
 
     $imagen = guardarImagen($_FILES['imagen'] ?? [], PORTADA_POR_DEFECTO);
     if ($imagen === null) {
-        $error = 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
-        require __DIR__ . '/../views/items/form.php';
+        mostrarFormItem(null, 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.');
         return;
     }
 
+    $categoria = Item::unificarCategoria($pdo, $categoria);
     Item::crear($pdo, $tipo, $titulo, $autor, $categoria, $stock, $imagen);
     flash('success', 'Ítem creado correctamente.');
     header('Location: index.php?accion=listarItems');
@@ -101,7 +111,7 @@ function formEditarItem() {
         header('Location: index.php?accion=listarItems');
         exit;
     }
-    require __DIR__ . '/../views/items/form.php';
+    mostrarFormItem($item);
 }
 
 function editarItem() {
@@ -127,7 +137,7 @@ function editarItem() {
         $error = 'Hay ' . $item->getPrestados() . ' ejemplares prestados: el stock no puede ser menor.';
     }
     if ($error !== '') {
-        require __DIR__ . '/../views/items/form.php';
+        mostrarFormItem($item, $error);
         return;
     }
 
@@ -136,12 +146,13 @@ function editarItem() {
     if (!empty($_FILES['imagen']['name'])) {
         $imagenNueva = guardarImagen($_FILES['imagen'], PORTADA_POR_DEFECTO);
         if ($imagenNueva === null) {
-            $error = 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
-            require __DIR__ . '/../views/items/form.php';
+            mostrarFormItem($item, 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.');
             return;
         }
         $imagen = $imagenNueva;
     }
+
+    $categoria = Item::unificarCategoria($pdo, $categoria, $id);
 
     Item::actualizar($pdo, $id, $tipo, $titulo, $autor, $categoria, $stock, $imagen);
     if ($imagen !== $item->getImagen()) {

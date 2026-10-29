@@ -50,8 +50,15 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
 
       <div class="mb-3">
         <label class="form-label">Categoría (opcional)</label>
+        <?php // list="categorias": al escribir, el navegador sugiere las categorías que ya existen. ?>
         <input type="text" name="categoria" class="form-control" maxlength="50" placeholder="Novela, Estrategia, Robótica..."
-          value="<?= htmlspecialchars($categoria) ?>">
+          list="categorias" autocomplete="off" value="<?= htmlspecialchars($categoria) ?>">
+        <datalist id="categorias">
+          <?php foreach ($categorias as $nombreCategoria): ?>
+            <option value="<?= htmlspecialchars($nombreCategoria) ?>"></option>
+          <?php endforeach; ?>
+        </datalist>
+        <div class="form-text">Elegí una de las sugeridas si ya existe, así no quedan repetidas.</div>
       </div>
 
       <div class="mb-3">

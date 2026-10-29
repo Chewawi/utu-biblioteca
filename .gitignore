@@ -6,3 +6,6 @@ uploads/*
 Thumbs.db
 # Dependencias de Composer (se instalan con "composer install")
 vendor/
+
+# Credenciales del correo (se copia de config/correo.ejemplo.php)
+config/correo.php

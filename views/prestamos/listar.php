@@ -90,13 +90,8 @@ require __DIR__ . '/../filtros.php';
                       data-boton="Registrar devolución" data-color="primary">
                       <?= campoCsrf() ?>
                       <input type="hidden" name="id" value="<?= $p->getId() ?>">
-                      <?php // Mandamos también los filtros y la página actuales, para volver a la lista tal como estaba. ?>
-                      <?php foreach ($filtros as $clave => $valor): ?>
-                        <?php if ($valor !== ''): ?>
-                          <input type="hidden" name="<?= htmlspecialchars($clave) ?>" value="<?= htmlspecialchars($valor) ?>">
-                        <?php endif; ?>
-                      <?php endforeach; ?>
-                      <input type="hidden" name="p" value="<?= htmlspecialchars($resultado['pagina']) ?>">
+                      <?php // También los filtros y la página actuales, para volver a la lista tal como estaba. ?>
+                      <?= camposOcultos(array_merge($filtros, ['p' => $resultado['pagina']])) ?>
                       <button type="submit" class="btn btn-sm btn-outline-secondary">Devolver</button>
                     </form>
                   <?php endif; ?>

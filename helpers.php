@@ -157,6 +157,21 @@ function urlPagina($numero) {
 }
 
 /**
+ * Un campo oculto por cada valor de $valores ([nombre => valor]) que no esté
+ * vacío. Va dentro de un formulario POST de un listado (devolver, reservar,
+ * cancelar...) para volver después al listado con sus filtros y su página.
+ */
+function camposOcultos($valores) {
+    $html = '';
+    foreach ($valores as $nombre => $valor) {
+        if ($valor !== '') {
+            $html .= '<input type="hidden" name="' . htmlspecialchars($nombre) . '" value="' . htmlspecialchars($valor) . '">';
+        }
+    }
+    return $html;
+}
+
+/**
  * URL de un listado con los parámetros $base ([nombre => valor]) cambiados por
  * $cambios. Saca los vacíos, para que la URL quede corta, y no lleva la página:
  * al cambiar un filtro se vuelve a la 1.

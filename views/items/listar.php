@@ -151,7 +151,9 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
                   <form method="POST" action="index.php?accion=crearReserva">
                     <?= campoCsrf() ?>
                     <?= camposOcultos(['item_id' => $item->getId(), 'tipo' => $tipo, 'categoria' => $categoria, 'q' => $filtros['q'], 'p' => $resultado['pagina']]) ?>
-                    <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Reservar</button>
+                    <button type="submit" class="btn btn-sm btn-outline-secondary w-100">
+                      Reservar<span class="visually-hidden"> «<?= htmlspecialchars($item->getTitulo()) ?>»</span>
+                    </button>
                   </form>
                 <?php endif; ?>
               </div>

@@ -1,7 +1,10 @@
-<?php require __DIR__ . '/../header.php'; ?>
+<?php
+$tituloPagina = isset($usuario) ? 'Editar usuario' : 'Nuevo usuario';
+require __DIR__ . '/../header.php';
+?>
 
 <div class="encabezado">
-  <h1 class="h3"><?= isset($usuario) ? 'Editar usuario' : 'Nuevo usuario' ?></h1>
+  <h1 class="h3"><?= htmlspecialchars($tituloPagina) ?></h1>
 </div>
 
 <?php if (isset($error)): ?>

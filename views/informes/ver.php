@@ -1,4 +1,7 @@
-<?php require __DIR__ . '/../header.php'; ?>
+<?php
+$tituloPagina = 'Informes';
+require __DIR__ . '/../header.php';
+?>
 
 <?php
 // Lo que tiene clase d-print-none (barra, pestañas, filtros, botones) no sale al imprimir.

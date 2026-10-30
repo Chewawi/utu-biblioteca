@@ -9,7 +9,8 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEd
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bibliodeko</title>
+  <?php // Cada vista pone $tituloPagina antes de incluir este archivo: así cada pestaña del navegador dice dónde estás. ?>
+  <title><?= isset($tituloPagina) ? htmlspecialchars($tituloPagina) . ' · ' : '' ?>Bibliodeko</title>
   <script>
     // Tema claro u oscuro: el que eligió el usuario (queda guardado en el navegador)
     // o, si nunca eligió, el del sistema. Va acá arriba para que la página no

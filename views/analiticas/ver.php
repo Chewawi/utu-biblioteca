@@ -1,4 +1,7 @@
-<?php require __DIR__ . '/../header.php'; ?>
+<?php
+$tituloPagina = 'Analíticas';
+require __DIR__ . '/../header.php';
+?>
 
 <?php
 // Texto del período elegido, para el título de la parte de actividad.

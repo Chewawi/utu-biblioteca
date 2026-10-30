@@ -1,7 +1,10 @@
-<?php require __DIR__ . '/../header.php'; ?>
+<?php
+$tituloPagina = $titulo;
+require __DIR__ . '/../header.php';
+?>
 
 <div class="encabezado">
-  <h1 class="h3"><?= htmlspecialchars($titulo) ?></h1>
+  <h1 class="h3"><?= htmlspecialchars($tituloPagina) ?></h1>
   <?php if (esAdmin()): ?>
     <div class="d-flex flex-wrap gap-2">
       <?php // Sin correo configurado el botón no aparece: no tendría nada que hacer. ?>

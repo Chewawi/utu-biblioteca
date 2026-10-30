@@ -1,4 +1,7 @@
-<?php require __DIR__ . '/../header.php'; ?>
+<?php
+$tituloPagina = 'Nuevo préstamo';
+require __DIR__ . '/../header.php';
+?>
 
 <div class="encabezado">
   <h1 class="h3">Nuevo préstamo</h1>

@@ -1,4 +1,7 @@
-<?php require __DIR__ . '/../header.php'; ?>
+<?php
+$tituloPagina = 'Iniciar sesión';
+require __DIR__ . '/../header.php';
+?>
 
 <div class="card card-login">
   <div class="card-body p-4 p-sm-5">

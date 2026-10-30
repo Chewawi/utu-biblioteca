@@ -1,7 +1,10 @@
 <?php
-// Para marcar en la barra la sección en la que estamos.
+// Para marcar en la barra la sección en la que estamos (también en sus formularios).
 $accionActual = $_GET['accion'] ?? 'listarItems';
 $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEditarItem', 'crearItem', 'editarItem']);
+$enPrestamos  = in_array($accionActual, ['listarPrestamos', 'formCrearPrestamo', 'crearPrestamo']);
+$enSocios     = in_array($accionActual, ['listarSocios', 'formCrearSocio', 'formEditarSocio', 'crearSocio', 'editarSocio']);
+$enUsuarios   = in_array($accionActual, ['listarUsuarios', 'formCrearUsuario', 'formEditarUsuario', 'crearUsuario', 'editarUsuario']);
 ?>
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="light">
@@ -62,12 +65,12 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEd
             </ul>
           </li>
           <?php if (isset($_SESSION['usuario'])): ?>
-            <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarPrestamos' ? 'active' : '' ?>" href="index.php?accion=listarPrestamos"><?= esAdmin() ? 'Préstamos' : 'Mis préstamos' ?></a></li>
+            <li class="nav-item"><a class="nav-link <?= $enPrestamos ? 'active' : '' ?>" href="index.php?accion=listarPrestamos"><?= esAdmin() ? 'Préstamos' : 'Mis préstamos' ?></a></li>
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarReservas' ? 'active' : '' ?>" href="index.php?accion=listarReservas"><?= esAdmin() ? 'Reservas' : 'Mis reservas' ?></a></li>
           <?php endif; ?>
           <?php if (esAdmin()): ?>
-            <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarSocios' ? 'active' : '' ?>" href="index.php?accion=listarSocios">Socios</a></li>
-            <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarUsuarios' ? 'active' : '' ?>" href="index.php?accion=listarUsuarios">Usuarios</a></li>
+            <li class="nav-item"><a class="nav-link <?= $enSocios ? 'active' : '' ?>" href="index.php?accion=listarSocios">Socios</a></li>
+            <li class="nav-item"><a class="nav-link <?= $enUsuarios ? 'active' : '' ?>" href="index.php?accion=listarUsuarios">Usuarios</a></li>
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'verAnaliticas' ? 'active' : '' ?>" href="index.php?accion=verAnaliticas">Analíticas</a></li>
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'verInforme' ? 'active' : '' ?>" href="index.php?accion=verInforme">Informes</a></li>
           <?php endif; ?>

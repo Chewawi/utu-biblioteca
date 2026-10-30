@@ -10,7 +10,7 @@
 return [
     'host'      => 'smtp.ejemplo.com',
     'puerto'    => 587,
-    'seguridad' => 'tls',  // 'tls', 'ssl' o '' (sin cifrar: solo para un SMTP de prueba local)
+    'seguridad' => '',     // '' = sin cifrar, para un SMTP de prueba local. Para un SMTP real: 'tls' (puerto 587) o 'ssl' (puerto 465)
     'usuario'   => '',     // vacío = el servidor no pide usuario
     'clave'     => '',
     'remitente' => 'biblioteca@ejemplo.com',

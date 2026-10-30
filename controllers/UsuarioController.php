@@ -99,7 +99,7 @@ function crearUsuario() {
 function formEditarUsuario() {
     global $pdo;
     requerirAdmin();
-    $usuario = Usuario::buscarPorId($pdo, $_GET['id']);
+    $usuario = Usuario::buscarPorId($pdo, $_GET['id'] ?? '');
     if (!$usuario) {
         flash('danger', 'Usuario no encontrado.');
         header('Location: index.php?accion=listarUsuarios');
@@ -112,7 +112,7 @@ function editarUsuario() {
     global $pdo;
     requerirAdmin();
 
-    $id    = $_POST['id'];
+    $id    = $_POST['id'] ?? '';
     $rol   = trim($_POST['rol'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $pass  = trim($_POST['pass'] ?? '');
@@ -164,8 +164,13 @@ function eliminarUsuario() {
     global $pdo;
     requerirAdmin();
 
-    $id = $_POST['id'];
+    $id = $_POST['id'] ?? '';
 
+    if (!Usuario::buscarPorId($pdo, $id)) {
+        flash('danger', 'Usuario no encontrado.');
+        header('Location: index.php?accion=listarUsuarios');
+        exit;
+    }
     if ($id == $_SESSION['usuario']['id']) {
         flash('danger', 'No podés eliminar tu propia cuenta.');
         header('Location: index.php?accion=listarUsuarios');

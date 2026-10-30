@@ -79,7 +79,7 @@ function crearSocio() {
 function formEditarSocio() {
     global $pdo;
     requerirAdmin();
-    $socio = Socio::buscarPorId($pdo, $_GET['id']);
+    $socio = Socio::buscarPorId($pdo, $_GET['id'] ?? '');
     if (!$socio) {
         flash('danger', 'Socio no encontrado.');
         header('Location: index.php?accion=listarSocios');
@@ -93,7 +93,7 @@ function editarSocio() {
     global $pdo;
     requerirAdmin();
 
-    $id = $_POST['id'];
+    $id = $_POST['id'] ?? '';
     $socio = Socio::buscarPorId($pdo, $id);
     if (!$socio) {
         flash('danger', 'Socio no encontrado.');
@@ -138,7 +138,7 @@ function eliminarSocio() {
     global $pdo;
     requerirAdmin();
 
-    $id = $_POST['id'];
+    $id = $_POST['id'] ?? '';
     $socio = Socio::buscarPorId($pdo, $id);
     if (!$socio) {
         flash('danger', 'Socio no encontrado.');

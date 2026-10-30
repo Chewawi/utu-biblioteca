@@ -120,7 +120,7 @@ function crearItem() {
 function formEditarItem() {
     global $pdo;
     requerirAdmin();
-    $item = Item::buscarPorId($pdo, $_GET['id']);
+    $item = Item::buscarPorId($pdo, $_GET['id'] ?? '');
     if (!$item) {
         flash('danger', 'Ítem no encontrado.');
         header('Location: index.php?accion=listarItems');
@@ -133,7 +133,7 @@ function editarItem() {
     global $pdo;
     requerirAdmin();
 
-    $id = $_POST['id'];
+    $id = $_POST['id'] ?? '';
     $item = Item::buscarPorId($pdo, $id);
     if (!$item) {
         flash('danger', 'Ítem no encontrado.');
@@ -184,7 +184,7 @@ function eliminarItem() {
     global $pdo;
     requerirAdmin();
 
-    $id = $_POST['id'];
+    $id = $_POST['id'] ?? '';
     $item = Item::buscarPorId($pdo, $id);
     if (!$item) {
         flash('danger', 'Ítem no encontrado.');

@@ -137,3 +137,23 @@ INSERT INTO prestamos (socio_id, item_id, fecha_prestamo, fecha_limite, fecha_de
 (4, 9,  CURDATE() - INTERVAL 70 DAY,  CURDATE() - INTERVAL 56 DAY,  CURDATE() - INTERVAL 49 DAY,   'devuelto'),
 (2, 12, CURDATE() - INTERVAL 100 DAY, CURDATE() - INTERVAL 86 DAY,  CURDATE() - INTERVAL 80 DAY,   'devuelto'),
 (3, 6,  CURDATE() - INTERVAL 170 DAY, CURDATE() - INTERVAL 156 DAY, CURDATE() - INTERVAL 150 DAY,  'devuelto');
+
+-- Reservas en todos los estados, también con fechas relativas. Van en orden
+-- de llegada (el id es el orden de la cola): en la de 1984, primero el socio
+-- de prueba y después Lucía.
+INSERT INTO reservas (socio_id, item_id, fecha_reserva, fecha_vencimiento, estado) VALUES
+-- canceladas: una que esperaba 1984 y otra que tenía Dixit apartado
+(4, 2,  CURDATE() - INTERVAL 12 DAY, NULL,                         'cancelada'),
+(2, 10, CURDATE() - INTERVAL 9 DAY,  CURDATE() - INTERVAL 7 DAY,   'cancelada'),
+-- retiradas: son los préstamos activos de Cien años de soledad y de Catan
+(1, 1,  CURDATE() - INTERVAL 6 DAY,  CURDATE() - INTERVAL 4 DAY,   'retirada'),
+(3, 9,  CURDATE() - INTERVAL 5 DAY,  CURDATE() - INTERVAL 3 DAY,   'retirada'),
+-- pendiente: el socio de prueba espera 1984, que está prestado y vencido
+(1, 2,  CURDATE() - INTERVAL 4 DAY,  NULL,                         'pendiente'),
+-- lista vencida: Martín no pasó a buscar El señor de los anillos y el ejemplar volvió a quedar libre
+(4, 8,  CURDATE() - INTERVAL 3 DAY,  CURDATE() - INTERVAL 1 DAY,   'lista'),
+-- pendientes: Martín espera El nombre del viento y Lucía es la segunda en la cola de 1984
+(4, 3,  CURDATE() - INTERVAL 3 DAY,  NULL,                         'pendiente'),
+(3, 2,  CURDATE() - INTERVAL 2 DAY,  NULL,                         'pendiente'),
+-- lista: un ejemplar de Sapiens apartado para el socio de prueba
+(1, 7,  CURDATE() - INTERVAL 1 DAY,  CURDATE() + INTERVAL 1 DAY,   'lista');

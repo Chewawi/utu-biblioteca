@@ -8,9 +8,6 @@
 // ============================================================
 
 class Prestamo {
-    // Tienen que coincidir con el ENUM de la columna "estado" en database.sql.
-    const ESTADOS = ['activo', 'devuelto'];
-
     // Opciones del filtro de estado: las de la columna más 'vencido', que no se
     // guarda: es un préstamo activo con la fecha límite pasada.
     const FILTROS_ESTADO = ['activo', 'vencido', 'devuelto'];

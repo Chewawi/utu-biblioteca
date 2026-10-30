@@ -1,5 +1,8 @@
 <?php
 require_once __DIR__ . '/../models/Item.php';
+require_once __DIR__ . '/../models/Socio.php';
+require_once __DIR__ . '/../models/Prestamo.php';
+require_once __DIR__ . '/../models/Reserva.php';
 
 // ============================================================
 //  Controller de Items
@@ -65,6 +68,18 @@ function listarItems() {
     $resultado = Item::listar($pdo, $filtros);
     $items = $resultado['filas'];
     $conteo = Item::contarPorTipo($pdo, $filtros['q'], $categoria);
+
+    // Para el botón "Reservar" de cada tarjeta: qué tiene prestado y reservado el socio logueado.
+    $socio = null;
+    $prestadosDelSocio = [];
+    $reservasDelSocio = [];
+    if (isset($_SESSION['usuario']) && !esAdmin()) {
+        $socio = Socio::buscarPorUsuarioId($pdo, $_SESSION['usuario']['id']);
+    }
+    if ($socio) {
+        $prestadosDelSocio = Prestamo::itemsPrestadosA($pdo, $socio->getId());
+        $reservasDelSocio = Reserva::activasDelSocio($pdo, $socio->getId());
+    }
     require __DIR__ . '/../views/items/listar.php';
 }
 

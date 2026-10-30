@@ -23,6 +23,7 @@ require_once __DIR__ . '/controllers/ItemController.php';
 require_once __DIR__ . '/controllers/SocioController.php';
 require_once __DIR__ . '/controllers/UsuarioController.php';
 require_once __DIR__ . '/controllers/PrestamoController.php';
+require_once __DIR__ . '/controllers/ReservaController.php';
 require_once __DIR__ . '/controllers/AnaliticaController.php';
 require_once __DIR__ . '/controllers/InformeController.php';
 
@@ -120,6 +121,11 @@ switch ($accion) {
         break;
     case 'avisarVencidos':
         avisarVencidos();
+        break;
+
+    // --- Reservas ---
+    case 'crearReserva':
+        crearReserva();
         break;
 
     // --- Analíticas ---

@@ -206,6 +206,13 @@ class Prestamo {
         return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
+    /** Los ids de los items que el socio $socioId tiene prestados ahora (préstamos activos). */
+    public static function itemsPrestadosA($pdo, $socioId) {
+        $stmt = $pdo->prepare("SELECT item_id FROM prestamos WHERE socio_id = ? AND estado = 'activo'");
+        $stmt->execute([$socioId]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
     /**
      * Préstamos vencidos con el nombre y el email del socio, para mandar los
      * recordatorios. Ordenados por socio, así quedan juntos los de cada uno.

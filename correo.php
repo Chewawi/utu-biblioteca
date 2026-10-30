@@ -96,6 +96,17 @@ function enviarConfirmacionPrestamo($email, $nombre, $titulo, $fechaPrestamo, $f
         textoCorreo($saludo, $parrafos), htmlCorreo($saludo, $parrafos));
 }
 
+/** Le avisa al socio que su reserva quedó lista y hasta cuándo le guardamos el ejemplar. */
+function enviarAvisoReservaLista($email, $nombre, $titulo, $fechaVencimiento) {
+    $saludo = 'Hola, ' . $nombre . ':';
+    $parrafos = [
+        'Tu reserva de «' . $titulo . '» está lista: te apartamos un ejemplar.',
+        'Podés retirarlo en la biblioteca hasta el ' . formatoFecha($fechaVencimiento) . '. Después la reserva vence y el ejemplar queda libre para otro socio.',
+    ];
+    return enviarCorreo($email, $nombre, 'Tu reserva está lista: ' . $titulo,
+        textoCorreo($saludo, $parrafos), htmlCorreo($saludo, $parrafos));
+}
+
 /**
  * Manda un recordatorio a cada socio que tenga préstamos vencidos: un solo
  * correo por socio, con todos sus ítems atrasados. Lo usan el botón

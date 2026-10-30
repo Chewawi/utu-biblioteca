@@ -136,6 +136,26 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
             <?php else: ?>
               <span class="punto bg-danger"></span>Sin ejemplares disponibles
             <?php endif; ?>
+
+            <?php if ($socio): ?>
+              <?php // Para el socio: si ya lo tiene o lo reservó, lo decimos; si no, puede reservarlo. ?>
+              <?php $reserva = $reservasDelSocio[$item->getId()] ?? null; ?>
+              <div class="mt-2">
+                <?php if (in_array($item->getId(), $prestadosDelSocio)): ?>
+                  <a href="index.php?accion=listarPrestamos" class="badge rounded-pill text-wrap bg-warning-subtle text-warning-emphasis">Lo tenés prestado</a>
+                <?php elseif ($reserva && $reserva->estaLista()): ?>
+                  <a href="index.php?accion=listarReservas" class="badge rounded-pill text-wrap bg-success-subtle text-success-emphasis">Apartado hasta el <?= htmlspecialchars(formatoFecha($reserva->getFechaVencimiento())) ?></a>
+                <?php elseif ($reserva): ?>
+                  <a href="index.php?accion=listarReservas" class="badge rounded-pill text-wrap bg-warning-subtle text-warning-emphasis">En espera · puesto <?= htmlspecialchars($reserva->getPuesto()) ?></a>
+                <?php else: ?>
+                  <form method="POST" action="index.php?accion=crearReserva">
+                    <?= campoCsrf() ?>
+                    <?= camposOcultos(['item_id' => $item->getId(), 'tipo' => $tipo, 'categoria' => $categoria, 'q' => $filtros['q'], 'p' => $resultado['pagina']]) ?>
+                    <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Reservar</button>
+                  </form>
+                <?php endif; ?>
+              </div>
+            <?php endif; ?>
           </div>
         </div>
       </div>

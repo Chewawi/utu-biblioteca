@@ -28,8 +28,8 @@ $fotoActual = isset($socio) ? $socio->getFoto() : AVATAR_POR_DEFECTO;
       <?php endif; ?>
 
       <div class="mb-3">
-        <label class="form-label">Usuario asociado</label>
-        <select name="usuario_id" class="form-select" required>
+        <label class="form-label" for="usuario_id">Usuario asociado</label>
+        <select id="usuario_id" name="usuario_id" class="form-select" required>
           <option value="">-- Elegir usuario --</option>
           <?php foreach ($usuariosDisponibles as $u): ?>
             <option value="<?= $u->getId() ?>" <?= $u->getId() == $usuarioElegido ? 'selected' : '' ?>>
@@ -41,22 +41,22 @@ $fotoActual = isset($socio) ? $socio->getFoto() : AVATAR_POR_DEFECTO;
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Nombre</label>
-        <input type="text" name="nombre" class="form-control" required maxlength="100" value="<?= htmlspecialchars($nombre) ?>">
+        <label class="form-label" for="nombre">Nombre</label>
+        <input type="text" id="nombre" name="nombre" class="form-control" required maxlength="100" value="<?= htmlspecialchars($nombre) ?>">
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Dirección</label>
-        <input type="text" name="direccion" class="form-control" required maxlength="255" value="<?= htmlspecialchars($direccion) ?>">
+        <label class="form-label" for="direccion">Dirección</label>
+        <input type="text" id="direccion" name="direccion" class="form-control" required maxlength="255" value="<?= htmlspecialchars($direccion) ?>">
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Teléfono</label>
-        <input type="text" name="telefono" class="form-control" required maxlength="20" value="<?= htmlspecialchars($telefono) ?>">
+        <label class="form-label" for="telefono">Teléfono</label>
+        <input type="text" id="telefono" name="telefono" class="form-control" required maxlength="20" value="<?= htmlspecialchars($telefono) ?>">
       </div>
 
       <div class="mb-3">
-        <label class="form-label d-block"><?= isset($socio) ? 'Reemplazar foto (opcional)' : 'Foto (opcional)' ?></label>
+        <label class="form-label d-block" for="foto"><?= isset($socio) ? 'Reemplazar foto (opcional)' : 'Foto (opcional)' ?></label>
         <div class="d-flex align-items-center gap-3">
           <img id="vista-previa" src="uploads/<?= htmlspecialchars($fotoActual) ?>" alt="Foto del socio"
             width="96" height="96" class="avatar">

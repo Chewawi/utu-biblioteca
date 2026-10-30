@@ -17,14 +17,14 @@
       <?php endif; ?>
 
       <div class="mb-3">
-        <label class="form-label">Correo electrónico</label>
-        <input type="email" name="email" class="form-control" required maxlength="100"
+        <label class="form-label" for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" class="form-control" required maxlength="100"
           value="<?= isset($usuario) ? htmlspecialchars($usuario->getEmail()) : htmlspecialchars($_POST['email'] ?? '') ?>">
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Rol</label>
-        <select name="rol" class="form-select">
+        <label class="form-label" for="rol">Rol</label>
+        <select id="rol" name="rol" class="form-select">
           <?php $rolActual = isset($usuario) ? $usuario->getRol() : ($_POST['rol'] ?? 'socio'); ?>
           <option value="socio" <?= $rolActual === 'socio' ? 'selected' : '' ?>>Socio</option>
           <option value="admin" <?= $rolActual === 'admin' ? 'selected' : '' ?>>Administrador</option>
@@ -32,10 +32,10 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label">
+        <label class="form-label" for="pass">
           <?= isset($usuario) ? 'Nueva contraseña (dejar en blanco para no cambiarla)' : 'Contraseña' ?>
         </label>
-        <input type="password" name="pass" class="form-control" <?= isset($usuario) ? '' : 'required' ?> minlength="6">
+        <input type="password" id="pass" name="pass" class="form-control" <?= isset($usuario) ? '' : 'required' ?> minlength="6">
       </div>
 
       <div class="d-flex gap-2 pt-2">

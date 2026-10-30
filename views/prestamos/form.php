@@ -21,8 +21,8 @@
     <form method="POST" action="index.php?accion=crearPrestamo">
       <?= campoCsrf() ?>
       <div class="mb-3">
-        <label class="form-label">Socio</label>
-        <select name="socio_id" class="form-select select2-buscable" required>
+        <label class="form-label" for="socio_id">Socio</label>
+        <select id="socio_id" name="socio_id" class="form-select select2-buscable" required>
           <option value="">-- Elegir socio --</option>
           <?php foreach ($socios as $socio): ?>
             <option value="<?= $socio->getId() ?>" <?= $socioId == $socio->getId() ? 'selected' : '' ?>><?= htmlspecialchars($socio->getNombre()) ?></option>
@@ -31,8 +31,8 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Ítem</label>
-        <select name="item_id" class="form-select select2-buscable" required>
+        <label class="form-label" for="item_id">Ítem</label>
+        <select id="item_id" name="item_id" class="form-select select2-buscable" required>
           <option value="">-- Elegir ítem --</option>
           <?php foreach ($items as $item): ?>
             <?php // Los ítems sin ejemplares libres se ven, pero no se pueden elegir; salvo el que este socio tiene apartado. ?>
@@ -48,14 +48,14 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Fecha de préstamo</label>
-        <input type="date" name="fecha_prestamo" class="form-control" max="<?= date('Y-m-d') ?>" value="<?= htmlspecialchars($_POST['fecha_prestamo'] ?? date('Y-m-d')) ?>" required>
+        <label class="form-label" for="fecha_prestamo">Fecha de préstamo</label>
+        <input type="date" id="fecha_prestamo" name="fecha_prestamo" class="form-control" max="<?= date('Y-m-d') ?>" value="<?= htmlspecialchars($_POST['fecha_prestamo'] ?? date('Y-m-d')) ?>" required>
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Fecha límite de devolución</label>
+        <label class="form-label" for="fecha_limite">Fecha límite de devolución</label>
         <?php // Por defecto, dos semanas desde hoy. ?>
-        <input type="date" name="fecha_limite" class="form-control" value="<?= htmlspecialchars($_POST['fecha_limite'] ?? date('Y-m-d', strtotime('+14 days'))) ?>" required>
+        <input type="date" id="fecha_limite" name="fecha_limite" class="form-control" value="<?= htmlspecialchars($_POST['fecha_limite'] ?? date('Y-m-d', strtotime('+14 days'))) ?>" required>
         <div class="form-text">Tiene que ser posterior a la fecha de préstamo.</div>
       </div>
 

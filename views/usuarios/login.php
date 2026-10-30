@@ -15,12 +15,12 @@
     <form method="POST" action="index.php?accion=auth">
       <?= campoCsrf() ?>
       <div class="mb-3">
-        <label class="form-label">Correo electrónico</label>
-        <input type="email" name="email" class="form-control" required autofocus autocomplete="username">
+        <label class="form-label" for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" class="form-control" required autofocus autocomplete="username">
       </div>
       <div class="mb-4">
-        <label class="form-label">Contraseña</label>
-        <input type="password" name="pass" class="form-control" required autocomplete="current-password">
+        <label class="form-label" for="pass">Contraseña</label>
+        <input type="password" id="pass" name="pass" class="form-control" required autocomplete="current-password">
       </div>
       <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
     </form>

@@ -34,7 +34,7 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
 
       <div class="mb-3">
         <label class="form-label" for="tipo">Tipo</label>
-        <select id="tipo" name="tipo" class="form-select select2" required>
+        <select id="tipo" name="tipo" class="form-select" required>
           <?php foreach (Item::TIPOS as $tipo): ?>
             <option value="<?= htmlspecialchars($tipo) ?>" <?= $tipo === $tipoElegido ? 'selected' : '' ?>><?= htmlspecialchars(ucfirst($tipo)) ?></option>
           <?php endforeach; ?>
@@ -95,12 +95,8 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
 
 <script>
   // Al cambiar el tipo, el campo "Autor" pasa a llamarse "Creador" (y al revés).
-  // Select2 avisa el cambio con un evento de jQuery, que se carga en el footer:
-  // por eso esperamos a que la página termine de cargar.
-  document.addEventListener('DOMContentLoaded', function () {
-    $('select[name="tipo"]').on('change', function () {
-      document.getElementById('etiqueta-autor').textContent = this.value === 'libro' ? 'Autor' : 'Creador';
-    });
+  document.getElementById('tipo').addEventListener('change', function () {
+    document.getElementById('etiqueta-autor').textContent = this.value === 'libro' ? 'Autor' : 'Creador';
   });
 </script>
 

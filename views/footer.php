@@ -25,9 +25,8 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
 <script>
-  // <select class="select2">: desplegable de Select2 sin buscador (para pocas opciones).
-  $('.select2').select2({ width: '100%', language: 'es', minimumResultsForSearch: Infinity });
-  // <select class="select2-buscable">: con buscador, para listas largas como socios o ítems.
+  // <select class="select2-buscable">: desplegable de Select2 con buscador, para
+  // listas largas como socios o ítems. Los de pocas opciones son <select> comunes.
   $('.select2-buscable').select2({ width: '100%', language: 'es' });
 
   // Botón de la barra: pasa de claro a oscuro (y al revés) y recuerda la elección.

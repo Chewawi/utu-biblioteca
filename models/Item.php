@@ -224,10 +224,13 @@ class Item {
         return $stmt->execute([$id]);
     }
 
-    /** true si el item tiene préstamos, activos o ya devueltos (historial). */
-    public static function tienePrestamos($pdo, $id) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM prestamos WHERE item_id = ?");
-        $stmt->execute([$id]);
+    /** true si el item tiene préstamos o reservas, aunque sean viejos (historial). */
+    public static function tieneHistorial($pdo, $id) {
+        $stmt = $pdo->prepare("
+            SELECT (SELECT COUNT(*) FROM prestamos WHERE item_id = ?)
+                 + (SELECT COUNT(*) FROM reservas WHERE item_id = ?)
+        ");
+        $stmt->execute([$id, $id]);
         return $stmt->fetchColumn() > 0;
     }
 }

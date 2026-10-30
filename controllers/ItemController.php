@@ -176,8 +176,8 @@ function eliminarItem() {
         exit;
     }
 
-    if (Item::tienePrestamos($pdo, $id)) {
-        flash('danger', 'No se puede eliminar: el ítem tiene préstamos registrados y se perdería el historial.');
+    if (Item::tieneHistorial($pdo, $id)) {
+        flash('danger', 'No se puede eliminar: el ítem tiene préstamos o reservas registrados y se perdería el historial.');
         header('Location: index.php?accion=listarItems');
         exit;
     }

@@ -89,7 +89,8 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
               <td><span class="badge etiqueta"><?= htmlspecialchars(ucfirst($item->getTipo())) ?></span></td>
               <td class="fw-medium"><?= htmlspecialchars($item->getTitulo()) ?></td>
               <td class="text-body-secondary"><?= htmlspecialchars($item->getAutor()) ?></td>
-              <td class="text-body-secondary"><?= htmlspecialchars($item->getCategoria() ?? '—') ?></td>
+              <?php // ?: y no ??: un ítem sin categoría puede tener NULL o '' (texto vacío). ?>
+              <td class="text-body-secondary"><?= htmlspecialchars($item->getCategoria() ?: '—') ?></td>
               <td class="text-nowrap">
                 <span class="punto <?= $item->getDisponibles() > 0 ? 'bg-success' : 'bg-danger' ?>"></span><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?>
                 <?php if ($item->getApartados() > 0): ?>

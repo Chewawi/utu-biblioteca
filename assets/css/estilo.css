@@ -338,6 +338,11 @@ a {
   background-color: var(--color-superficie-2);
 }
 
+/* El estado de la reserva del socio, en el pie de la tarjeta (que ya tiene letra chica). */
+.tarjeta-item .card-footer .badge {
+  font-size: .75rem;
+}
+
 /* Miniatura de portada en la tabla del admin. */
 .portada-mini {
   width: 40px;

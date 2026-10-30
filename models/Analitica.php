@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/Item.php';
+require_once __DIR__ . '/Prestamo.php';
+
 // ============================================================
 //  Modelo Analitica
 //  Consultas para la página de analíticas, una función por
@@ -76,7 +79,7 @@ class Analitica {
         $stmt = $pdo->prepare("
             SELECT COUNT(*) AS total,
                    COALESCE(SUM(p.estado = 'activo'), 0) AS activos,
-                   COALESCE(SUM(p.estado = 'activo' AND p.fecha_limite < ?), 0) AS vencidos,
+                   COALESCE(SUM(" . Prestamo::VENCIDO . "), 0) AS vencidos,
                    COALESCE(SUM(p.estado = 'devuelto'), 0) AS devueltos
             FROM prestamos p
         " . $where);
@@ -174,7 +177,7 @@ class Analitica {
             SELECT s.nombre, s.telefono,
                    COUNT(p.id) AS prestamos,
                    COALESCE(SUM(p.estado = 'activo'), 0) AS activos,
-                   COALESCE(SUM(p.estado = 'activo' AND p.fecha_limite < ?), 0) AS vencidos,
+                   COALESCE(SUM(" . Prestamo::VENCIDO . "), 0) AS vencidos,
                    COALESCE(SUM(p.estado = 'devuelto'), 0) AS devueltos,
                    COALESCE(SUM(p.fecha_devolucion > p.fecha_limite), 0) AS tardias,
                    MAX(p.fecha_prestamo) AS ultimo

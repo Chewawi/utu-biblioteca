@@ -15,6 +15,10 @@ class Prestamo {
     // guarda: es un préstamo activo con la fecha límite pasada.
     const FILTROS_ESTADO = ['activo', 'vencido', 'devuelto'];
 
+    // La regla de "vencido", escrita una sola vez para todas las consultas (el
+    // "?" es la fecha de hoy). estaVencido() es la misma regla para un préstamo ya leído.
+    const VENCIDO = "(p.estado = 'activo' AND p.fecha_limite < ?)";
+
     private $id;
     private $fechaPrestamo;
     private $fechaLimite;
@@ -89,7 +93,7 @@ class Prestamo {
             $parametros[] = $filtros['socio_id'];
         }
         if ($filtros['estado'] === 'vencido') {
-            $condiciones[] = "p.estado = 'activo' AND p.fecha_limite < ?";
+            $condiciones[] = self::VENCIDO;
             $parametros[] = date('Y-m-d');
         } elseif ($filtros['estado'] !== '') {
             $condiciones[] = 'p.estado = ?';
@@ -133,7 +137,7 @@ class Prestamo {
         $stmt = $pdo->prepare("
             SELECT COUNT(*),
                    COALESCE(SUM(p.estado = 'activo'), 0),
-                   COALESCE(SUM(p.estado = 'activo' AND p.fecha_limite < ?), 0),
+                   COALESCE(SUM(" . self::VENCIDO . "), 0),
                    COALESCE(SUM(p.estado = 'devuelto'), 0)
         " . $desdeDonde);
         // El "?" de la fecha está en el SELECT, antes que los del WHERE.
@@ -226,7 +230,7 @@ class Prestamo {
             INNER JOIN socios s ON p.socio_id = s.id
             INNER JOIN usuarios u ON s.usuario_id = u.id
             INNER JOIN items i ON p.item_id = i.id
-            WHERE p.estado = 'activo' AND p.fecha_limite < ?
+            WHERE " . self::VENCIDO . "
             ORDER BY s.id, p.fecha_limite
         ");
         $stmt->execute([date('Y-m-d')]);

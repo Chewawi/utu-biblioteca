@@ -26,13 +26,15 @@ class Usuario {
 
     // --- acceso a datos ---
 
-    public static function listar($pdo) {
-        $stmt = $pdo->query("SELECT * FROM usuarios ORDER BY email");
-        $filas = $stmt->fetchAll();
+    /** Arma un Usuario con una fila de la tabla. */
+    private static function desdeFila($f) {
+        return new Usuario($f['id'], $f['rol'], $f['email'], $f['pass']);
+    }
 
+    public static function listar($pdo) {
         $usuarios = [];
-        foreach ($filas as $f) {
-            $usuarios[] = new Usuario($f['id'], $f['rol'], $f['email'], $f['pass']);
+        foreach ($pdo->query("SELECT * FROM usuarios ORDER BY email")->fetchAll() as $f) {
+            $usuarios[] = self::desdeFila($f);
         }
         return $usuarios;
     }
@@ -41,14 +43,14 @@ class Usuario {
         $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE id = ?");
         $stmt->execute([$id]);
         $f = $stmt->fetch();
-        return $f ? new Usuario($f['id'], $f['rol'], $f['email'], $f['pass']) : null;
+        return $f ? self::desdeFila($f) : null;
     }
 
     public static function buscarPorEmail($pdo, $email) {
         $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ?");
         $stmt->execute([$email]);
         $f = $stmt->fetch();
-        return $f ? new Usuario($f['id'], $f['rol'], $f['email'], $f['pass']) : null;
+        return $f ? self::desdeFila($f) : null;
     }
 
     public static function crear($pdo, $rol, $email, $pass) {
@@ -68,26 +70,24 @@ class Usuario {
     }
 
     /**
-     * Usuarios con rol 'socio' que todavía no tienen un socio asociado.
-     * Se usa para el <select> del formulario de alta de socio.
+     * Usuarios con rol 'socio' que todavía no tienen un socio asociado, más el
+     * $usuarioIdActual (el del socio que se está editando, si hay uno).
+     * Se usa para el <select> del formulario de socio.
      */
     public static function listarDisponiblesParaSocio($pdo, $usuarioIdActual = null) {
-        // Traemos todos los usuarios con rol 'socio'...
-        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE rol = 'socio' ORDER BY email");
-        $stmt->execute();
-        $filas = $stmt->fetchAll();
-
-        // ...y los ids de usuario que YA tienen un socio, para descartarlos.
-        $stmt2 = $pdo->query("SELECT usuario_id FROM socios");
-        $yaUsados = $stmt2->fetchAll(PDO::FETCH_COLUMN);
+        // LEFT JOIN: un usuario sin socio queda igual en el resultado, con s.id en NULL.
+        $stmt = $pdo->prepare("
+            SELECT u.*
+            FROM usuarios u
+            LEFT JOIN socios s ON s.usuario_id = u.id
+            WHERE u.rol = 'socio' AND (s.id IS NULL OR u.id = ?)
+            ORDER BY u.email
+        ");
+        $stmt->execute([$usuarioIdActual ?? 0]);
 
         $usuarios = [];
-        foreach ($filas as $f) {
-            $yaTieneSocio = in_array($f['id'], $yaUsados);
-            $esElMismoQueEstamosEditando = $f['id'] == $usuarioIdActual;
-            if (!$yaTieneSocio || $esElMismoQueEstamosEditando) {
-                $usuarios[] = new Usuario($f['id'], $f['rol'], $f['email'], $f['pass']);
-            }
+        foreach ($stmt->fetchAll() as $f) {
+            $usuarios[] = self::desdeFila($f);
         }
         return $usuarios;
     }

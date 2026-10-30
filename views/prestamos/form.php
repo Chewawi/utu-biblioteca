@@ -8,6 +8,14 @@
   <div class="alert alert-danger ancho-formulario"><?= htmlspecialchars($error) ?></div>
 <?php endif; ?>
 
+<?php if ($reserva): ?>
+  <div class="alert alert-info ancho-formulario">
+    Retiro de una reserva: «<?= htmlspecialchars($reserva->getItemTitulo()) ?>» está apartado para
+    <?= htmlspecialchars($reserva->getSocioNombre()) ?> hasta el <?= htmlspecialchars(formatoFecha($reserva->getFechaVencimiento())) ?>.
+    Al registrar el préstamo, la reserva queda como retirada.
+  </div>
+<?php endif; ?>
+
 <div class="card ancho-formulario">
   <div class="card-body p-4">
     <form method="POST" action="index.php?accion=crearPrestamo">
@@ -17,7 +25,7 @@
         <select name="socio_id" class="form-select select2-buscable" required>
           <option value="">-- Elegir socio --</option>
           <?php foreach ($socios as $socio): ?>
-            <option value="<?= $socio->getId() ?>" <?= ($_POST['socio_id'] ?? '') == $socio->getId() ? 'selected' : '' ?>><?= htmlspecialchars($socio->getNombre()) ?></option>
+            <option value="<?= $socio->getId() ?>" <?= $socioId == $socio->getId() ? 'selected' : '' ?>><?= htmlspecialchars($socio->getNombre()) ?></option>
           <?php endforeach; ?>
         </select>
       </div>
@@ -27,11 +35,13 @@
         <select name="item_id" class="form-select select2-buscable" required>
           <option value="">-- Elegir ítem --</option>
           <?php foreach ($items as $item): ?>
-            <?php // Los ítems sin ejemplares libres se ven, pero no se pueden elegir. ?>
+            <?php // Los ítems sin ejemplares libres se ven, pero no se pueden elegir; salvo el que este socio tiene apartado. ?>
+            <?php $esElReservado = $reserva && $reserva->getItemId() == $item->getId(); ?>
             <option value="<?= $item->getId() ?>"
-              <?= $item->getDisponibles() < 1 ? 'disabled' : '' ?>
-              <?= ($_POST['item_id'] ?? '') == $item->getId() ? 'selected' : '' ?>>
-              <?= htmlspecialchars($item->getTitulo()) ?> (<?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?> disponibles)
+              <?= $item->getDisponibles() < 1 && !$esElReservado ? 'disabled' : '' ?>
+              <?= $itemId == $item->getId() ? 'selected' : '' ?>>
+              <?= htmlspecialchars($item->getTitulo()) ?>
+              (<?= $esElReservado ? 'apartado por su reserva' : htmlspecialchars($item->getDisponibles()) . ' de ' . htmlspecialchars($item->getStock()) . ' disponibles' ?>)
             </option>
           <?php endforeach; ?>
         </select>
@@ -51,7 +61,7 @@
 
       <div class="d-flex gap-2 pt-2">
         <button type="submit" class="btn btn-primary">Registrar préstamo</button>
-        <a href="index.php?accion=listarPrestamos" class="btn btn-link">Cancelar</a>
+        <a href="index.php?accion=<?= $reserva ? 'listarReservas' : 'listarPrestamos' ?>" class="btn btn-link">Cancelar</a>
       </div>
     </form>
   </div>

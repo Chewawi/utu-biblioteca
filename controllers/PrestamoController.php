@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../models/Prestamo.php';
 require_once __DIR__ . '/../models/Socio.php';
 require_once __DIR__ . '/../models/Item.php';
+require_once __DIR__ . '/../models/Reserva.php';
 
 // ============================================================
 //  Controller de Préstamos
@@ -81,12 +82,30 @@ function listarPrestamos() {
     require __DIR__ . '/../views/prestamos/listar.php';
 }
 
-function formCrearPrestamo() {
+/**
+ * Muestra el formulario de préstamo con el socio $socioId y el item $itemId
+ * ya elegidos ('' = ninguno) y el mensaje $error, si hubo uno. Si ese socio
+ * tiene el item apartado por una reserva lista, el formulario lo avisa y deja
+ * elegir el item aunque no tenga disponibles: el ejemplar apartado es suyo.
+ */
+function mostrarFormPrestamo($socioId, $itemId, $error = null) {
     global $pdo;
-    requerirAdmin();
     $socios = Socio::listar($pdo)['filas'];
     $items = Item::listar($pdo)['filas'];
+    $reserva = null;
+    if ($socioId !== '' && $itemId !== '') {
+        $reserva = Reserva::activasDelSocio($pdo, $socioId)[$itemId] ?? null;
+        if ($reserva && !$reserva->estaLista()) {
+            $reserva = null; // pendiente: todavía no tiene un ejemplar apartado
+        }
+    }
     require __DIR__ . '/../views/prestamos/form.php';
+}
+
+/** Formulario de préstamo. Desde "Retirar" (en Reservas) llega con ?socio_id= e ?item_id=. */
+function formCrearPrestamo() {
+    requerirAdmin();
+    mostrarFormPrestamo($_GET['socio_id'] ?? '', $_GET['item_id'] ?? '');
 }
 
 function crearPrestamo() {
@@ -99,6 +118,7 @@ function crearPrestamo() {
     $fechaLimite = $_POST['fecha_limite'] ?? '';
 
     $error = '';
+    $reserva = null;
     if ($socioId === '' || $itemId === '' || $fecha === '' || $fechaLimite === '') {
         $error = 'Elegí un socio, un ítem, la fecha del préstamo y la fecha límite.';
     } elseif (!fechaValida($fecha) || $fecha > date('Y-m-d')) {
@@ -110,28 +130,35 @@ function crearPrestamo() {
         $error = 'Elegí un socio de la lista.';
     } else {
         $item = Item::buscarPorId($pdo, $itemId);
-        if (!$item || $item->getDisponibles() < 1) {
+        // Si el socio tiene una reserva activa del item, se cumple con este préstamo.
+        // Si estaba lista, uno de los ejemplares apartados es el suyo.
+        $reserva = Reserva::activasDelSocio($pdo, $socioId)[$itemId] ?? null;
+        $libres = $item ? $item->getDisponibles() + ($reserva && $reserva->estaLista() ? 1 : 0) : 0;
+        if ($libres < 1) {
             $error = 'No quedan ejemplares disponibles de ese ítem.';
         }
     }
 
     if ($error !== '') {
-        $socios = Socio::listar($pdo)['filas'];
-        $items = Item::listar($pdo)['filas'];
-        require __DIR__ . '/../views/prestamos/form.php';
+        mostrarFormPrestamo($socioId, $itemId, $error);
         return;
     }
 
     Prestamo::crear($pdo, $socioId, $itemId, $fecha, $fechaLimite);
+    $mensaje = 'Préstamo registrado.';
+    if ($reserva) {
+        Reserva::marcarRetirada($pdo, $reserva->getId());
+        $mensaje .= ' La reserva quedó como retirada.';
+    }
 
     // El correo es un extra: si no está configurado o falla, el préstamo ya quedó guardado.
     $socio = Socio::buscarPorId($pdo, $socioId);
     if (!correoConfigurado()) {
-        flash('success', 'Préstamo registrado.');
+        flash('success', $mensaje);
     } elseif (enviarConfirmacionPrestamo($socio->getUsuario()->getEmail(), $socio->getNombre(), $item->getTitulo(), $fecha, $fechaLimite)) {
-        flash('success', 'Préstamo registrado. Le avisamos al socio por correo.');
+        flash('success', $mensaje . ' Le avisamos al socio por correo.');
     } else {
-        flash('warning', 'Préstamo registrado, pero no se pudo enviar el correo al socio.');
+        flash('warning', $mensaje . ' No se pudo enviar el correo al socio.');
     }
     header('Location: index.php?accion=listarPrestamos');
     exit;

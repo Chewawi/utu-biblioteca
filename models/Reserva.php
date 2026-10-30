@@ -230,6 +230,12 @@ class Reserva {
         return $stmt->rowCount() > 0;
     }
 
+    /** Pasa la reserva a 'retirada': el socio se llevó el item (se registró el préstamo). */
+    public static function marcarRetirada($pdo, $id) {
+        $stmt = $pdo->prepare("UPDATE reservas SET estado = 'retirada' WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
+
     /** Anota una reserva nueva al final de la cola del item. Devuelve su id. */
     public static function crear($pdo, $socioId, $itemId, $fecha) {
         $stmt = $pdo->prepare('INSERT INTO reservas (socio_id, item_id, fecha_reserva) VALUES (?, ?, ?)');

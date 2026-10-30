@@ -88,6 +88,11 @@ $hayFiltros = $filtros['estado'] !== '' || $filtros['q'] !== '' || $filtros['soc
                 <?= htmlspecialchars($r->estaLista() || $r->estaVencida() ? formatoFecha($r->getFechaVencimiento()) : '—') ?>
               </td>
               <td class="text-end text-nowrap">
+                <?php if (esAdmin() && $r->estaLista()): ?>
+                  <?php // Cuando el socio viene a buscarlo: abre el préstamo con el socio y el ítem ya elegidos. ?>
+                  <a href="index.php?accion=formCrearPrestamo&amp;socio_id=<?= $r->getSocioId() ?>&amp;item_id=<?= $r->getItemId() ?>"
+                    class="btn btn-sm btn-outline-secondary">Retirar</a>
+                <?php endif; ?>
                 <?php // El socio cancela las activas; el admin además puede limpiar las vencidas. ?>
                 <?php if ($r->estaActiva() || (esAdmin() && $r->estaVencida())): ?>
                   <?php

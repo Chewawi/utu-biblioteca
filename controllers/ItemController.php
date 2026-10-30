@@ -174,7 +174,8 @@ function editarItem() {
     if ($imagen !== $item->getImagen()) {
         borrarImagen($item->getImagen()); // la portada vieja ya no la usa nadie
     }
-    flash('success', 'Ítem actualizado correctamente.');
+    // Si se sumaron ejemplares, pueden ser para la lista de espera.
+    flash('success', 'Ítem actualizado correctamente.' . mensajeReparto(repartirEjemplares($pdo, $id)));
     header('Location: index.php?accion=listarItems');
     exit;
 }

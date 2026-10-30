@@ -241,6 +241,14 @@ class Prestamo {
         return $stmt->execute([$socioId, $itemId, $fecha, $fechaLimite]);
     }
 
+    /** El id del item del préstamo $id, o null si no existe. */
+    public static function itemDelPrestamo($pdo, $id) {
+        $stmt = $pdo->prepare('SELECT item_id FROM prestamos WHERE id = ?');
+        $stmt->execute([$id]);
+        $itemId = $stmt->fetchColumn();
+        return $itemId === false ? null : $itemId;
+    }
+
     /**
      * Pasa el préstamo a 'devuelto' con la fecha $fecha. No se borra: queda en
      * el historial. Si ya estaba devuelto no cambia nada y devuelve false.

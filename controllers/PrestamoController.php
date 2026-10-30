@@ -189,8 +189,11 @@ function devolverPrestamo() {
     global $pdo;
     requerirAdmin();
 
-    if (Prestamo::devolver($pdo, $_POST['id'], date('Y-m-d'))) {
-        flash('success', 'Devolución registrada.');
+    $id = $_POST['id'] ?? '';
+    $itemId = Prestamo::itemDelPrestamo($pdo, $id);
+    if (Prestamo::devolver($pdo, $id, date('Y-m-d'))) {
+        // El ejemplar que volvió puede ser para el primero de la lista de espera.
+        flash('success', 'Devolución registrada.' . mensajeReparto(repartirEjemplares($pdo, $itemId)));
     } else {
         flash('warning', 'Ese préstamo ya estaba devuelto.');
     }

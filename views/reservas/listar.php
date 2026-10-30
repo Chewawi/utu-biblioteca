@@ -35,13 +35,12 @@ $barra = [
     'valores'  => $filtros,
 ];
 require __DIR__ . '/../filtros.php';
-
-$hayFiltros = $filtros['estado'] !== '' || $filtros['q'] !== '' || $filtros['socio_id'] !== '' || $filtros['item_id'] !== '';
 ?>
 
 <?php if (empty($reservas)): ?>
   <div class="card estado-vacio">
-    <?php if ($hayFiltros): ?>
+    <?php // array_filter saca los filtros vacíos: si queda alguno, el usuario filtró. ?>
+    <?php if (!empty(array_filter($filtros))): ?>
       <p class="titulo">No hay reservas para mostrar.</p>
       <p class="small mb-0">Probá con otra pestaña u otra búsqueda.</p>
     <?php elseif (esAdmin()): ?>

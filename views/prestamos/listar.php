@@ -47,8 +47,17 @@ require __DIR__ . '/../filtros.php';
 
 <?php if (empty($prestamos)): ?>
   <div class="card estado-vacio">
-    <p class="titulo">No hay préstamos para mostrar.</p>
-    <p class="small mb-0">Si filtraste, probá con otros filtros.</p>
+    <?php // array_filter saca los filtros vacíos: si queda alguno, el usuario filtró. ?>
+    <?php if (!empty(array_filter($filtros))): ?>
+      <p class="titulo">No hay préstamos para mostrar.</p>
+      <p class="small mb-0">Probá con otra pestaña u otros filtros.</p>
+    <?php elseif (esAdmin()): ?>
+      <p class="titulo">Todavía no hay préstamos.</p>
+      <p class="small mb-0">Registrá el primero con «Nuevo préstamo».</p>
+    <?php else: ?>
+      <p class="titulo">Todavía no tenés préstamos.</p>
+      <p class="small mb-0">Cuando te lleves algo de la biblioteca, va a aparecer acá.</p>
+    <?php endif; ?>
   </div>
 <?php else: ?>
   <div class="card">

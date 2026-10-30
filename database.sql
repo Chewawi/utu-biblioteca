@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
     pass    VARCHAR(255) NOT NULL
 );
 
--- Datos personales del socio, enganchado a una cuenta de usuarios.
+-- Datos personales del socio, enganchado a una cuenta de usuarios. Para
+-- borrar la cuenta hay que borrar antes al socio (ON DELETE RESTRICT).
 CREATE TABLE IF NOT EXISTS socios (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id  INT NOT NULL UNIQUE,
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS socios (
     direccion   VARCHAR(255) NOT NULL,
     telefono    VARCHAR(20)  NOT NULL,
     foto        VARCHAR(100) NOT NULL DEFAULT 'avatar.png',
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT
 );
 
 -- Todo lo que se puede pedir prestado. "stock" es cuántos ejemplares
@@ -55,7 +56,11 @@ CREATE TABLE IF NOT EXISTS prestamos (
     fecha_devolucion DATE NULL,
     estado          ENUM('activo', 'devuelto') NOT NULL DEFAULT 'activo',
     FOREIGN KEY (socio_id) REFERENCES socios(id) ON DELETE RESTRICT,
-    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE RESTRICT
+    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE RESTRICT,
+    -- La base también controla las fechas y que activo/devuelto concuerde con fecha_devolucion.
+    CHECK (fecha_limite > fecha_prestamo),
+    CHECK (fecha_devolucion >= fecha_prestamo),
+    CHECK ((estado = 'activo' AND fecha_devolucion IS NULL) OR (estado = 'devuelto' AND fecha_devolucion IS NOT NULL))
 );
 
 -- Una reserva es un socio pidiendo un item por adelantado. "estado":
@@ -74,7 +79,9 @@ CREATE TABLE IF NOT EXISTS reservas (
     fecha_vencimiento DATE NULL,
     estado            ENUM('pendiente', 'lista', 'retirada', 'cancelada') NOT NULL DEFAULT 'pendiente',
     FOREIGN KEY (socio_id) REFERENCES socios(id) ON DELETE RESTRICT,
-    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE RESTRICT
+    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE RESTRICT,
+    -- Una reserva lista siempre dice hasta cuándo aparta el ejemplar.
+    CHECK (estado <> 'lista' OR fecha_vencimiento IS NOT NULL)
 );
 
 -- =====================================================================

@@ -58,6 +58,25 @@ CREATE TABLE IF NOT EXISTS prestamos (
     FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE RESTRICT
 );
 
+-- Una reserva es un socio pidiendo un item por adelantado. "estado":
+--   'pendiente' -> espera un ejemplar, en una cola por orden de llegada;
+--   'lista'     -> tiene un ejemplar apartado hasta fecha_vencimiento;
+--   'retirada'  -> se lo llevó (pasó a ser un préstamo);
+--   'cancelada' -> la canceló el socio o el admin.
+-- Una 'lista' con fecha_vencimiento pasada ya no aparta el ejemplar: eso
+-- no se guarda, se calcula al leer (igual que un préstamo vencido). Las
+-- filas quedan como historial, por eso ON DELETE RESTRICT.
+CREATE TABLE IF NOT EXISTS reservas (
+    id                INT  AUTO_INCREMENT PRIMARY KEY,
+    socio_id          INT  NOT NULL,
+    item_id           INT  NOT NULL,
+    fecha_reserva     DATE NOT NULL,
+    fecha_vencimiento DATE NULL,
+    estado            ENUM('pendiente', 'lista', 'retirada', 'cancelada') NOT NULL DEFAULT 'pendiente',
+    FOREIGN KEY (socio_id) REFERENCES socios(id) ON DELETE RESTRICT,
+    FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE RESTRICT
+);
+
 -- =====================================================================
 --  DATOS DE EJEMPLO
 -- =====================================================================

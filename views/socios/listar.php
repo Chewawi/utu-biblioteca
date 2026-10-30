@@ -54,13 +54,13 @@
               <td class="text-body-secondary text-nowrap"><?= htmlspecialchars($socio->getTelefono()) ?></td>
               <td class="text-body-secondary"><?= htmlspecialchars($socio->getUsuario()->getEmail()) ?></td>
               <td class="text-end text-nowrap">
-                <a href="index.php?accion=formEditarSocio&id=<?= $socio->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
+                <a href="index.php?accion=formEditarSocio&id=<?= $socio->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar<span class="visually-hidden"> a <?= htmlspecialchars($socio->getNombre()) ?></span></a>
                 <form method="POST" action="index.php?accion=eliminarSocio" class="d-inline"
                   data-confirmar="¿Eliminar al socio «<?= htmlspecialchars($socio->getNombre()) ?>»? No se puede deshacer."
                   data-boton="Eliminar" data-color="danger">
                   <?= campoCsrf() ?>
                   <input type="hidden" name="id" value="<?= $socio->getId() ?>">
-                  <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar<span class="visually-hidden"> a <?= htmlspecialchars($socio->getNombre()) ?></span></button>
                 </form>
               </td>
             </tr>

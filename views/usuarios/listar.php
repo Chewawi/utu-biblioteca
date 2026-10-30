@@ -17,14 +17,14 @@
             <td class="fw-medium"><?= htmlspecialchars($usuario->getEmail()) ?></td>
             <td><span class="badge etiqueta"><?= htmlspecialchars($usuario->getRol()) ?></span></td>
             <td class="text-end text-nowrap">
-              <a href="index.php?accion=formEditarUsuario&id=<?= $usuario->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
+              <a href="index.php?accion=formEditarUsuario&id=<?= $usuario->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar<span class="visually-hidden"> <?= htmlspecialchars($usuario->getEmail()) ?></span></a>
               <?php if ($usuario->getId() != $_SESSION['usuario']['id']): ?>
                 <form method="POST" action="index.php?accion=eliminarUsuario" class="d-inline"
                   data-confirmar="¿Eliminar el usuario «<?= htmlspecialchars($usuario->getEmail()) ?>»? No se puede deshacer."
                   data-boton="Eliminar" data-color="danger">
                   <?= campoCsrf() ?>
                   <input type="hidden" name="id" value="<?= $usuario->getId() ?>">
-                  <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar<span class="visually-hidden"> <?= htmlspecialchars($usuario->getEmail()) ?></span></button>
                 </form>
               <?php endif; ?>
             </td>

@@ -101,7 +101,7 @@ require __DIR__ . '/../filtros.php';
                       <input type="hidden" name="id" value="<?= $p->getId() ?>">
                       <?php // También los filtros y la página actuales, para volver a la lista tal como estaba. ?>
                       <?= camposOcultos(array_merge($filtros, ['p' => $resultado['pagina']])) ?>
-                      <button type="submit" class="btn btn-sm btn-outline-secondary">Devolver</button>
+                      <button type="submit" class="btn btn-sm btn-outline-secondary">Devolver<span class="visually-hidden"> «<?= htmlspecialchars($p->getItemTitulo()) ?>»</span></button>
                     </form>
                   <?php endif; ?>
                 </td>

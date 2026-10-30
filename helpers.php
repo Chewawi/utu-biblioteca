@@ -62,7 +62,7 @@ function mostrarFlash() {
         $msg = htmlspecialchars($_SESSION['flash']['mensaje']);
         echo "<div class='alert alert-{$tipo} alert-dismissible fade show'>
                 {$msg}
-                <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
+                <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Cerrar'></button>
               </div>";
         unset($_SESSION['flash']);
     }

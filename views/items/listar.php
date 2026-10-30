@@ -98,13 +98,13 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
                 <?php endif; ?>
               </td>
               <td class="text-end text-nowrap">
-                <a href="index.php?accion=formEditarItem&id=<?= $item->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
+                <a href="index.php?accion=formEditarItem&id=<?= $item->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar<span class="visually-hidden"> «<?= htmlspecialchars($item->getTitulo()) ?>»</span></a>
                 <form method="POST" action="index.php?accion=eliminarItem" class="d-inline"
                   data-confirmar="¿Eliminar «<?= htmlspecialchars($item->getTitulo()) ?>» del catálogo? No se puede deshacer."
                   data-boton="Eliminar" data-color="danger">
                   <?= campoCsrf() ?>
                   <input type="hidden" name="id" value="<?= $item->getId() ?>">
-                  <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar<span class="visually-hidden"> «<?= htmlspecialchars($item->getTitulo()) ?>»</span></button>
                 </form>
               </td>
             </tr>

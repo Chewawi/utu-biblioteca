@@ -112,15 +112,25 @@ function borrarImagen($nombre) {
 }
 
 /**
- * Calcula la paginación de un listado con $total resultados. Si $pagina está
- * fuera de rango la corrige: a 1 si es menor, a la última si es mayor.
- * Devuelve la página corregida, la cantidad de páginas y desde qué fila
- * empezar (el OFFSET del SQL).
+ * Calcula la paginación de un listado con $total resultados y $porPagina por
+ * página (0 = todos, sin paginar). Si $pagina está fuera de rango la corrige:
+ * a 1 si es menor, a la última si es mayor.
+ * Devuelve la página corregida, la cantidad de páginas y el LIMIT para
+ * agregarle al SQL ('' si no se pagina). LIMIT y OFFSET son enteros que
+ * calculamos acá (no texto del usuario), por eso pueden ir directo en el SQL.
  */
 function calcularPaginacion($total, $pagina, $porPagina) {
+    $porPagina = (int) $porPagina;
+    if ($porPagina <= 0) {
+        return ['pagina' => 1, 'paginas' => 1, 'limite' => ''];
+    }
     $paginas = max(1, (int) ceil($total / $porPagina));
     $pagina = min(max(1, (int) $pagina), $paginas);
-    return ['pagina' => $pagina, 'paginas' => $paginas, 'desde' => ($pagina - 1) * $porPagina];
+    return [
+        'pagina'  => $pagina,
+        'paginas' => $paginas,
+        'limite'  => ' LIMIT ' . $porPagina . ' OFFSET ' . ($pagina - 1) * $porPagina,
+    ];
 }
 
 /** true si $fecha es una fecha real con formato AAAA-MM-DD. */

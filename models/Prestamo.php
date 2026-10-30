@@ -172,16 +172,8 @@ class Prestamo {
                    i.titulo AS item_titulo
         ' . $desdeDonde . ' ORDER BY p.estado, p.fecha_prestamo DESC';
 
-        $pagina = 1;
-        $paginas = 1;
-        if ($filtros['por_pagina'] > 0) {
-            $paginacion = calcularPaginacion($total, $filtros['pagina'], $filtros['por_pagina']);
-            $pagina = $paginacion['pagina'];
-            $paginas = $paginacion['paginas'];
-            // LIMIT y OFFSET son enteros que calculamos nosotros (no texto del usuario),
-            // por eso se pueden poner directo en el SQL.
-            $sql .= ' LIMIT ' . (int) $filtros['por_pagina'] . ' OFFSET ' . $paginacion['desde'];
-        }
+        $paginacion = calcularPaginacion($total, $filtros['pagina'], $filtros['por_pagina']);
+        $sql .= $paginacion['limite'];
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($parametros);
@@ -191,7 +183,7 @@ class Prestamo {
         foreach ($filas as $f) {
             $prestamos[] = new Prestamo($f['id'], $f['fecha_prestamo'], $f['fecha_limite'], $f['fecha_devolucion'], $f['estado'], $f['socio_nombre'], $f['item_titulo'], $f['socio_telefono']);
         }
-        return ['filas' => $prestamos, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
+        return ['filas' => $prestamos, 'total' => $total, 'pagina' => $paginacion['pagina'], 'paginas' => $paginacion['paginas']];
     }
 
     /** Los items que pidió alguna vez el socio $socioId, para su filtro por ítem: [id => título]. */

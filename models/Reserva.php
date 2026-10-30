@@ -180,16 +180,8 @@ class Reserva {
 
         $sql = self::SELECT . $where . ' ORDER BY r.estado, r.id DESC';
 
-        $pagina = 1;
-        $paginas = 1;
-        if ($filtros['por_pagina'] > 0) {
-            $paginacion = calcularPaginacion($total, $filtros['pagina'], $filtros['por_pagina']);
-            $pagina = $paginacion['pagina'];
-            $paginas = $paginacion['paginas'];
-            // LIMIT y OFFSET son enteros que calculamos nosotros (no texto del usuario),
-            // por eso se pueden poner directo en el SQL.
-            $sql .= ' LIMIT ' . (int) $filtros['por_pagina'] . ' OFFSET ' . $paginacion['desde'];
-        }
+        $paginacion = calcularPaginacion($total, $filtros['pagina'], $filtros['por_pagina']);
+        $sql .= $paginacion['limite'];
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($parametros);
@@ -198,7 +190,7 @@ class Reserva {
         foreach ($stmt->fetchAll() as $f) {
             $reservas[] = self::desdeFila($f);
         }
-        return ['filas' => $reservas, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
+        return ['filas' => $reservas, 'total' => $total, 'pagina' => $paginacion['pagina'], 'paginas' => $paginacion['paginas']];
     }
 
     public static function buscarPorId($pdo, $id) {

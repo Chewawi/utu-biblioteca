@@ -68,16 +68,8 @@ class Socio {
 
         $sql = 'SELECT s.*, u.rol, u.email, u.pass' . $desdeDonde . ' ORDER BY s.nombre';
 
-        $pagina = 1;
-        $paginas = 1;
-        if ($filtros['por_pagina'] > 0) {
-            $paginacion = calcularPaginacion($total, $filtros['pagina'], $filtros['por_pagina']);
-            $pagina = $paginacion['pagina'];
-            $paginas = $paginacion['paginas'];
-            // LIMIT y OFFSET son enteros que calculamos nosotros (no texto del usuario),
-            // por eso se pueden poner directo en el SQL.
-            $sql .= ' LIMIT ' . (int) $filtros['por_pagina'] . ' OFFSET ' . $paginacion['desde'];
-        }
+        $paginacion = calcularPaginacion($total, $filtros['pagina'], $filtros['por_pagina']);
+        $sql .= $paginacion['limite'];
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($parametros);
@@ -88,7 +80,7 @@ class Socio {
             $usuario = new Usuario($f['usuario_id'], $f['rol'], $f['email'], $f['pass']);
             $socios[] = new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono'], $f['foto']);
         }
-        return ['filas' => $socios, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
+        return ['filas' => $socios, 'total' => $total, 'pagina' => $paginacion['pagina'], 'paginas' => $paginacion['paginas']];
     }
 
     /** Todos los socios como [id => nombre], para los desplegables de los filtros. */

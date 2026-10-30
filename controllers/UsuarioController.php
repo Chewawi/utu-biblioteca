@@ -70,7 +70,7 @@ function crearUsuario() {
     $pass  = trim($_POST['pass'] ?? '');
 
     if (($rol !== 'admin' && $rol !== 'socio') || $email === '' || $pass === '') {
-        $error = 'Completa todos los campos con un rol válido.';
+        $error = 'Completá todos los campos con un rol válido.';
         require __DIR__ . '/../views/usuarios/form.php';
         return;
     }
@@ -127,7 +127,7 @@ function editarUsuario() {
     $otro = Usuario::buscarPorEmail($pdo, $email);
     $error = '';
     if (($rol !== 'admin' && $rol !== 'socio') || $email === '') {
-        $error = 'Completa el email y elegí un rol válido.';
+        $error = 'Completá el email y elegí un rol válido.';
     } elseif (mb_strlen($email) > 100) {
         $error = 'El email admite hasta 100 caracteres.';
     } elseif ($otro && $otro->getId() != $id) {

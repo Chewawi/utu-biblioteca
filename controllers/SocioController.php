@@ -13,7 +13,7 @@ require_once __DIR__ . '/../models/Usuario.php';
  */
 function validarSocio($usuarioId, $nombre, $direccion, $telefono, $usuariosDisponibles) {
     if ($usuarioId === '' || $nombre === '' || $direccion === '' || $telefono === '') {
-        return 'Completa todos los campos y elegí un usuario.';
+        return 'Completá todos los campos y elegí un usuario.';
     }
     if (mb_strlen($nombre) > 100 || mb_strlen($direccion) > 255 || mb_strlen($telefono) > 20) {
         return 'El nombre admite hasta 100 caracteres, la dirección 255 y el teléfono 20.';

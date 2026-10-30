@@ -133,8 +133,9 @@ function editarItem() {
     $stock     = trim($_POST['stock'] ?? '');
 
     $error = validarItem($tipo, $titulo, $autor, $categoria, $stock);
-    if ($error === '' && $stock < $item->getPrestados()) {
-        $error = 'Hay ' . $item->getPrestados() . ' ejemplares prestados: el stock no puede ser menor.';
+    $enUso = $item->getPrestados() + $item->getApartados();
+    if ($error === '' && $stock < $enUso) {
+        $error = 'Hay ' . $enUso . ' ejemplares prestados o apartados por reservas: el stock no puede ser menor.';
     }
     if ($error !== '') {
         mostrarFormItem($item, $error);

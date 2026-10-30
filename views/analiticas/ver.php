@@ -184,10 +184,10 @@ $datosGraficos = [
         <p class="card-body pt-0 text-body-secondary small mb-0">Todavía no hay ítems en el catálogo.</p>
       <?php else: ?>
         <ul class="list-group list-group-flush small">
-          <?php foreach ($menosDisponibles as $fila): ?>
+          <?php foreach ($menosDisponibles as $item): ?>
             <li class="list-group-item d-flex justify-content-between gap-2">
-              <span class="text-truncate" title="<?= htmlspecialchars($fila['titulo']) ?>"><?= htmlspecialchars($fila['titulo']) ?></span>
-              <span class="text-nowrap"><span class="punto <?= $fila['disponibles'] > 0 ? 'bg-success' : 'bg-danger' ?>"></span><?= htmlspecialchars($fila['disponibles']) ?> de <?= htmlspecialchars($fila['stock']) ?></span>
+              <span class="text-truncate" title="<?= htmlspecialchars($item->getTitulo()) ?>"><?= htmlspecialchars($item->getTitulo()) ?></span>
+              <span class="text-nowrap"><span class="punto <?= $item->getDisponibles() > 0 ? 'bg-success' : 'bg-danger' ?>"></span><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?></span>
             </li>
           <?php endforeach; ?>
         </ul>

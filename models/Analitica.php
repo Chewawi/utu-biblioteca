@@ -3,7 +3,8 @@
 //  Modelo Analitica
 //  Consultas para la página de analíticas, una función por
 //  indicador. No tiene tabla propia: lee items, socios y
-//  préstamos. Devuelve arrays simples, listos para mostrar.
+//  préstamos. Casi todas devuelven arrays simples, listos
+//  para mostrar.
 //
 //  $desde y $hasta (AAAA-MM-DD, '' = sin límite) filtran los
 //  préstamos por su fecha de préstamo, como en el listado.
@@ -51,21 +52,16 @@ class Analitica {
     }
 
     /**
-     * Los $limite items con menos ejemplares libres ahora mismo.
-     * Cada fila: titulo, tipo, stock, prestados, disponibles.
+     * Los $limite items con menos ejemplares disponibles ahora mismo. Devuelve
+     * objetos Item: los disponibles los calcula Item, igual que en el catálogo.
      */
     public static function itemsConMenosDisponibilidad($pdo, $limite = 5) {
-        // CAST: stock es UNSIGNED y la resta daría error si quedara negativa.
-        $sql = "
-            SELECT titulo, tipo, stock, prestados, CAST(stock AS SIGNED) - prestados AS disponibles
-            FROM (
-                SELECT i.titulo, i.tipo, i.stock,
-                       (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.estado = 'activo') AS prestados
-                FROM items i
-            ) AS conteo
-            ORDER BY disponibles, prestados DESC, titulo
-            LIMIT " . (int) $limite;
-        return $pdo->query($sql)->fetchAll();
+        $items = Item::listar($pdo)['filas']; // vienen ordenados por título
+        // usort no cambia el orden de los que empatan: quedan por título.
+        usort($items, function ($a, $b) {
+            return $a->getDisponibles() - $b->getDisponibles();
+        });
+        return array_slice($items, 0, $limite);
     }
 
     // --- Actividad (filtrada por el período) ---

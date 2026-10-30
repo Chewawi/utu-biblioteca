@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/Reserva.php';
+
 // ============================================================
 //  Modelo Item
 //  Sabe hablar con la tabla "items". Un item es cualquier cosa
@@ -19,9 +21,11 @@ class Item {
     private $categoria;
     private $stock;
     private $imagen;
-    private $prestados; // ejemplares prestados ahora mismo (no viene de una columna, se cuenta)
+    // Estos dos no vienen de una columna, se cuentan (ver selectConUso()):
+    private $prestados; // ejemplares prestados ahora mismo
+    private $apartados; // ejemplares apartados para una reserva lista que no venció
 
-    public function __construct($id, $tipo, $titulo, $autor, $categoria, $stock, $imagen, $prestados) {
+    public function __construct($id, $tipo, $titulo, $autor, $categoria, $stock, $imagen, $prestados, $apartados) {
         $this->id = $id;
         $this->tipo = $tipo;
         $this->titulo = $titulo;
@@ -30,6 +34,7 @@ class Item {
         $this->stock = $stock;
         $this->imagen = $imagen;
         $this->prestados = $prestados;
+        $this->apartados = $apartados;
     }
 
     // --- getters ---
@@ -41,7 +46,9 @@ class Item {
     public function getStock() { return $this->stock; }
     public function getImagen() { return $this->imagen; }
     public function getPrestados() { return $this->prestados; }
-    public function getDisponibles() { return $this->stock - $this->prestados; }
+    public function getApartados() { return $this->apartados; }
+    // La regla de "disponible" de todo el sistema: los que no están prestados ni apartados.
+    public function getDisponibles() { return $this->stock - $this->prestados - $this->apartados; }
 
     /** Cómo se llama el campo "autor" según el tipo: un libro tiene autor, el resto un creador. '' = todos los tipos. */
     public static function etiquetaAutor($tipo) {
@@ -53,10 +60,26 @@ class Item {
 
     // --- acceso a datos ---
 
-    /*
-     * Las consultas de lectura traen además la columna "prestados": una
-     * subconsulta que cuenta los préstamos activos de cada item.
+    /**
+     * El SELECT de las consultas de lectura. Además de las columnas de items
+     * cuenta, para cada uno, los "prestados" (sus préstamos activos) y los
+     * "apartados" (sus reservas listas que no vencieron). Con eso
+     * getDisponibles() calcula los disponibles. Lleva un "?" con la fecha de
+     * hoy, que va antes que los del WHERE.
      */
+    private static function selectConUso() {
+        return "
+            SELECT i.*,
+                   (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.estado = 'activo') AS prestados,
+                   (SELECT COUNT(*) FROM reservas r WHERE r.item_id = i.id AND " . Reserva::LISTA_VIGENTE . ") AS apartados
+            FROM items i
+        ";
+    }
+
+    /** Arma un Item con una fila de selectConUso(). */
+    private static function desdeFila($f) {
+        return new Item($f['id'], $f['tipo'], $f['titulo'], $f['autor'], $f['categoria'], $f['stock'], $f['imagen'], $f['prestados'], $f['apartados']);
+    }
 
     /**
      * Items del catálogo, filtrados y paginados.
@@ -88,20 +111,14 @@ class Item {
             $parametros[] = $filtros['categoria'];
         }
 
-        // El FROM y el WHERE son los mismos para contar y para traer las filas.
-        $desdeDonde = ' FROM items i';
-        if (!empty($condiciones)) {
-            $desdeDonde .= ' WHERE ' . implode(' AND ', $condiciones);
-        }
+        // El WHERE es el mismo para contar y para traer las filas.
+        $where = empty($condiciones) ? '' : ' WHERE ' . implode(' AND ', $condiciones);
 
-        $stmt = $pdo->prepare('SELECT COUNT(*)' . $desdeDonde);
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM items i' . $where);
         $stmt->execute($parametros);
         $total = (int) $stmt->fetchColumn();
 
-        $sql = "
-            SELECT i.*,
-                   (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.estado = 'activo') AS prestados
-        " . $desdeDonde . ' ORDER BY i.titulo';
+        $sql = self::selectConUso() . $where . ' ORDER BY i.titulo';
 
         $pagina = 1;
         $paginas = 1;
@@ -115,12 +132,11 @@ class Item {
         }
 
         $stmt = $pdo->prepare($sql);
-        $stmt->execute($parametros);
-        $filas = $stmt->fetchAll();
+        $stmt->execute(array_merge([date('Y-m-d')], $parametros));
 
         $items = [];
-        foreach ($filas as $f) {
-            $items[] = new Item($f['id'], $f['tipo'], $f['titulo'], $f['autor'], $f['categoria'], $f['stock'], $f['imagen'], $f['prestados']);
+        foreach ($stmt->fetchAll() as $f) {
+            $items[] = self::desdeFila($f);
         }
         return ['filas' => $items, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
     }
@@ -183,15 +199,10 @@ class Item {
     }
 
     public static function buscarPorId($pdo, $id) {
-        $stmt = $pdo->prepare("
-            SELECT i.*,
-                   (SELECT COUNT(*) FROM prestamos p WHERE p.item_id = i.id AND p.estado = 'activo') AS prestados
-            FROM items i
-            WHERE i.id = ?
-        ");
-        $stmt->execute([$id]);
+        $stmt = $pdo->prepare(self::selectConUso() . ' WHERE i.id = ?');
+        $stmt->execute([date('Y-m-d'), $id]);
         $f = $stmt->fetch();
-        return $f ? new Item($f['id'], $f['tipo'], $f['titulo'], $f['autor'], $f['categoria'], $f['stock'], $f['imagen'], $f['prestados']) : null;
+        return $f ? self::desdeFila($f) : null;
     }
 
     public static function crear($pdo, $tipo, $titulo, $autor, $categoria, $stock, $imagen) {

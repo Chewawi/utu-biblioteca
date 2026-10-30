@@ -92,6 +92,9 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
               <td class="text-body-secondary"><?= htmlspecialchars($item->getCategoria() ?? '—') ?></td>
               <td class="text-nowrap">
                 <span class="punto <?= $item->getDisponibles() > 0 ? 'bg-success' : 'bg-danger' ?>"></span><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?>
+                <?php if ($item->getApartados() > 0): ?>
+                  <span class="text-body-secondary small">· <?= htmlspecialchars($item->getApartados()) ?> <?= $item->getApartados() == 1 ? 'apartado' : 'apartados' ?></span>
+                <?php endif; ?>
               </td>
               <td class="text-end text-nowrap">
                 <a href="index.php?accion=formEditarItem&id=<?= $item->getId() ?>" class="btn btn-sm btn-outline-secondary">Editar</a>

@@ -125,23 +125,28 @@ function informeVencidos($pdo) {
     ];
 }
 
-/** Ejemplares de cada ítem: stock, prestados y disponibles. Se puede agrupar por tipo y/o categoría. */
+/**
+ * Ejemplares de cada ítem: stock, prestados, apartados por reservas y
+ * disponibles. Se puede agrupar por tipo y/o categoría.
+ */
 function informeInventario($pdo, $agrupar) {
     $items = Item::listar($pdo)['filas'];
     $porTipo = in_array($agrupar, ['tipo', 'tipo_categoria']);
     $porCategoria = in_array($agrupar, ['categoria', 'tipo_categoria']);
 
     $filas = [];
-    $totales = ['titulos' => 0, 'stock' => 0, 'prestados' => 0, 'disponibles' => 0];
+    $totales = ['titulos' => 0, 'stock' => 0, 'prestados' => 0, 'apartados' => 0, 'disponibles' => 0];
     foreach ($items as $item) {
         $stock = (int) $item->getStock();
         $prestados = (int) $item->getPrestados();
+        $apartados = (int) $item->getApartados();
+        $disponibles = (int) $item->getDisponibles();
         $categoria = $item->getCategoria() ?: 'Sin categoría';
 
         if ($agrupar === '') {
-            $filas[] = [$item->getTitulo(), ucfirst($item->getTipo()), $categoria, $stock, $prestados, $stock - $prestados];
+            $filas[] = [$item->getTitulo(), ucfirst($item->getTipo()), $categoria, $stock, $prestados, $apartados, $disponibles];
         } else {
-            // Una fila por grupo: las columnas del grupo y después títulos, stock, prestados y disponibles.
+            // Una fila por grupo: las columnas del grupo y después títulos, stock, prestados, apartados y disponibles.
             $grupo = [];
             if ($porTipo) {
                 $grupo[] = ucfirst($item->getTipo());
@@ -151,24 +156,26 @@ function informeInventario($pdo, $agrupar) {
             }
             $clave = implode(' / ', $grupo);
             if (!isset($filas[$clave])) {
-                $filas[$clave] = array_merge($grupo, [0, 0, 0, 0]);
+                $filas[$clave] = array_merge($grupo, [0, 0, 0, 0, 0]);
             }
             $n = count($grupo); // dónde empiezan los números
             $filas[$clave][$n] += 1;
             $filas[$clave][$n + 1] += $stock;
             $filas[$clave][$n + 2] += $prestados;
-            $filas[$clave][$n + 3] += $stock - $prestados;
+            $filas[$clave][$n + 3] += $apartados;
+            $filas[$clave][$n + 4] += $disponibles;
         }
 
         $totales['titulos']++;
         $totales['stock'] += $stock;
         $totales['prestados'] += $prestados;
-        $totales['disponibles'] += $stock - $prestados;
+        $totales['apartados'] += $apartados;
+        $totales['disponibles'] += $disponibles;
     }
 
     if ($agrupar === '') {
-        $columnas = ['Título', 'Tipo', 'Categoría', 'Stock', 'Prestados', 'Disponibles'];
-        $filaTotales = ['Total: ' . $totales['titulos'] . ' ítems', '', '', $totales['stock'], $totales['prestados'], $totales['disponibles']];
+        $columnas = ['Título', 'Tipo', 'Categoría', 'Stock', 'Prestados', 'Apartados', 'Disponibles'];
+        $filaTotales = ['Total: ' . $totales['titulos'] . ' ítems', '', '', $totales['stock'], $totales['prestados'], $totales['apartados'], $totales['disponibles']];
     } else {
         ksort($filas); // los grupos en orden alfabético
         $filas = array_values($filas);
@@ -181,7 +188,7 @@ function informeInventario($pdo, $agrupar) {
         }
         // La palabra "Total" va en la primera columna; si hay dos columnas de grupo, la segunda queda vacía.
         $filaTotales = array_merge(['Total'], array_fill(0, count($columnas) - 1, ''), array_values($totales));
-        $columnas = array_merge($columnas, ['Ítems', 'Stock', 'Prestados', 'Disponibles']);
+        $columnas = array_merge($columnas, ['Ítems', 'Stock', 'Prestados', 'Apartados', 'Disponibles']);
     }
 
     return [

@@ -34,9 +34,18 @@ class Socio {
 
     // --- acceso a datos ---
 
+    // Cada socio con los datos de su cuenta: el JOIN los trae en la misma consulta.
+    const DESDE = ' FROM socios s INNER JOIN usuarios u ON s.usuario_id = u.id';
+    const SELECT = 'SELECT s.*, u.rol, u.email, u.pass' . self::DESDE;
+
+    /** Arma un Socio, con su Usuario, con una fila de SELECT. */
+    private static function desdeFila($f) {
+        $usuario = new Usuario($f['usuario_id'], $f['rol'], $f['email'], $f['pass']);
+        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono'], $f['foto']);
+    }
+
     /**
-     * Todos los socios, cada uno con su Usuario. Se resuelve en una sola
-     * consulta: el JOIN trae los datos de la cuenta junto con los del socio.
+     * Todos los socios, cada uno con su Usuario.
      * $filtros es un array con estas claves (todas opcionales):
      *   q          -> texto que se busca en el nombre, el teléfono o el email,
      *   pagina     -> número de página (si está fuera de rango se corrige),
@@ -56,29 +65,24 @@ class Socio {
             $parametros[] = '%' . $filtros['q'] . '%';
         }
 
-        // El FROM y el WHERE son los mismos para contar y para traer las filas.
-        $desdeDonde = ' FROM socios s INNER JOIN usuarios u ON s.usuario_id = u.id';
-        if (!empty($condiciones)) {
-            $desdeDonde .= ' WHERE ' . implode(' AND ', $condiciones);
-        }
+        // El WHERE es el mismo para contar y para traer las filas.
+        $where = empty($condiciones) ? '' : ' WHERE ' . implode(' AND ', $condiciones);
 
-        $stmt = $pdo->prepare('SELECT COUNT(*)' . $desdeDonde);
+        $stmt = $pdo->prepare('SELECT COUNT(*)' . self::DESDE . $where);
         $stmt->execute($parametros);
         $total = (int) $stmt->fetchColumn();
 
-        $sql = 'SELECT s.*, u.rol, u.email, u.pass' . $desdeDonde . ' ORDER BY s.nombre';
+        $sql = self::SELECT . $where . ' ORDER BY s.nombre';
 
         $paginacion = calcularPaginacion($total, $filtros['pagina'], $filtros['por_pagina']);
         $sql .= $paginacion['limite'];
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($parametros);
-        $filas = $stmt->fetchAll();
 
         $socios = [];
-        foreach ($filas as $f) {
-            $usuario = new Usuario($f['usuario_id'], $f['rol'], $f['email'], $f['pass']);
-            $socios[] = new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono'], $f['foto']);
+        foreach ($stmt->fetchAll() as $f) {
+            $socios[] = self::desdeFila($f);
         }
         return ['filas' => $socios, 'total' => $total, 'pagina' => $paginacion['pagina'], 'paginas' => $paginacion['paginas']];
     }
@@ -89,26 +93,18 @@ class Socio {
     }
 
     public static function buscarPorId($pdo, $id) {
-        $stmt = $pdo->prepare("SELECT * FROM socios WHERE id = ?");
+        $stmt = $pdo->prepare(self::SELECT . ' WHERE s.id = ?');
         $stmt->execute([$id]);
         $f = $stmt->fetch();
-        if (!$f) {
-            return null;
-        }
-        $usuario = Usuario::buscarPorId($pdo, $f['usuario_id']);
-        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono'], $f['foto']);
+        return $f ? self::desdeFila($f) : null;
     }
 
-    /** Busca el socio asociado a una cuenta de usuario (para "Mis préstamos"). */
+    /** Busca el socio asociado a una cuenta de usuario (para "Mis préstamos" y "Mis reservas"). */
     public static function buscarPorUsuarioId($pdo, $usuarioId) {
-        $stmt = $pdo->prepare("SELECT * FROM socios WHERE usuario_id = ?");
+        $stmt = $pdo->prepare(self::SELECT . ' WHERE s.usuario_id = ?');
         $stmt->execute([$usuarioId]);
         $f = $stmt->fetch();
-        if (!$f) {
-            return null;
-        }
-        $usuario = Usuario::buscarPorId($pdo, $f['usuario_id']);
-        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono'], $f['foto']);
+        return $f ? self::desdeFila($f) : null;
     }
 
     public static function crear($pdo, $usuarioId, $nombre, $direccion, $telefono, $foto) {

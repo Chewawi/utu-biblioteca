@@ -124,8 +124,14 @@ switch ($accion) {
         break;
 
     // --- Reservas ---
+    case 'listarReservas':
+        listarReservas();
+        break;
     case 'crearReserva':
         crearReserva();
+        break;
+    case 'cancelarReserva':
+        cancelarReserva();
         break;
 
     // --- Analíticas ---

@@ -8,8 +8,65 @@ require_once __DIR__ . '/../models/Prestamo.php';
 //  Controller de Reservas
 //  El socio reserva desde el catálogo. Si hay un ejemplar
 //  disponible se lo apartamos; si no, queda en la lista de
-//  espera del item hasta que se libere uno.
+//  espera del item hasta que se libere uno. En "Mis reservas"
+//  ve las suyas y las puede cancelar. El admin ve todas.
 // ============================================================
+
+/**
+ * Lee los filtros del listado desde $datos ($_GET o $_POST) y descarta los
+ * valores inválidos. Devuelve siempre las mismas claves; '' = sin filtrar.
+ */
+function leerFiltrosReservas($datos) {
+    $filtros = [
+        'socio_id' => trim($datos['socio_id'] ?? ''),
+        'item_id'  => trim($datos['item_id'] ?? ''),
+        'estado'   => trim($datos['estado'] ?? ''),
+        'q'        => trim($datos['q'] ?? ''),
+    ];
+    if (!ctype_digit($filtros['socio_id'])) {
+        $filtros['socio_id'] = '';
+    }
+    if (!ctype_digit($filtros['item_id'])) {
+        $filtros['item_id'] = '';
+    }
+    if (!in_array($filtros['estado'], Reserva::FILTROS_ESTADO)) {
+        $filtros['estado'] = '';
+    }
+    return $filtros;
+}
+
+function listarReservas() {
+    global $pdo;
+    requerirLogin();
+
+    $filtros = leerFiltrosReservas($_GET);
+    $paginacion = ['pagina' => $_GET['p'] ?? 1, 'por_pagina' => 10];
+
+    if (esAdmin()) {
+        // Opciones de los desplegables de "Más filtros": [id => texto].
+        $opcionesSocios = Socio::nombres($pdo);
+        $opcionesItems = Item::titulos($pdo);
+        $resultado = Reserva::listar($pdo, array_merge($filtros, $paginacion));
+        $conteo = Reserva::contarPorEstado($pdo, $filtros);
+        $titulo = 'Reservas';
+    } else {
+        // Un socio solo ve las suyas: el filtro por socio no lo elige él, lo fijamos acá.
+        $filtros['socio_id'] = '';
+        $filtros['item_id'] = '';
+        $resultado = ['filas' => [], 'total' => 0, 'pagina' => 1, 'paginas' => 1];
+        $conteo = array_fill_keys(['', 'lista', 'pendiente', 'vencida', 'retirada', 'cancelada'], 0);
+        $socio = Socio::buscarPorUsuarioId($pdo, $_SESSION['usuario']['id']);
+        if ($socio) {
+            $filtrosDelSocio = array_merge($filtros, ['socio_id' => $socio->getId()]);
+            $resultado = Reserva::listar($pdo, array_merge($filtrosDelSocio, $paginacion));
+            $conteo = Reserva::contarPorEstado($pdo, $filtrosDelSocio);
+        }
+        $titulo = 'Mis reservas';
+    }
+    $reservas = $resultado['filas'];
+
+    require __DIR__ . '/../views/reservas/listar.php';
+}
 
 /**
  * Le pasa los ejemplares disponibles del item a su cola de reservas (ver
@@ -28,6 +85,29 @@ function repartirEjemplares($pdo, $itemId) {
         }
     }
     return $reparto;
+}
+
+/**
+ * Texto para el admin después de repartirEjemplares(): para quién tiene que
+ * apartar el ejemplar y si ya se le avisó. '' si no le tocó a nadie.
+ */
+function mensajeReparto($reparto) {
+    $cantidad = count($reparto['socios']);
+    if ($cantidad === 0) {
+        return '';
+    }
+    if ($cantidad === 1) {
+        $texto = ' Apartá el ejemplar para ' . $reparto['socios'][0] . ', que lo tenía reservado.';
+    } else {
+        $texto = ' Apartá un ejemplar para cada uno de estos socios, que lo tenían reservado: ' . implode(', ', $reparto['socios']) . '.';
+    }
+    if (!correoConfigurado()) {
+        return $texto . ($cantidad === 1 ? ' Avisale que ya puede retirarlo.' : ' Avisales que ya pueden retirarlo.');
+    }
+    if ($reparto['sin_aviso'] > 0) {
+        return $texto . ' No se pudo enviar el correo: ' . ($cantidad === 1 ? 'avisale vos.' : 'avisales vos.');
+    }
+    return $texto . ($cantidad === 1 ? ' Ya le avisamos por correo.' : ' Ya les avisamos por correo.');
 }
 
 /** Botón "Reservar" del catálogo. */
@@ -81,5 +161,40 @@ function crearReserva() {
             . '. Cuando te toque, la reserva pasa a «Lista»' . (correoConfigurado() ? ' y te avisamos por correo.' : '.'));
     }
     header('Location: ' . $volverA);
+    exit;
+}
+
+/** El socio cancela una reserva suya; el admin, cualquiera. */
+function cancelarReserva() {
+    global $pdo;
+    requerirLogin();
+
+    $reserva = Reserva::buscarPorId($pdo, $_POST['id'] ?? '');
+    $esSuya = false;
+    if ($reserva && !esAdmin()) {
+        $socio = Socio::buscarPorUsuarioId($pdo, $_SESSION['usuario']['id']);
+        $esSuya = $socio && $socio->getId() == $reserva->getSocioId();
+    }
+
+    if (!$reserva || (!esAdmin() && !$esSuya)) {
+        flash('danger', 'Reserva no encontrada.');
+    } elseif (!Reserva::cancelar($pdo, $reserva->getId())) {
+        flash('warning', 'Esa reserva ya estaba retirada o cancelada.');
+    } else {
+        // Si tenía un ejemplar apartado, quedó libre: pasa al siguiente de la cola.
+        $reparto = repartirEjemplares($pdo, $reserva->getItemId());
+        if (esAdmin()) {
+            flash('success', 'Reserva cancelada.' . mensajeReparto($reparto));
+        } else {
+            flash('success', 'Cancelaste tu reserva de «' . $reserva->getItemTitulo() . '».');
+        }
+    }
+
+    // Volvemos a la lista con los mismos filtros y la misma página (vienen en campos ocultos).
+    $volverA = array_merge(['accion' => 'listarReservas'], leerFiltrosReservas($_POST));
+    if (ctype_digit($_POST['p'] ?? '')) {
+        $volverA['p'] = $_POST['p'];
+    }
+    header('Location: ' . urlFiltros($volverA));
     exit;
 }

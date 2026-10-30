@@ -62,6 +62,7 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEd
           </li>
           <?php if (isset($_SESSION['usuario'])): ?>
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarPrestamos' ? 'active' : '' ?>" href="index.php?accion=listarPrestamos"><?= esAdmin() ? 'Préstamos' : 'Mis préstamos' ?></a></li>
+            <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarReservas' ? 'active' : '' ?>" href="index.php?accion=listarReservas"><?= esAdmin() ? 'Reservas' : 'Mis reservas' ?></a></li>
           <?php endif; ?>
           <?php if (esAdmin()): ?>
             <li class="nav-item"><a class="nav-link <?= $accionActual === 'listarSocios' ? 'active' : '' ?>" href="index.php?accion=listarSocios">Socios</a></li>

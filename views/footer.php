@@ -13,7 +13,7 @@
       </div>
       <div class="modal-body text-body-secondary" id="modal-confirmar-texto"></div>
       <div class="modal-footer pt-0">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="modal-confirmar-volver">Cancelar</button>
         <button type="button" class="btn" id="modal-confirmar-boton"></button>
       </div>
     </div>
@@ -39,8 +39,9 @@
 
   // Confirmación antes de una acción que no se puede deshacer.
   // El formulario lleva data-confirmar (la pregunta), data-boton (el texto del
-  // botón que confirma) y data-color (danger o primary). Al mandarlo, en vez de
-  // enviarse muestra el modal; recién si confirman se envía.
+  // botón que confirma) y data-color (danger o primary). Opcional: data-volver,
+  // el texto del botón que no hace nada (si no, "Cancelar"). Al mandarlo, en vez
+  // de enviarse muestra el modal; recién si confirman se envía.
   var modalConfirmar = new bootstrap.Modal('#modal-confirmar');
   var botonConfirmar = document.getElementById('modal-confirmar-boton');
   var formPendiente = null;
@@ -50,6 +51,7 @@
       evento.preventDefault();
       formPendiente = form;
       document.getElementById('modal-confirmar-texto').textContent = form.dataset.confirmar;
+      document.getElementById('modal-confirmar-volver').textContent = form.dataset.volver || 'Cancelar';
       botonConfirmar.textContent = form.dataset.boton;
       botonConfirmar.className = 'btn btn-' + form.dataset.color;
       modalConfirmar.show();

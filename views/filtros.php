@@ -7,7 +7,8 @@
 //                'conteo' => [valor => cantidad]],
 //   buscar   -> ['nombre' => parámetro de la URL, 'placeholder' => texto],
 //   campos   -> los de "Más filtros", cada uno ['nombre', 'etiqueta'] y además
-//               'opciones' => [valor => texto] (un desplegable) o 'tipo' => 'date',
+//               'opciones' => [valor => texto] (un desplegable) o 'tipo' => 'date';
+//               si no hay ninguno, el botón "Más filtros" no aparece,
 //   valores  -> el valor actual (ya validado) de cada parámetro; '' = sin filtrar.
 // Las pestañas y las etiquetas son links; el buscador y el panel son un solo formulario.
 $valores   = $barra['valores'];
@@ -55,18 +56,21 @@ $activosEnPanel = count($activos) - ($valores[$buscar] !== '' ? 1 : 0);
   <?php endif; ?>
 
   <div class="d-flex gap-2">
-    <?php // Se busca con Enter: lo envía el botón "Aplicar" del panel, aunque esté plegado. ?>
+    <?php // Se busca con Enter: lo envía el botón "Aplicar" del panel, aunque esté plegado (o el navegador, si no hay panel). ?>
     <input type="search" name="<?= htmlspecialchars($buscar) ?>" class="form-control" aria-label="Buscar"
       placeholder="<?= htmlspecialchars($barra['buscar']['placeholder']) ?>" value="<?= htmlspecialchars($valores[$buscar]) ?>">
-    <button type="button" class="btn btn-outline-secondary text-nowrap boton-mas-filtros"
-      data-bs-toggle="collapse" data-bs-target="#mas-filtros" aria-expanded="false" aria-controls="mas-filtros">
-      Más filtros
-      <?php if ($activosEnPanel > 0): ?>
-        <span class="contador" title="Filtros activos"><?= htmlspecialchars($activosEnPanel) ?><span class="visually-hidden"> activos</span></span>
-      <?php endif; ?>
-    </button>
+    <?php if (!empty($barra['campos'])): ?>
+      <button type="button" class="btn btn-outline-secondary text-nowrap boton-mas-filtros"
+        data-bs-toggle="collapse" data-bs-target="#mas-filtros" aria-expanded="false" aria-controls="mas-filtros">
+        Más filtros
+        <?php if ($activosEnPanel > 0): ?>
+          <span class="contador" title="Filtros activos"><?= htmlspecialchars($activosEnPanel) ?><span class="visually-hidden"> activos</span></span>
+        <?php endif; ?>
+      </button>
+    <?php endif; ?>
   </div>
 
+  <?php if (!empty($barra['campos'])): ?>
   <div class="collapse" id="mas-filtros">
     <div class="card card-body mt-2">
       <div class="row g-3 align-items-end">
@@ -96,6 +100,7 @@ $activosEnPanel = count($activos) - ($valores[$buscar] !== '' ? 1 : 0);
       </div>
     </div>
   </div>
+  <?php endif; ?>
 </form>
 
 <?php if (!empty($activos)): ?>

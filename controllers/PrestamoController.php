@@ -52,12 +52,8 @@ function listarPrestamos() {
     $opcionesSocios = [];
 
     if (esAdmin()) {
-        foreach (Item::listar($pdo)['filas'] as $item) {
-            $opcionesItems[$item->getId()] = $item->getTitulo();
-        }
-        foreach (Socio::listar($pdo)['filas'] as $socio) {
-            $opcionesSocios[$socio->getId()] = $socio->getNombre();
-        }
+        $opcionesItems = Item::titulos($pdo);
+        $opcionesSocios = Socio::nombres($pdo);
         $resultado = Prestamo::listar($pdo, array_merge($filtros, $paginacion));
         $conteo = Prestamo::contarPorEstado($pdo, $filtros);
         $titulo = 'Préstamos';

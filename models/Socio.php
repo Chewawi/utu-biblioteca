@@ -91,6 +91,11 @@ class Socio {
         return ['filas' => $socios, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
     }
 
+    /** Todos los socios como [id => nombre], para los desplegables de los filtros. */
+    public static function nombres($pdo) {
+        return $pdo->query('SELECT id, nombre FROM socios ORDER BY nombre')->fetchAll(PDO::FETCH_KEY_PAIR);
+    }
+
     public static function buscarPorId($pdo, $id) {
         $stmt = $pdo->prepare("SELECT * FROM socios WHERE id = ?");
         $stmt->execute([$id]);

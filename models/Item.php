@@ -141,6 +141,11 @@ class Item {
         return ['filas' => $items, 'total' => $total, 'pagina' => $pagina, 'paginas' => $paginas];
     }
 
+    /** Todos los items como [id => título], para los desplegables de los filtros. */
+    public static function titulos($pdo) {
+        return $pdo->query('SELECT id, titulo FROM items ORDER BY titulo')->fetchAll(PDO::FETCH_KEY_PAIR);
+    }
+
     /**
      * Cuántos items de cada tipo coinciden con la búsqueda $q y la categoría
      * $categoria (para los contadores de las pestañas). Devuelve, por ejemplo,

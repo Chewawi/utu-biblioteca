@@ -27,7 +27,18 @@
 <script>
   // <select class="select2-buscable">: desplegable de Select2 con buscador, para
   // listas largas como socios o ítems. Los de pocas opciones son <select> comunes.
-  $('.select2-buscable').select2({ width: '100%', language: 'es' });
+  // Select2 arma su propia lista: templateResult le pasa a cada opción la clase
+  // que tiene en el HTML (por ejemplo, el rojo de los ítems sin disponibles).
+  $('.select2-buscable').select2({
+    width: '100%',
+    language: 'es',
+    templateResult: function (opcion) {
+      if (!opcion.element || !opcion.element.className) {
+        return opcion.text;
+      }
+      return $('<span>').addClass(opcion.element.className).text(opcion.text);
+    }
+  });
 
   // Botón de la barra: pasa de claro a oscuro (y al revés) y recuerda la elección.
   document.getElementById('cambiar-tema').addEventListener('click', function () {

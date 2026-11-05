@@ -659,6 +659,11 @@ a {
   opacity: .6;
 }
 
+/* Salvo las que van en rojo (ítems sin disponibles): apagadas no se notaría el color. */
+.select2-container--default .select2-results__option--disabled:has(.text-danger-emphasis) {
+  opacity: 1;
+}
+
 /* --- Impresión (informes) ---
    Siempre en claro, sin sombras ni fondo, aunque se esté usando el tema oscuro.
    La barra, el pie y los botones llevan d-print-none y no salen. */

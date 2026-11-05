@@ -38,10 +38,11 @@ require __DIR__ . '/../header.php';
         <select id="item_id" name="item_id" class="form-select select2-buscable" required>
           <option value="">-- Elegir ítem --</option>
           <?php foreach ($items as $item): ?>
-            <?php // Los ítems sin ejemplares libres se ven, pero no se pueden elegir; salvo el que este socio tiene apartado. ?>
+            <?php // Los ítems sin ejemplares libres se ven en rojo, pero no se pueden elegir; salvo el que este socio tiene apartado. ?>
             <?php $esElReservado = $reserva && $reserva->getItemId() == $item->getId(); ?>
+            <?php $sinDisponibles = $item->getDisponibles() < 1 && !$esElReservado; ?>
             <option value="<?= $item->getId() ?>"
-              <?= $item->getDisponibles() < 1 && !$esElReservado ? 'disabled' : '' ?>
+              <?= $sinDisponibles ? 'disabled class="text-danger-emphasis"' : '' ?>
               <?= $itemId == $item->getId() ? 'selected' : '' ?>>
               <?= htmlspecialchars($item->getTitulo()) ?>
               (<?= $esElReservado ? 'apartado por su reserva' : htmlspecialchars($item->getDisponibles()) . ' de ' . htmlspecialchars($item->getStock()) . ' disponibles' ?>)

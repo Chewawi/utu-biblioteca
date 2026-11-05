@@ -190,7 +190,8 @@ $datosGraficos = [
           <?php foreach ($menosDisponibles as $item): ?>
             <li class="list-group-item d-flex justify-content-between gap-2">
               <span class="text-truncate" title="<?= htmlspecialchars($item->getTitulo()) ?>"><?= htmlspecialchars($item->getTitulo()) ?></span>
-              <span class="text-nowrap"><span class="punto <?= $item->getDisponibles() > 0 ? 'bg-success' : 'bg-danger' ?>"></span><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?></span>
+              <?php // Sin disponibles, el número va en rojo. ?>
+              <span class="text-nowrap <?= $item->getDisponibles() > 0 ? '' : 'text-danger-emphasis fw-medium' ?>"><span class="punto <?= $item->getDisponibles() > 0 ? 'bg-success' : 'bg-danger' ?>"></span><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?></span>
             </li>
           <?php endforeach; ?>
         </ul>

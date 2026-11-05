@@ -95,8 +95,13 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
               <td class="text-body-secondary"><?= htmlspecialchars($item->getAutor()) ?></td>
               <?php // ?: y no ??: un ítem sin categoría puede tener NULL o '' (texto vacío). ?>
               <td class="text-body-secondary"><?= htmlspecialchars($item->getCategoria() ?: '—') ?></td>
+              <?php // Sin disponibles, el número va en rojo. ?>
               <td class="text-nowrap">
-                <span class="punto <?= $item->getDisponibles() > 0 ? 'bg-success' : 'bg-danger' ?>"></span><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?>
+                <?php if ($item->getDisponibles() > 0): ?>
+                  <span class="punto bg-success"></span><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?>
+                <?php else: ?>
+                  <span class="text-danger-emphasis fw-medium"><span class="punto bg-danger"></span>0 de <?= htmlspecialchars($item->getStock()) ?></span>
+                <?php endif; ?>
                 <?php if ($item->getApartados() > 0): ?>
                   <span class="text-body-secondary small">· <?= htmlspecialchars($item->getApartados()) ?> <?= $item->getApartados() == 1 ? 'apartado' : 'apartados' ?></span>
                 <?php endif; ?>
@@ -144,7 +149,7 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
             <?php if ($item->getDisponibles() > 0): ?>
               <span class="punto bg-success"></span><?= htmlspecialchars($item->getDisponibles()) ?> de <?= htmlspecialchars($item->getStock()) ?> disponibles
             <?php else: ?>
-              <span class="punto bg-danger"></span>Sin ejemplares disponibles
+              <span class="text-danger-emphasis fw-medium"><span class="punto bg-danger"></span>Sin ejemplares disponibles</span>
             <?php endif; ?>
 
             <?php if ($socio): ?>

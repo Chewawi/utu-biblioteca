@@ -73,6 +73,9 @@ $datosGraficos = [
       <p class="nombre">Ítems</p>
       <p class="valor"><?= htmlspecialchars($totalTitulos) ?></p>
       <p class="detalle"><?= htmlspecialchars(implode(' · ', $resumenTipos)) ?></p>
+      <?php if ($sinIsbn > 0): ?>
+        <p class="detalle"><?= htmlspecialchars($sinIsbn) ?> <?= $sinIsbn === 1 ? 'libro' : 'libros' ?> sin ISBN</p>
+      <?php endif; ?>
     </div></div>
   </div>
 </div>

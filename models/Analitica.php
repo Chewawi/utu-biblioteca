@@ -50,6 +50,11 @@ class Analitica {
         return $resultado;
     }
 
+    /** Cuántos libros todavía no tienen ISBN cargado. */
+    public static function librosSinIsbn($pdo) {
+        return (int) $pdo->query("SELECT COUNT(*) FROM items WHERE tipo = 'libro' AND isbn IS NULL")->fetchColumn();
+    }
+
     public static function totalSocios($pdo) {
         return (int) $pdo->query('SELECT COUNT(*) FROM socios')->fetchColumn();
     }

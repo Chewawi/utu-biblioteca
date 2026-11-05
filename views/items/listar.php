@@ -91,7 +91,7 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
             <tr>
               <td><img src="uploads/<?= htmlspecialchars($item->getImagen()) ?>" alt="" class="portada-mini"></td>
               <td><span class="badge etiqueta"><?= htmlspecialchars(ucfirst($item->getTipo())) ?></span></td>
-              <td class="fw-medium"><?= htmlspecialchars($item->getTitulo()) ?></td>
+              <td class="fw-medium"><a href="index.php?accion=verItem&amp;id=<?= $item->getId() ?>" class="link-body-emphasis enlace-titulo"><?= htmlspecialchars($item->getTitulo()) ?></a></td>
               <td class="text-body-secondary"><?= htmlspecialchars($item->getAutor()) ?></td>
               <?php // ?: y no ??: un ítem sin categoría puede tener NULL o '' (texto vacío). ?>
               <td class="text-body-secondary"><?= htmlspecialchars($item->getCategoria() ?: '—') ?></td>
@@ -124,7 +124,10 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
     <?php foreach ($items as $item): ?>
       <div class="col">
         <div class="card h-100 tarjeta-item">
-          <img src="uploads/<?= htmlspecialchars($item->getImagen()) ?>" alt="" class="card-img-top portada-tarjeta">
+          <?php // La portada y el título llevan a la página del ítem. La portada no se anuncia en lectores de pantalla: repetiría el enlace del título. ?>
+          <a href="index.php?accion=verItem&amp;id=<?= $item->getId() ?>" tabindex="-1" aria-hidden="true">
+            <img src="uploads/<?= htmlspecialchars($item->getImagen()) ?>" alt="" class="card-img-top portada-tarjeta">
+          </a>
           <div class="card-body">
             <div class="d-flex flex-wrap gap-1 mb-2">
               <span class="badge etiqueta"><?= htmlspecialchars(ucfirst($item->getTipo())) ?></span>
@@ -132,7 +135,9 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
                 <span class="badge etiqueta"><?= htmlspecialchars($item->getCategoria()) ?></span>
               <?php endif; ?>
             </div>
-            <h2 class="h6 card-title mb-1"><?= htmlspecialchars($item->getTitulo()) ?></h2>
+            <h2 class="h6 card-title mb-1">
+              <a href="index.php?accion=verItem&amp;id=<?= $item->getId() ?>" class="link-body-emphasis enlace-titulo"><?= htmlspecialchars($item->getTitulo()) ?></a>
+            </h2>
             <p class="card-text text-body-secondary small mb-0"><?= htmlspecialchars($item->getAutor()) ?></p>
           </div>
           <div class="card-footer small text-body-secondary">
@@ -143,24 +148,10 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
             <?php endif; ?>
 
             <?php if ($socio): ?>
-              <?php // Para el socio: si ya lo tiene o lo reservó, lo decimos; si no, puede reservarlo. ?>
-              <?php $reserva = $reservasDelSocio[$item->getId()] ?? null; ?>
               <div class="mt-2">
-                <?php if (in_array($item->getId(), $prestadosDelSocio)): ?>
-                  <a href="index.php?accion=listarPrestamos" class="badge rounded-pill text-wrap bg-warning-subtle text-warning-emphasis">Lo tenés prestado</a>
-                <?php elseif ($reserva && $reserva->estaLista()): ?>
-                  <a href="index.php?accion=listarReservas" class="badge rounded-pill text-wrap bg-success-subtle text-success-emphasis">Apartado hasta el <?= htmlspecialchars(formatoFecha($reserva->getFechaVencimiento())) ?></a>
-                <?php elseif ($reserva): ?>
-                  <a href="index.php?accion=listarReservas" class="badge rounded-pill text-wrap bg-warning-subtle text-warning-emphasis">En espera · puesto <?= htmlspecialchars($reserva->getPuesto()) ?></a>
-                <?php else: ?>
-                  <form method="POST" action="index.php?accion=crearReserva">
-                    <?= campoCsrf() ?>
-                    <?= camposOcultos(['item_id' => $item->getId(), 'tipo' => $tipo, 'categoria' => $categoria, 'q' => $filtros['q'], 'p' => $resultado['pagina']]) ?>
-                    <button type="submit" class="btn btn-sm btn-outline-secondary w-100">
-                      Reservar<span class="visually-hidden"> «<?= htmlspecialchars($item->getTitulo()) ?>»</span>
-                    </button>
-                  </form>
-                <?php endif; ?>
+                <?php // Después de reservar, vuelve al catálogo con los mismos filtros y la misma página. ?>
+                <?php $volverA = ['tipo' => $tipo, 'categoria' => $categoria, 'q' => $filtros['q'], 'p' => $resultado['pagina']]; ?>
+                <?php require __DIR__ . '/reserva_socio.php'; ?>
               </div>
             <?php endif; ?>
           </div>

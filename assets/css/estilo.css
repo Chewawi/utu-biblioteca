@@ -343,6 +343,46 @@ a {
   font-size: .75rem;
 }
 
+/* Título que lleva a la página del ítem (en las tarjetas y en la tabla del admin). */
+.enlace-titulo:hover {
+  text-decoration: underline;
+}
+
+/* --- Página de un ítem (views/items/ver.php) --- */
+.portada-detalle {
+  width: 100%;
+  aspect-ratio: var(--proporcion-portada);
+  object-fit: cover;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-grande);
+  background-color: var(--color-superficie-2);
+}
+
+/* ISBN y disponibles: el nombre a la izquierda y el dato al lado. */
+.datos-item {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: .25rem 1.5rem;
+}
+
+.datos-item dt {
+  font-weight: 500;
+  color: var(--color-texto-suave);
+}
+
+.datos-item dd {
+  margin: 0;
+}
+
+.reserva-detalle {
+  max-width: 16rem;
+}
+
+/* La descripción, con un ancho cómodo para leer. */
+.descripcion-item {
+  max-width: 42rem;
+}
+
 /* Miniatura de portada en la tabla del admin. */
 .portada-mini {
   width: 40px;

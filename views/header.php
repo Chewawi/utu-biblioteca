@@ -1,7 +1,7 @@
 <?php
 // Para marcar en la barra la sección en la que estamos (también en sus formularios).
 $accionActual = $_GET['accion'] ?? 'listarItems';
-$enCatalogo   = in_array($accionActual, ['listarItems', 'formCrearItem', 'formEditarItem', 'crearItem', 'editarItem']);
+$enCatalogo   = in_array($accionActual, ['listarItems', 'verItem', 'formCrearItem', 'formEditarItem', 'crearItem', 'editarItem']);
 $enPrestamos  = in_array($accionActual, ['listarPrestamos', 'formCrearPrestamo', 'crearPrestamo']);
 $enSocios     = in_array($accionActual, ['listarSocios', 'formCrearSocio', 'formEditarSocio', 'crearSocio', 'editarSocio']);
 $enUsuarios   = in_array($accionActual, ['listarUsuarios', 'formCrearUsuario', 'formEditarUsuario', 'crearUsuario', 'editarUsuario']);

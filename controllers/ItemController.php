@@ -108,18 +108,40 @@ function listarItems() {
     $items = $resultado['filas'];
     $conteo = Item::contarPorTipo($pdo, $filtros['q'], $categoria);
 
-    // Para el botón "Reservar" de cada tarjeta: qué tiene prestado y reservado el socio logueado.
+    // Para el botón "Reservar" de cada tarjeta.
+    [$socio, $prestadosDelSocio, $reservasDelSocio] = socioYSusReservas($pdo);
+    require __DIR__ . '/../views/items/listar.php';
+}
+
+/**
+ * Para el botón "Reservar": el socio logueado (null si no hay uno), los ids de
+ * los ítems que tiene prestados y sus reservas activas (por id de ítem).
+ */
+function socioYSusReservas($pdo) {
     $socio = null;
-    $prestadosDelSocio = [];
-    $reservasDelSocio = [];
+    $prestados = [];
+    $reservas = [];
     if (isset($_SESSION['usuario']) && !esAdmin()) {
         $socio = Socio::buscarPorUsuarioId($pdo, $_SESSION['usuario']['id']);
     }
     if ($socio) {
-        $prestadosDelSocio = Prestamo::itemsPrestadosA($pdo, $socio->getId());
-        $reservasDelSocio = Reserva::activasDelSocio($pdo, $socio->getId());
+        $prestados = Prestamo::itemsPrestadosA($pdo, $socio->getId());
+        $reservas = Reserva::activasDelSocio($pdo, $socio->getId());
     }
-    require __DIR__ . '/../views/items/listar.php';
+    return [$socio, $prestados, $reservas];
+}
+
+/** Página de un ítem, con su portada grande y su descripción. Pública, como el catálogo. */
+function verItem() {
+    global $pdo;
+    $item = Item::buscarPorId($pdo, $_GET['id'] ?? '');
+    if (!$item) {
+        flash('danger', 'Ítem no encontrado.');
+        header('Location: index.php?accion=listarItems');
+        exit;
+    }
+    [$socio, $prestadosDelSocio, $reservasDelSocio] = socioYSusReservas($pdo);
+    require __DIR__ . '/../views/items/ver.php';
 }
 
 function formCrearItem() {

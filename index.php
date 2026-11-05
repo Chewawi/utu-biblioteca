@@ -50,6 +50,9 @@ switch ($accion) {
     case 'listarItems':
         listarItems();
         break;
+    case 'verItem':
+        verItem();
+        break;
     case 'formCrearItem':
         formCrearItem();
         break;

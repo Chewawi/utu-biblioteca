@@ -115,14 +115,19 @@ function crearReserva() {
     global $pdo;
     requerirLogin();
 
-    // Volvemos al catálogo como estaba: el formulario manda sus filtros y su página.
-    $volverA = urlFiltros([
-        'accion'    => 'listarItems',
-        'tipo'      => $_POST['tipo'] ?? '',
-        'categoria' => $_POST['categoria'] ?? '',
-        'q'         => $_POST['q'] ?? '',
-        'p'         => $_POST['p'] ?? '',
-    ]);
+    // Volvemos a la página del ítem si reservó desde ahí, o al catálogo como
+    // estaba: el formulario manda sus filtros y su página.
+    if (($_POST['volver'] ?? '') === 'verItem') {
+        $volverA = urlFiltros(['accion' => 'verItem', 'id' => $_POST['item_id'] ?? '']);
+    } else {
+        $volverA = urlFiltros([
+            'accion'    => 'listarItems',
+            'tipo'      => $_POST['tipo'] ?? '',
+            'categoria' => $_POST['categoria'] ?? '',
+            'q'         => $_POST['q'] ?? '',
+            'p'         => $_POST['p'] ?? '',
+        ]);
+    }
 
     $socio = Socio::buscarPorUsuarioId($pdo, $_SESSION['usuario']['id']);
     $item = Item::buscarPorId($pdo, $_POST['item_id'] ?? '');

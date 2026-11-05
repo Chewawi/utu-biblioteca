@@ -66,6 +66,39 @@ function validarItem($pdo, $datos, $id = null) {
     return '';
 }
 
+/** true si el formulario se mandó con el botón "Traer portada" (que llena el campo oculto traer_portada). */
+function pidioTraerPortada() {
+    return ($_POST['traer_portada'] ?? '') === '1';
+}
+
+/**
+ * La portada que se guarda con el formulario: la de Open Library si apretaron
+ * "Traer portada", la que subieron si eligieron un archivo, o $actual si no.
+ * Devuelve ['imagen' => nombre del archivo, 'error' => '']; si algo falla,
+ * 'error' dice por qué y no hay que guardar nada.
+ */
+function portadaDelFormulario($isbn, $actual) {
+    if (pidioTraerPortada()) {
+        $portada = $isbn === ''
+            ? ['imagen' => null, 'error' => 'Para traer la portada, cargá el ISBN del libro.']
+            : traerPortada($isbn);
+        if ($portada['error'] !== '') {
+            $portada['error'] .= ' Todavía no se guardó nada: podés subir la portada a mano o apretar Guardar para dejarla como estaba.';
+        }
+        return $portada;
+    }
+    $imagen = guardarImagen($_FILES['imagen'] ?? [], $actual);
+    if ($imagen === null) {
+        return ['imagen' => null, 'error' => 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.'];
+    }
+    return ['imagen' => $imagen, 'error' => ''];
+}
+
+/** Adónde ir después de guardar: con "Traer portada", de vuelta al formulario para ver la portada nueva; si no, al catálogo. */
+function urlDespuesDeGuardar($id) {
+    return pidioTraerPortada() ? 'index.php?accion=formEditarItem&id=' . $id : 'index.php?accion=listarItems';
+}
+
 /** '' -> null, para guardar "sin ISBN" o "sin descripción" como NULL en la base. */
 function nuloSiVacio($texto) {
     return $texto === '' ? null : $texto;
@@ -160,16 +193,16 @@ function crearItem() {
         return;
     }
 
-    $imagen = guardarImagen($_FILES['imagen'] ?? [], PORTADA_POR_DEFECTO);
-    if ($imagen === null) {
-        mostrarFormItem(null, 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.');
+    $portada = portadaDelFormulario($d['isbn'], PORTADA_POR_DEFECTO);
+    if ($portada['error'] !== '') {
+        mostrarFormItem(null, $portada['error']);
         return;
     }
 
     $categoria = Item::unificarCategoria($pdo, $d['categoria']);
-    Item::crear($pdo, $d['tipo'], $d['titulo'], $d['autor'], $categoria, nuloSiVacio($d['isbn']), nuloSiVacio($d['descripcion']), $d['stock'], $imagen);
-    flash('success', 'Ítem creado correctamente.');
-    header('Location: index.php?accion=listarItems');
+    $id = Item::crear($pdo, $d['tipo'], $d['titulo'], $d['autor'], $categoria, nuloSiVacio($d['isbn']), nuloSiVacio($d['descripcion']), $d['stock'], $portada['imagen']);
+    flash('success', 'Ítem creado correctamente.' . (pidioTraerPortada() ? ' La portada es la de Open Library.' : ''));
+    header('Location: ' . urlDespuesDeGuardar($id));
     exit;
 }
 
@@ -208,16 +241,13 @@ function editarItem() {
         return;
     }
 
-    // Si no suben una portada nueva, conservamos la que ya tenía.
-    $imagen = $item->getImagen();
-    if (!empty($_FILES['imagen']['name'])) {
-        $imagenNueva = guardarImagen($_FILES['imagen'], PORTADA_POR_DEFECTO);
-        if ($imagenNueva === null) {
-            mostrarFormItem($item, 'La imagen tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.');
-            return;
-        }
-        $imagen = $imagenNueva;
+    // Si no piden una portada nueva, conservamos la que ya tenía.
+    $portada = portadaDelFormulario($d['isbn'], $item->getImagen());
+    if ($portada['error'] !== '') {
+        mostrarFormItem($item, $portada['error']);
+        return;
     }
+    $imagen = $portada['imagen'];
 
     $categoria = Item::unificarCategoria($pdo, $d['categoria'], $id);
 
@@ -226,8 +256,10 @@ function editarItem() {
         borrarImagen($item->getImagen()); // la portada vieja ya no la usa nadie
     }
     // Si se sumaron ejemplares, pueden ser para la lista de espera.
-    flash('success', 'Ítem actualizado correctamente.' . mensajeReparto(repartirEjemplares($pdo, $id)));
-    header('Location: index.php?accion=listarItems');
+    $mensaje = 'Ítem actualizado correctamente.' . (pidioTraerPortada() ? ' La portada es la de Open Library.' : '');
+    // Si se sumaron ejemplares, pueden ser para la lista de espera.
+    flash('success', $mensaje . mensajeReparto(repartirEjemplares($pdo, $id)));
+    header('Location: ' . urlDespuesDeGuardar($id));
     exit;
 }
 

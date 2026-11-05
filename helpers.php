@@ -75,6 +75,25 @@ const PORTADA_POR_DEFECTO = 'default.png';
 const AVATAR_POR_DEFECTO  = 'avatar.png';
 
 /**
+ * Revisa el archivo de $ruta antes de guardarlo como imagen. Devuelve la
+ * extensión que le corresponde (jpg, png o webp), o null si no es una imagen
+ * de esos tipos o pesa más de 2 MB.
+ */
+function extensionDeImagen($ruta) {
+    if (filesize($ruta) > 2 * 1024 * 1024) {
+        return null;
+    }
+    // Miramos el contenido real del archivo, no la extensión del nombre (que
+    // cualquiera puede cambiar). getimagesize() devuelve false si no es una imagen.
+    $permitidos = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $info = getimagesize($ruta);
+    if (!$info || !isset($permitidos[$info['mime']])) {
+        return null;
+    }
+    return $permitidos[$info['mime']];
+}
+
+/**
  * Guarda una imagen subida en uploads/ y devuelve el nombre final del archivo.
  * Si no subieron nada devuelve $porDefecto. Si el archivo no es una imagen
  * JPG, PNG o WEBP, o pesa más de 2 MB, devuelve null.
@@ -83,24 +102,74 @@ function guardarImagen($archivo, $porDefecto) {
     if (empty($archivo['name'])) {
         return $porDefecto;
     }
-    if ($archivo['error'] !== UPLOAD_ERR_OK || $archivo['size'] > 2 * 1024 * 1024) {
+    if ($archivo['error'] !== UPLOAD_ERR_OK) {
         return null;
     }
-
-    // Miramos el contenido real del archivo, no la extensión del nombre (que
-    // cualquiera puede cambiar). getimagesize() devuelve false si no es una imagen.
-    $permitidos = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $info = getimagesize($archivo['tmp_name']);
-    if (!$info || !isset($permitidos[$info['mime']])) {
+    $extension = extensionDeImagen($archivo['tmp_name']);
+    if ($extension === null) {
         return null;
     }
 
     // La extensión del archivo guardado sale del contenido, no del nombre original.
-    $nombre = uniqid() . '.' . $permitidos[$info['mime']];
+    $nombre = uniqid() . '.' . $extension;
     if (!move_uploaded_file($archivo['tmp_name'], __DIR__ . '/uploads/' . $nombre)) {
         return null;
     }
     return $nombre;
+}
+
+/**
+ * Descarga de Open Library la portada del libro con ISBN $isbn y la guarda en
+ * uploads/, revisada igual que una imagen subida (con extensionDeImagen()).
+ * Hace una sola consulta, con espera corta: el servicio admite hasta 100
+ * consultas cada 5 minutos desde una misma IP.
+ * Devuelve ['imagen' => nombre del archivo guardado, 'error' => ''] o, si no
+ * se pudo, ['imagen' => null, 'error' => el motivo, para mostrárselo al admin].
+ */
+function traerPortada($isbn) {
+    // default=false: si no tiene portada, Open Library responde 404 en vez de una imagen vacía.
+    $curl = curl_init('https://covers.openlibrary.org/b/isbn/' . urlencode($isbn) . '-L.jpg?default=false');
+    curl_setopt_array($curl, [
+        CURLOPT_RETURNTRANSFER => true, // que curl_exec() devuelva la imagen en vez de mostrarla
+        CURLOPT_FOLLOWLOCATION => true, // Open Library redirige al servidor donde está la imagen
+        CURLOPT_MAXREDIRS      => 3,
+        CURLOPT_TIMEOUT        => 8,    // segundos: si tarda más, lo damos por fallado
+        CURLOPT_USERAGENT      => 'Bibliodeko (biblioteca del curso)',
+    ]);
+    $datos = curl_exec($curl);
+    $codigo = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+    curl_close($curl);
+
+    if ($datos === false || $codigo === 0) {
+        return ['imagen' => null, 'error' => 'No se pudo conectar con Open Library. Revisá la conexión a internet o probá más tarde.'];
+    }
+    if ($codigo === 404) {
+        return ['imagen' => null, 'error' => 'Open Library no tiene una portada para el ISBN ' . $isbn . '.'];
+    }
+    if ($codigo === 429) {
+        return ['imagen' => null, 'error' => 'Open Library recibió demasiadas consultas. Esperá unos minutos y volvé a probar.'];
+    }
+    if ($codigo !== 200) {
+        return ['imagen' => null, 'error' => 'Open Library no pudo responder (error ' . $codigo . '). Probá más tarde.'];
+    }
+
+    // La pasamos a un archivo temporal para revisarla igual que una imagen subida.
+    $temporal = tempnam(sys_get_temp_dir(), 'portada');
+    file_put_contents($temporal, $datos);
+    $extension = extensionDeImagen($temporal);
+    if ($extension === null) {
+        unlink($temporal);
+        return ['imagen' => null, 'error' => 'Lo que mandó Open Library no es una imagen JPG, PNG o WEBP de menos de 2 MB.'];
+    }
+
+    $nombre = uniqid() . '.' . $extension;
+    // copy() y no rename(): así queda con los mismos permisos que una imagen subida.
+    $guardada = copy($temporal, __DIR__ . '/uploads/' . $nombre);
+    unlink($temporal);
+    if (!$guardada) {
+        return ['imagen' => null, 'error' => 'No se pudo guardar la portada en la carpeta uploads/.'];
+    }
+    return ['imagen' => $nombre, 'error' => ''];
 }
 
 /** Borra una imagen de uploads/, salvo las genéricas. */

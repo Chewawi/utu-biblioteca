@@ -264,12 +264,16 @@ class Item {
         return $titulo === false ? null : $titulo;
     }
 
-    // $isbn y $descripcion van como null si están vacíos (sin ISBN, sin descripción).
+    /**
+     * Crea el item y devuelve su id. $isbn y $descripcion van como null si
+     * están vacíos (sin ISBN, sin descripción).
+     */
     public static function crear($pdo, $tipo, $titulo, $autor, $categoria, $isbn, $descripcion, $stock, $imagen) {
         $stmt = $pdo->prepare(
             "INSERT INTO items (tipo, titulo, autor, categoria, isbn, descripcion, stock, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        return $stmt->execute([$tipo, $titulo, $autor, $categoria, $isbn, $descripcion, $stock, $imagen]);
+        $stmt->execute([$tipo, $titulo, $autor, $categoria, $isbn, $descripcion, $stock, $imagen]);
+        return (int) $pdo->lastInsertId();
     }
 
     public static function actualizar($pdo, $id, $tipo, $titulo, $autor, $categoria, $isbn, $descripcion, $stock, $imagen) {

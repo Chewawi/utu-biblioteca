@@ -54,7 +54,7 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
       </div>
 
       <?php // Solo los libros tienen ISBN: para los otros tipos el campo se esconde (ver el script de abajo). ?>
-      <div class="mb-3" id="campo-isbn" <?= $tipoElegido === 'libro' ? '' : 'hidden' ?>>
+      <div class="mb-3 solo-libros" <?= $tipoElegido === 'libro' ? '' : 'hidden' ?>>
         <label class="form-label" for="isbn">ISBN (opcional)</label>
         <input type="text" id="isbn" name="isbn" class="form-control" maxlength="20" inputmode="numeric" autocomplete="off"
           placeholder="978-84-376-0494-7" value="<?= htmlspecialchars($isbn) ?>">
@@ -102,6 +102,13 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
         <div class="form-text">JPG, PNG o WEBP. Máximo 2&nbsp;MB.</div>
       </div>
 
+      <?php // Otra forma de cargar la portada de un libro: pedírsela a Open Library con el ISBN (ver el script de abajo). ?>
+      <div class="mb-3 solo-libros" <?= $tipoElegido === 'libro' ? '' : 'hidden' ?>>
+        <input type="hidden" name="traer_portada" id="traer_portada" value="">
+        <button type="button" id="boton-traer-portada" class="btn btn-sm btn-outline-secondary" <?= $isbn === '' ? 'disabled' : '' ?>>Traer portada</button>
+        <div class="form-text">La busca en Open Library con el ISBN y guarda el ítem con esa portada.</div>
+      </div>
+
       <div class="d-flex gap-2 pt-2">
         <button type="submit" class="btn btn-primary">Guardar</button>
         <a href="index.php?accion=listarItems" class="btn btn-link">Cancelar</a>
@@ -112,10 +119,33 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
 
 <script>
   // Al cambiar el tipo, el campo "Autor" pasa a llamarse "Creador" (y al revés),
-  // y el ISBN aparece solo para los libros.
-  document.getElementById('tipo').addEventListener('change', function () {
-    document.getElementById('etiqueta-autor').textContent = this.value === 'libro' ? 'Autor' : 'Creador';
-    document.getElementById('campo-isbn').hidden = this.value !== 'libro';
+  // y el ISBN y "Traer portada" (clase solo-libros) aparecen solo para los libros.
+  var tipo = document.getElementById('tipo');
+  tipo.addEventListener('change', function () {
+    document.getElementById('etiqueta-autor').textContent = tipo.value === 'libro' ? 'Autor' : 'Creador';
+    document.querySelectorAll('.solo-libros').forEach(function (campo) {
+      campo.hidden = tipo.value !== 'libro';
+    });
+  });
+
+  // "Traer portada" se puede usar cuando hay un ISBN escrito.
+  var isbn = document.getElementById('isbn');
+  var botonPortada = document.getElementById('boton-traer-portada');
+  isbn.addEventListener('input', function () {
+    botonPortada.disabled = isbn.value.trim() === '';
+  });
+
+  // Manda el formulario con el campo oculto traer_portada en 1: así el
+  // servidor sabe que tiene que pedirle la portada a Open Library.
+  botonPortada.addEventListener('click', function () {
+    var form = botonPortada.form;
+    if (!form.reportValidity()) {
+      return; // le falta algún campo obligatorio: el navegador lo marca, como al apretar Guardar
+    }
+    document.getElementById('traer_portada').value = '1';
+    botonPortada.disabled = true;
+    botonPortada.textContent = 'Buscando la portada...';
+    form.submit();
   });
 </script>
 

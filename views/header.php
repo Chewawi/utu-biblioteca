@@ -25,7 +25,8 @@ $enUsuarios   = in_array($accionActual, ['listarUsuarios', 'formCrearUsuario', '
   <link rel="icon" type="image/x-icon" href="views/imagenes/favicon.ico">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-  <link href="assets/css/estilo.css" rel="stylesheet">
+  <?php // ?v= cambia cada vez que se guarda el archivo: así el navegador no usa una copia vieja de los estilos. ?>
+  <link href="assets/css/estilo.css?v=<?= filemtime(__DIR__ . '/../assets/css/estilo.css') ?>" rel="stylesheet">
 </head>
 
 <body>

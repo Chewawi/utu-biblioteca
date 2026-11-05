@@ -29,15 +29,20 @@ CREATE TABLE IF NOT EXISTS socios (
 );
 
 -- Todo lo que se puede pedir prestado. "stock" es cuántos ejemplares
--- tiene la biblioteca de ese item.
+-- tiene la biblioteca de ese item. "isbn" es opcional y solo para libros:
+-- se guarda sin guiones (10 o 13 caracteres). UNIQUE no deja repetir un
+-- ISBN, pero sí tener muchos items sin ISBN (NULL).
 CREATE TABLE IF NOT EXISTS items (
-    id        INT AUTO_INCREMENT PRIMARY KEY,
-    tipo      ENUM('libro', 'juego', 'proyecto') NOT NULL DEFAULT 'libro',
-    titulo    VARCHAR(150) NOT NULL,
-    autor     VARCHAR(100) NOT NULL,
-    categoria VARCHAR(50)  NULL,
-    stock     INT UNSIGNED NOT NULL DEFAULT 1,
-    imagen    VARCHAR(100) NOT NULL DEFAULT 'default.png'
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    tipo        ENUM('libro', 'juego', 'proyecto') NOT NULL DEFAULT 'libro',
+    titulo      VARCHAR(150) NOT NULL,
+    autor       VARCHAR(100) NOT NULL,
+    categoria   VARCHAR(50)  NULL,
+    isbn        VARCHAR(13)  NULL UNIQUE,
+    descripcion TEXT         NULL,
+    stock       INT UNSIGNED NOT NULL DEFAULT 1,
+    imagen      VARCHAR(100) NOT NULL DEFAULT 'default.png',
+    CHECK (isbn IS NULL OR tipo = 'libro')
 );
 
 -- Un préstamo conecta un socio con un item. "estado" dice si sigue

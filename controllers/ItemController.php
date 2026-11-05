@@ -11,25 +11,64 @@ require_once __DIR__ . '/../models/Reserva.php';
 //  guarde/lea/borre, y muestran una vista o redirigen.
 // ============================================================
 
+// Largo máximo de la descripción (la columna TEXT admite más, pero así queda legible).
+const MAX_DESCRIPCION = 5000;
+
+/** Los campos del formulario de ítems, sin espacios de más. El ISBN, normalizado. */
+function leerFormItem() {
+    $datos = [
+        'tipo'        => trim($_POST['tipo'] ?? ''),
+        'titulo'      => trim($_POST['titulo'] ?? ''),
+        'autor'       => trim($_POST['autor'] ?? ''),
+        'categoria'   => trim($_POST['categoria'] ?? ''),
+        'isbn'        => Item::normalizarIsbn(trim($_POST['isbn'] ?? '')),
+        'descripcion' => trim($_POST['descripcion'] ?? ''),
+        'stock'       => trim($_POST['stock'] ?? ''),
+    ];
+    // Solo los libros tienen ISBN: si es otro tipo, se descarta.
+    if ($datos['tipo'] !== 'libro') {
+        $datos['isbn'] = '';
+    }
+    return $datos;
+}
+
 /**
- * Revisa los campos del formulario. Devuelve el mensaje de error, o '' si está todo bien.
- * Los largos máximos son los de las columnas en database.sql.
+ * Revisa los campos del formulario ($datos, de leerFormItem()). Devuelve el
+ * mensaje de error, o '' si está todo bien. $id es el ítem que se edita (null
+ * al crear). Los largos máximos son los de las columnas en database.sql.
  */
-function validarItem($tipo, $titulo, $autor, $categoria, $stock) {
-    if (!in_array($tipo, Item::TIPOS)) {
+function validarItem($pdo, $datos, $id = null) {
+    if (!in_array($datos['tipo'], Item::TIPOS)) {
         return 'Elegí un tipo válido.';
     }
-    if ($titulo === '' || $autor === '') {
+    if ($datos['titulo'] === '' || $datos['autor'] === '') {
         return 'Título y autor son obligatorios.';
     }
-    if (mb_strlen($titulo) > 150 || mb_strlen($autor) > 100 || mb_strlen($categoria) > 50) {
+    if (mb_strlen($datos['titulo']) > 150 || mb_strlen($datos['autor']) > 100 || mb_strlen($datos['categoria']) > 50) {
         return 'El título admite hasta 150 caracteres, el autor 100 y la categoría 50.';
     }
+    if ($datos['isbn'] !== '' && !Item::isbnValido($datos['isbn'])) {
+        return 'El ISBN no es válido: tiene que tener 10 o 13 dígitos (con o sin guiones) y el último tiene que coincidir. Revisá que esté bien copiado.';
+    }
+    if ($datos['isbn'] !== '') {
+        $otro = Item::tituloConIsbn($pdo, $datos['isbn'], $id);
+        if ($otro !== null) {
+            return 'Ese ISBN ya lo tiene «' . $otro . '».';
+        }
+    }
+    if (mb_strlen($datos['descripcion']) > MAX_DESCRIPCION) {
+        return 'La descripción admite hasta ' . MAX_DESCRIPCION . ' caracteres.';
+    }
     // ctype_digit: solo dígitos, así descartamos negativos, decimales y texto.
-    if (!ctype_digit($stock) || $stock < 1 || $stock > 9999) {
+    if (!ctype_digit($datos['stock']) || $datos['stock'] < 1 || $datos['stock'] > 9999) {
         return 'El stock tiene que ser un número entero entre 1 y 9999.';
     }
     return '';
+}
+
+/** '' -> null, para guardar "sin ISBN" o "sin descripción" como NULL en la base. */
+function nuloSiVacio($texto) {
+    return $texto === '' ? null : $texto;
 }
 
 /**
@@ -92,13 +131,8 @@ function crearItem() {
     global $pdo;
     requerirAdmin();
 
-    $tipo      = trim($_POST['tipo'] ?? '');
-    $titulo    = trim($_POST['titulo'] ?? '');
-    $autor     = trim($_POST['autor'] ?? '');
-    $categoria = trim($_POST['categoria'] ?? '');
-    $stock     = trim($_POST['stock'] ?? '');
-
-    $error = validarItem($tipo, $titulo, $autor, $categoria, $stock);
+    $d = leerFormItem();
+    $error = validarItem($pdo, $d);
     if ($error !== '') {
         mostrarFormItem(null, $error);
         return;
@@ -110,8 +144,8 @@ function crearItem() {
         return;
     }
 
-    $categoria = Item::unificarCategoria($pdo, $categoria);
-    Item::crear($pdo, $tipo, $titulo, $autor, $categoria, $stock, $imagen);
+    $categoria = Item::unificarCategoria($pdo, $d['categoria']);
+    Item::crear($pdo, $d['tipo'], $d['titulo'], $d['autor'], $categoria, nuloSiVacio($d['isbn']), nuloSiVacio($d['descripcion']), $d['stock'], $imagen);
     flash('success', 'Ítem creado correctamente.');
     header('Location: index.php?accion=listarItems');
     exit;
@@ -141,15 +175,10 @@ function editarItem() {
         exit;
     }
 
-    $tipo      = trim($_POST['tipo'] ?? '');
-    $titulo    = trim($_POST['titulo'] ?? '');
-    $autor     = trim($_POST['autor'] ?? '');
-    $categoria = trim($_POST['categoria'] ?? '');
-    $stock     = trim($_POST['stock'] ?? '');
-
-    $error = validarItem($tipo, $titulo, $autor, $categoria, $stock);
+    $d = leerFormItem();
+    $error = validarItem($pdo, $d, $id);
     $enUso = $item->getPrestados() + $item->getApartados();
-    if ($error === '' && $stock < $enUso) {
+    if ($error === '' && $d['stock'] < $enUso) {
         $error = 'Hay ' . $enUso . ' ejemplares prestados o apartados por reservas: el stock no puede ser menor.';
     }
     if ($error !== '') {
@@ -168,9 +197,9 @@ function editarItem() {
         $imagen = $imagenNueva;
     }
 
-    $categoria = Item::unificarCategoria($pdo, $categoria, $id);
+    $categoria = Item::unificarCategoria($pdo, $d['categoria'], $id);
 
-    Item::actualizar($pdo, $id, $tipo, $titulo, $autor, $categoria, $stock, $imagen);
+    Item::actualizar($pdo, $id, $d['tipo'], $d['titulo'], $d['autor'], $categoria, nuloSiVacio($d['isbn']), nuloSiVacio($d['descripcion']), $d['stock'], $imagen);
     if ($imagen !== $item->getImagen()) {
         borrarImagen($item->getImagen()); // la portada vieja ya no la usa nadie
     }

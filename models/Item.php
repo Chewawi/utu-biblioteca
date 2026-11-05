@@ -19,18 +19,22 @@ class Item {
     private $titulo;
     private $autor;
     private $categoria;
+    private $isbn;        // sin guiones; null si no tiene
+    private $descripcion; // null si no tiene
     private $stock;
     private $imagen;
     // Estos dos no vienen de una columna, se cuentan (ver selectConUso()):
     private $prestados; // ejemplares prestados ahora mismo
     private $apartados; // ejemplares apartados para una reserva lista que no venció
 
-    public function __construct($id, $tipo, $titulo, $autor, $categoria, $stock, $imagen, $prestados, $apartados) {
+    public function __construct($id, $tipo, $titulo, $autor, $categoria, $isbn, $descripcion, $stock, $imagen, $prestados, $apartados) {
         $this->id = $id;
         $this->tipo = $tipo;
         $this->titulo = $titulo;
         $this->autor = $autor;
         $this->categoria = $categoria;
+        $this->isbn = $isbn;
+        $this->descripcion = $descripcion;
         $this->stock = $stock;
         $this->imagen = $imagen;
         $this->prestados = $prestados;
@@ -43,6 +47,8 @@ class Item {
     public function getTitulo() { return $this->titulo; }
     public function getAutor() { return $this->autor; }
     public function getCategoria() { return $this->categoria; }
+    public function getIsbn() { return $this->isbn; }
+    public function getDescripcion() { return $this->descripcion; }
     public function getStock() { return $this->stock; }
     public function getImagen() { return $this->imagen; }
     public function getPrestados() { return $this->prestados; }
@@ -56,6 +62,35 @@ class Item {
             return 'Autor';
         }
         return $tipo === '' ? 'Autor o creador' : 'Creador';
+    }
+
+    /** El ISBN como se guarda: sin guiones ni espacios y con la X en mayúscula. "84-376-0494-X" -> "843760494X". */
+    public static function normalizarIsbn($isbn) {
+        return strtoupper(str_replace(['-', ' '], '', $isbn));
+    }
+
+    /**
+     * true si $isbn (ya normalizado) es un ISBN-10 o un ISBN-13 con el dígito
+     * verificador (el último) bien. Así se detectan casi todos los errores de tipeo.
+     */
+    public static function isbnValido($isbn) {
+        $suma = 0;
+        if (preg_match('/^[0-9]{9}[0-9X]$/', $isbn)) {
+            // ISBN-10: cada dígito por 10, 9, 8... 1 (la X final vale 10). La suma tiene que ser múltiplo de 11.
+            for ($i = 0; $i < 10; $i++) {
+                $digito = $isbn[$i] === 'X' ? 10 : (int) $isbn[$i];
+                $suma += $digito * (10 - $i);
+            }
+            return $suma % 11 === 0;
+        }
+        if (preg_match('/^[0-9]{13}$/', $isbn)) {
+            // ISBN-13: los dígitos se multiplican por 1 y por 3, alternados. La suma tiene que ser múltiplo de 10.
+            for ($i = 0; $i < 13; $i++) {
+                $suma += (int) $isbn[$i] * ($i % 2 === 0 ? 1 : 3);
+            }
+            return $suma % 10 === 0;
+        }
+        return false;
     }
 
     // --- acceso a datos ---
@@ -78,7 +113,7 @@ class Item {
 
     /** Arma un Item con una fila de selectConUso(). */
     private static function desdeFila($f) {
-        return new Item($f['id'], $f['tipo'], $f['titulo'], $f['autor'], $f['categoria'], $f['stock'], $f['imagen'], $f['prestados'], $f['apartados']);
+        return new Item($f['id'], $f['tipo'], $f['titulo'], $f['autor'], $f['categoria'], $f['isbn'], $f['descripcion'], $f['stock'], $f['imagen'], $f['prestados'], $f['apartados']);
     }
 
     /**
@@ -202,18 +237,30 @@ class Item {
         return $f ? self::desdeFila($f) : null;
     }
 
-    public static function crear($pdo, $tipo, $titulo, $autor, $categoria, $stock, $imagen) {
-        $stmt = $pdo->prepare(
-            "INSERT INTO items (tipo, titulo, autor, categoria, stock, imagen) VALUES (?, ?, ?, ?, ?, ?)"
-        );
-        return $stmt->execute([$tipo, $titulo, $autor, $categoria, $stock, $imagen]);
+    /**
+     * Título del item que ya tiene el ISBN $isbn, o null si ninguno lo tiene.
+     * $id es el item que se está editando (null al crear): no se compara consigo mismo.
+     */
+    public static function tituloConIsbn($pdo, $isbn, $id = null) {
+        $stmt = $pdo->prepare('SELECT titulo FROM items WHERE isbn = ? AND id <> ?');
+        $stmt->execute([$isbn, $id ?? 0]);
+        $titulo = $stmt->fetchColumn();
+        return $titulo === false ? null : $titulo;
     }
 
-    public static function actualizar($pdo, $id, $tipo, $titulo, $autor, $categoria, $stock, $imagen) {
+    // $isbn y $descripcion van como null si están vacíos (sin ISBN, sin descripción).
+    public static function crear($pdo, $tipo, $titulo, $autor, $categoria, $isbn, $descripcion, $stock, $imagen) {
         $stmt = $pdo->prepare(
-            "UPDATE items SET tipo = ?, titulo = ?, autor = ?, categoria = ?, stock = ?, imagen = ? WHERE id = ?"
+            "INSERT INTO items (tipo, titulo, autor, categoria, isbn, descripcion, stock, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        return $stmt->execute([$tipo, $titulo, $autor, $categoria, $stock, $imagen, $id]);
+        return $stmt->execute([$tipo, $titulo, $autor, $categoria, $isbn, $descripcion, $stock, $imagen]);
+    }
+
+    public static function actualizar($pdo, $id, $tipo, $titulo, $autor, $categoria, $isbn, $descripcion, $stock, $imagen) {
+        $stmt = $pdo->prepare(
+            "UPDATE items SET tipo = ?, titulo = ?, autor = ?, categoria = ?, isbn = ?, descripcion = ?, stock = ?, imagen = ? WHERE id = ?"
+        );
+        return $stmt->execute([$tipo, $titulo, $autor, $categoria, $isbn, $descripcion, $stock, $imagen, $id]);
     }
 
     public static function eliminar($pdo, $id) {

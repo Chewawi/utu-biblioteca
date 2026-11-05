@@ -18,6 +18,8 @@ $tipoElegido = $_POST['tipo'] ?? (isset($item) ? $item->getTipo() : 'libro');
 $titulo      = $_POST['titulo'] ?? (isset($item) ? $item->getTitulo() : '');
 $autor       = $_POST['autor'] ?? (isset($item) ? $item->getAutor() : '');
 $categoria   = $_POST['categoria'] ?? (isset($item) ? ($item->getCategoria() ?? '') : '');
+$isbn        = $_POST['isbn'] ?? (isset($item) ? ($item->getIsbn() ?? '') : '');
+$descripcion = $_POST['descripcion'] ?? (isset($item) ? ($item->getDescripcion() ?? '') : '');
 $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
 ?>
 
@@ -51,6 +53,14 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
         <input type="text" id="autor" name="autor" class="form-control" required maxlength="100" value="<?= htmlspecialchars($autor) ?>">
       </div>
 
+      <?php // Solo los libros tienen ISBN: para los otros tipos el campo se esconde (ver el script de abajo). ?>
+      <div class="mb-3" id="campo-isbn" <?= $tipoElegido === 'libro' ? '' : 'hidden' ?>>
+        <label class="form-label" for="isbn">ISBN (opcional)</label>
+        <input type="text" id="isbn" name="isbn" class="form-control" maxlength="20" inputmode="numeric" autocomplete="off"
+          placeholder="978-84-376-0494-7" value="<?= htmlspecialchars($isbn) ?>">
+        <div class="form-text">El código del libro, de 10 o 13 dígitos. Podés escribirlo con o sin guiones.</div>
+      </div>
+
       <div class="mb-3">
         <label class="form-label" for="categoria">Categoría (opcional)</label>
         <?php // list="categorias": al escribir, el navegador sugiere las categorías que ya existen. ?>
@@ -62,6 +72,13 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
           <?php endforeach; ?>
         </datalist>
         <div class="form-text">Elegí una de las sugeridas si ya existe, así no quedan repetidas.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="descripcion">Descripción (opcional)</label>
+        <textarea id="descripcion" name="descripcion" class="form-control" rows="5" maxlength="<?= MAX_DESCRIPCION ?>"
+          placeholder="De qué se trata, para quién es, qué trae..."><?= htmlspecialchars($descripcion) ?></textarea>
+        <div class="form-text">Se ve en la página del ítem. Para separar párrafos, dejá una línea en blanco.</div>
       </div>
 
       <div class="mb-3">
@@ -94,9 +111,11 @@ $stock       = $_POST['stock'] ?? (isset($item) ? $item->getStock() : '1');
 </div>
 
 <script>
-  // Al cambiar el tipo, el campo "Autor" pasa a llamarse "Creador" (y al revés).
+  // Al cambiar el tipo, el campo "Autor" pasa a llamarse "Creador" (y al revés),
+  // y el ISBN aparece solo para los libros.
   document.getElementById('tipo').addEventListener('change', function () {
     document.getElementById('etiqueta-autor').textContent = this.value === 'libro' ? 'Autor' : 'Creador';
+    document.getElementById('campo-isbn').hidden = this.value !== 'libro';
   });
 </script>
 

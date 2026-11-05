@@ -117,9 +117,25 @@ class Item {
     }
 
     /**
+     * Condición del WHERE para buscar $q en el título, el autor, la categoría o
+     * el ISBN. El ISBN se guarda sin guiones, así que al buscarlo se los sacamos
+     * a $q: "978-0-307" encuentra 9780307474728. Devuelve [condición, parámetros].
+     */
+    private static function condicionBusqueda($q) {
+        $condicion = '(i.titulo LIKE ? OR i.autor LIKE ? OR i.categoria LIKE ?';
+        $parametros = ['%' . $q . '%', '%' . $q . '%', '%' . $q . '%'];
+        $isbn = self::normalizarIsbn($q);
+        if ($isbn !== '') { // si $q era solo guiones, no buscamos por ISBN
+            $condicion .= ' OR i.isbn LIKE ?';
+            $parametros[] = '%' . $isbn . '%';
+        }
+        return [$condicion . ')', $parametros];
+    }
+
+    /**
      * Items del catálogo, filtrados y paginados.
      * $filtros es un array con estas claves (todas opcionales):
-     *   q          -> texto que se busca en el título o el autor,
+     *   q          -> texto que se busca en el título, el autor, la categoría o el ISBN,
      *   tipo       -> uno de TIPOS; '' = todos,
      *   categoria  -> una categoría (el género); '' = todas,
      *   pagina     -> número de página (si está fuera de rango se corrige),
@@ -133,9 +149,9 @@ class Item {
         $condiciones = [];
         $parametros = [];
         if ($filtros['q'] !== '') {
-            $condiciones[] = '(i.titulo LIKE ? OR i.autor LIKE ?)';
-            $parametros[] = '%' . $filtros['q'] . '%';
-            $parametros[] = '%' . $filtros['q'] . '%';
+            [$condicion, $parametrosBusqueda] = self::condicionBusqueda($filtros['q']);
+            $condiciones[] = $condicion;
+            $parametros = array_merge($parametros, $parametrosBusqueda);
         }
         if ($filtros['tipo'] !== '') {
             $condiciones[] = 'i.tipo = ?';
@@ -184,19 +200,19 @@ class Item {
         $condiciones = [];
         $parametros = [];
         if ($q !== '') {
-            $condiciones[] = '(titulo LIKE ? OR autor LIKE ?)';
-            $parametros[] = '%' . $q . '%';
-            $parametros[] = '%' . $q . '%';
+            [$condicion, $parametrosBusqueda] = self::condicionBusqueda($q);
+            $condiciones[] = $condicion;
+            $parametros = array_merge($parametros, $parametrosBusqueda);
         }
         if ($categoria !== '') {
-            $condiciones[] = 'categoria = ?';
+            $condiciones[] = 'i.categoria = ?';
             $parametros[] = $categoria;
         }
-        $sql = 'SELECT tipo, COUNT(*) AS cantidad FROM items';
+        $sql = 'SELECT i.tipo, COUNT(*) AS cantidad FROM items i';
         if (!empty($condiciones)) {
             $sql .= ' WHERE ' . implode(' AND ', $condiciones);
         }
-        $stmt = $pdo->prepare($sql . ' GROUP BY tipo');
+        $stmt = $pdo->prepare($sql . ' GROUP BY i.tipo');
         $stmt->execute($parametros);
         foreach ($stmt->fetchAll() as $f) {
             $conteo[$f['tipo']] = (int) $f['cantidad'];

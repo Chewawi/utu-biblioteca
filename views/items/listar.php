@@ -40,8 +40,9 @@ $hayFiltros = $filtros['q'] !== '' || $categoria !== '';
     <input type="hidden" name="tipo" value="<?= htmlspecialchars($tipo) ?>">
   <?php endif; ?>
   <div class="input-group">
+    <?php // Busca también por categoría; el ISBN lo nombramos donde hay libros. ?>
     <input type="search" name="q" class="form-control" aria-label="Buscar"
-      placeholder="Buscar por título o <?= htmlspecialchars(mb_strtolower(Item::etiquetaAutor($tipo))) ?>..."
+      placeholder="<?= in_array($tipo, ['', 'libro']) ? 'Buscar por título, autor o ISBN...' : 'Buscar por título o creador...' ?>"
       value="<?= htmlspecialchars($filtros['q']) ?>">
     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
   </div>

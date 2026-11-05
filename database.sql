@@ -107,19 +107,34 @@ INSERT INTO socios (usuario_id, nombre, direccion, telefono) VALUES
 (4, 'Lucía Pereira',     'Av. Italia 2890',     '091234567'),
 (5, 'Martín Silva',      '18 de Julio 1520',    '094555123');
 
-INSERT INTO items (tipo, titulo, autor, categoria, stock, imagen) VALUES
-('libro',    'Cien años de soledad',          'Gabriel García Márquez',   'Novela',     2, 'default.png'),
-('libro',    '1984',                          'George Orwell',            'Distopía',   1, 'default.png'),
-('libro',    'El nombre del viento',          'Patrick Rothfuss',         'Fantasía',   1, 'default.png'),
-('libro',    'Rayuela',                       'Julio Cortázar',           'Novela',     1, 'default.png'),
-('libro',    'Fahrenheit 451',                'Ray Bradbury',             'Distopía',   2, 'default.png'),
-('libro',    'El principito',                 'Antoine de Saint-Exupéry', 'Infantil',   3, 'default.png'),
-('libro',    'Sapiens',                       'Yuval Noah Harari',        'Ensayo',     1, 'default.png'),
-('libro',    'El señor de los anillos',       'J. R. R. Tolkien',         'Fantasía',   1, 'default.png'),
-('juego',    'Catan',                         'Klaus Teuber',             'Estrategia', 2, 'default.png'),
-('juego',    'Dixit',                         'Jean-Louis Roubira',       'Familiar',   1, 'default.png'),
-('proyecto', 'Estación meteorológica Arduino', 'Grupo 3.º B',              'Robótica',   1, 'default.png'),
-('proyecto', 'Huerta con riego automático',   'Grupo 2.º A',              'Electrónica', 1, 'default.png');
+-- ISBN de ediciones reales (1984 con uno de 10 dígitos). El señor de los
+-- anillos queda sin ISBN, para ver un libro sin él. Las portadas se pueden
+-- traer con "Traer portada" desde el formulario de cada libro.
+INSERT INTO items (tipo, titulo, autor, categoria, isbn, descripcion, stock, imagen) VALUES
+('libro',    'Cien años de soledad',          'Gabriel García Márquez',   'Novela',     '9780307474728',
+ 'La historia de la familia Buendía a lo largo de siete generaciones en Macondo, un pueblo inventado donde lo mágico es parte de lo cotidiano.\n\nUna de las novelas más leídas en español.', 2, 'default.png'),
+('libro',    '1984',                          'George Orwell',            'Distopía',   '0451524934',
+ 'Winston Smith trabaja reescribiendo la historia para un gobierno que vigila todo lo que hace la gente. Un clásico sobre el control y la libertad.', 1, 'default.png'),
+('libro',    'El nombre del viento',          'Patrick Rothfuss',         'Fantasía',   '9788401337208',
+ 'Kvothe, ya adulto, cuenta cómo fue su vida: de chico en una compañía de artistas ambulantes a estudiante en la Universidad. Primer libro de una saga.', 1, 'default.png'),
+('libro',    'Rayuela',                       'Julio Cortázar',           'Novela',     '9788437604572',
+ 'Una novela que se puede leer en más de un orden. Sigue a Horacio Oliveira entre París y Buenos Aires.', 1, 'default.png'),
+('libro',    'Fahrenheit 451',                'Ray Bradbury',             'Distopía',   '9781451673319',
+ 'En un futuro donde los libros están prohibidos, los bomberos no apagan incendios: los provocan. Edición en inglés.', 2, 'default.png'),
+('libro',    'El principito',                 'Antoine de Saint-Exupéry', 'Infantil',   '9780156013925',
+ 'Un aviador perdido en el desierto conoce a un pequeño príncipe que viene de otro planeta. Para leer a cualquier edad.', 3, 'default.png'),
+('libro',    'Sapiens',                       'Yuval Noah Harari',        'Ensayo',     '9788499926223',
+ 'Un recorrido por la historia de la humanidad, desde los primeros humanos hasta hoy, contado para cualquier lector.', 1, 'default.png'),
+('libro',    'El señor de los anillos',       'J. R. R. Tolkien',         'Fantasía',   NULL,
+ 'Frodo y sus compañeros emprenden un viaje para destruir un anillo que podría darle todo el poder al enemigo.', 1, 'default.png'),
+('juego',    'Catan',                         'Klaus Teuber',             'Estrategia', NULL,
+ 'Juego de mesa para 3 o 4 jugadores: se colonizan territorios, se comercian recursos y se construyen caminos y ciudades.', 2, 'default.png'),
+('juego',    'Dixit',                         'Jean-Louis Roubira',       'Familiar',   NULL,
+ 'Juego de cartas ilustradas donde hay que adivinar qué carta eligió el narrador a partir de una pista. De 3 a 6 jugadores.', 1, 'default.png'),
+('proyecto', 'Estación meteorológica Arduino', 'Grupo 3.º B',              'Robótica',   NULL,
+ 'Mide temperatura, humedad y presión con sensores conectados a un Arduino. Incluye el código y las instrucciones para armarla.', 1, 'default.png'),
+('proyecto', 'Huerta con riego automático',   'Grupo 2.º A',              'Electrónica', NULL,
+ 'Un sensor de humedad en la tierra activa una bomba de agua cuando hace falta regar. Trae los planos y la lista de materiales.', 1, 'default.png');
 
 -- Las fechas son relativas al día en que se importa, así siempre hay préstamos
 -- al día, vencidos (activos con la fecha límite pasada) y devueltos, algunos

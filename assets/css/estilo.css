@@ -349,38 +349,128 @@ a {
 }
 
 /* --- Página de un ítem (views/items/ver.php) --- */
-.portada-detalle {
+/* En el celular, la portada arriba y el texto abajo. */
+.detalle-item {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.detalle-portada {
   width: 100%;
-  aspect-ratio: var(--proporcion-portada);
-  object-fit: cover;
+  max-width: 18rem;
+  margin: 0 auto;
+}
+
+/* Desde 768px: la portada en una columna fija a la izquierda, y queda
+   quieta (sticky) mientras se baja leyendo el texto. */
+@media (min-width: 768px) {
+  .detalle-item {
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .detalle-portada {
+    max-width: none;
+    position: sticky;
+    top: 5rem; /* debajo de la barra, que también es sticky */
+  }
+}
+
+/* Marco con forma de libro (2:3). La imagen entra entera (contain), sin
+   recortarse ni salirse, sea alta, apaisada o cuadrada. */
+.marco-portada {
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-grande);
   background-color: var(--color-superficie-2);
+  box-shadow: var(--sombra-elevada);
 }
 
-/* ISBN y disponibles: el nombre a la izquierda y el dato al lado. */
+.marco-portada img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.titulo-detalle {
+  margin-bottom: .25rem;
+  font-size: calc(1.5rem + 1vw);
+  line-height: 1.15;
+}
+
+@media (min-width: 1200px) {
+  .titulo-detalle {
+    font-size: 2.25rem;
+  }
+}
+
+.pastilla-disponibles {
+  padding: .45rem .8rem;
+  font-size: .875rem;
+}
+
+/* Reservar, Prestar, Editar: en el celular a todo el ancho; desde 576px en fila. */
+.acciones-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-top: 1.5rem;
+}
+
+.acciones-detalle .btn {
+  width: 100%;
+}
+
+@media (min-width: 576px) {
+  .acciones-detalle {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .acciones-detalle .btn {
+    width: auto;
+    padding-inline: 1.25rem;
+  }
+}
+
+/* Cada parte de la tarjeta (datos, descripción) separada por una línea. */
+.seccion-detalle {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+/* Autor, ISBN y categoría: la etiqueta chica y apagada a la izquierda, el dato al lado. */
 .datos-item {
   display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: .25rem 1.5rem;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: .6rem 2rem;
+  margin: 0;
 }
 
 .datos-item dt {
-  font-weight: 500;
   color: var(--color-texto-suave);
+  font-size: .8125rem;
+  font-weight: 500;
+  line-height: 1.5rem; /* alineada con el dato, que es más grande */
 }
 
 .datos-item dd {
   margin: 0;
+  overflow-wrap: anywhere; /* un dato muy largo baja de renglón en vez de desbordar */
 }
 
-.reserva-detalle {
-  max-width: 16rem;
-}
-
-/* La descripción, con un ancho cómodo para leer. */
+/* La descripción, con un ancho cómodo para leer (unos 65 caracteres por línea). */
 .descripcion-item {
-  max-width: 42rem;
+  max-width: 65ch;
+  line-height: 1.7;
+}
+
+.descripcion-item p:last-child {
+  margin-bottom: 0;
 }
 
 /* Miniatura de portada en la tabla del admin. */

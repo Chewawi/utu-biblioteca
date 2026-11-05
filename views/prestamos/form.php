@@ -58,8 +58,8 @@ require __DIR__ . '/../header.php';
 
       <div class="mb-3">
         <label class="form-label" for="fecha_limite">Fecha límite de devolución</label>
-        <?php // Por defecto, dos semanas desde hoy. ?>
-        <input type="date" id="fecha_limite" name="fecha_limite" class="form-control" value="<?= htmlspecialchars($_POST['fecha_limite'] ?? date('Y-m-d', strtotime('+14 days'))) ?>" required>
+        <?php // Por defecto, una semana desde hoy. ?>
+        <input type="date" id="fecha_limite" name="fecha_limite" class="form-control" value="<?= htmlspecialchars($_POST['fecha_limite'] ?? date('Y-m-d', strtotime('+7 days'))) ?>" required>
         <div class="form-text">Tiene que ser posterior a la fecha de préstamo.</div>
       </div>
 

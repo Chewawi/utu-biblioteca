@@ -144,7 +144,7 @@ function informeInventario($pdo, $agrupar) {
         $categoria = $item->getCategoria() ?: 'Sin categoría';
 
         if ($agrupar === '') {
-            $filas[] = [$item->getTitulo(), ucfirst($item->getTipo()), $categoria, $stock, $prestados, $apartados, $disponibles];
+            $filas[] = [$item->getTitulo(), ucfirst($item->getTipo()), $item->getIsbn() ?: '—', $categoria, $stock, $prestados, $apartados, $disponibles];
         } else {
             // Una fila por grupo: las columnas del grupo y después títulos, stock, prestados, apartados y disponibles.
             $grupo = [];
@@ -174,8 +174,8 @@ function informeInventario($pdo, $agrupar) {
     }
 
     if ($agrupar === '') {
-        $columnas = ['Título', 'Tipo', 'Categoría', 'Stock', 'Prestados', 'Apartados', 'Disponibles'];
-        $filaTotales = ['Total: ' . $totales['titulos'] . ' ítems', '', '', $totales['stock'], $totales['prestados'], $totales['apartados'], $totales['disponibles']];
+        $columnas = ['Título', 'Tipo', 'ISBN', 'Categoría', 'Stock', 'Prestados', 'Apartados', 'Disponibles'];
+        $filaTotales = ['Total: ' . $totales['titulos'] . ' ítems', '', '', '', $totales['stock'], $totales['prestados'], $totales['apartados'], $totales['disponibles']];
     } else {
         ksort($filas); // los grupos en orden alfabético
         $filas = array_values($filas);
@@ -252,8 +252,9 @@ function celdaCsv($valor) {
     if (strpos('=+-@', $valor[0]) !== false) {
         return "'" . $valor;
     }
-    // Un teléfono como 099123456 Excel lo convierte en número y le borra el 0. Escrito ="099123456" lo deja como texto.
-    if (preg_match('/^0[0-9]+$/', $valor)) {
+    // Excel convierte en número los códigos hechos solo de dígitos: a un teléfono como 099123456 le borra
+    // el 0 y un ISBN como 9780307474728 lo muestra como 9,78E+12. Escrito ="..." lo deja como texto.
+    if (preg_match('/^(0[0-9]+|[0-9]{10,})$/', $valor)) {
         return '="' . $valor . '"';
     }
     return $valor;

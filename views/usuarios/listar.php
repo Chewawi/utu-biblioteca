@@ -12,11 +12,14 @@ require __DIR__ . '/../header.php';
   <div class="table-responsive">
     <table class="table table-hover align-middle">
       <thead>
-        <tr><th>Email</th><th>Rol</th><th><span class="visually-hidden">Acciones</span></th></tr>
+        <tr><th><span class="visually-hidden">Foto</span></th><th>Email</th><th>Rol</th><th><span class="visually-hidden">Acciones</span></th></tr>
       </thead>
       <tbody>
         <?php foreach ($usuarios as $usuario): ?>
           <tr>
+            <td class="columna-avatar">
+              <img src="uploads/<?= htmlspecialchars($usuario->getFoto()) ?>" alt="" width="40" height="40" class="avatar">
+            </td>
             <td class="fw-medium"><?= htmlspecialchars($usuario->getEmail()) ?></td>
             <td><span class="badge etiqueta"><?= htmlspecialchars($usuario->getRol()) ?></span></td>
             <td class="text-end text-nowrap">

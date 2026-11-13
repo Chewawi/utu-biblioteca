@@ -5,6 +5,7 @@ $enCatalogo   = in_array($accionActual, ['listarItems', 'verItem', 'formCrearIte
 $enPrestamos  = in_array($accionActual, ['listarPrestamos', 'formCrearPrestamo', 'crearPrestamo']);
 $enSocios     = in_array($accionActual, ['listarSocios', 'formCrearSocio', 'formEditarSocio', 'crearSocio', 'editarSocio']);
 $enUsuarios   = in_array($accionActual, ['listarUsuarios', 'formCrearUsuario', 'formEditarUsuario', 'crearUsuario', 'editarUsuario']);
+$enPerfil     = in_array($accionActual, ['verPerfil', 'editarPerfil', 'cambiarPass']);
 ?>
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="light">
@@ -78,11 +79,16 @@ $enUsuarios   = in_array($accionActual, ['listarUsuarios', 'formCrearUsuario', '
         </ul>
         <ul class="navbar-nav align-items-lg-center">
           <?php if (isset($_SESSION['usuario'])): ?>
+            <?php // Una sesión abierta antes de que hubiera fotos de perfil no la tiene: va la genérica. ?>
+            <?php $fotoBarra = $_SESSION['usuario']['foto'] ?? AVATAR_POR_DEFECTO; ?>
             <li class="nav-item">
-              <span class="navbar-text d-inline-flex align-items-center gap-2 me-lg-3 small">
-                <span class="email-usuario text-truncate" title="<?= htmlspecialchars($_SESSION['usuario']['email']) ?>"><?= htmlspecialchars($_SESSION['usuario']['email']) ?></span>
+              <a class="nav-link d-inline-flex align-items-center gap-2 me-lg-2 small <?= $enPerfil ? 'active' : '' ?>"
+                href="index.php?accion=verPerfil" title="Mi perfil">
+                <img src="uploads/<?= htmlspecialchars($fotoBarra) ?>" alt="" width="28" height="28" class="avatar">
+                <span class="visually-hidden">Mi perfil:</span>
+                <span class="email-usuario text-truncate"><?= htmlspecialchars($_SESSION['usuario']['email']) ?></span>
                 <span class="badge etiqueta"><?= htmlspecialchars($_SESSION['usuario']['rol']) ?></span>
-              </span>
+              </a>
             </li>
             <li class="nav-item"><a class="nav-link" href="index.php?accion=logout">Salir</a></li>
           <?php else: ?>

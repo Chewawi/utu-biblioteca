@@ -537,8 +537,8 @@ a {
   position: relative;
 }
 
-/* --- Imágenes de socios --- */
-/* Foto redonda de socio. El tamaño va en los atributos width/height del <img>. */
+/* --- Fotos de perfil --- */
+/* Foto redonda de un usuario. El tamaño va en los atributos width/height del <img>. */
 .avatar {
   border-radius: 50%;
   border: 1px solid var(--color-borde);

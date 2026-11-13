@@ -22,6 +22,7 @@ require_once __DIR__ . '/correo.php';
 require_once __DIR__ . '/controllers/ItemController.php';
 require_once __DIR__ . '/controllers/SocioController.php';
 require_once __DIR__ . '/controllers/UsuarioController.php';
+require_once __DIR__ . '/controllers/PerfilController.php';
 require_once __DIR__ . '/controllers/PrestamoController.php';
 require_once __DIR__ . '/controllers/ReservaController.php';
 require_once __DIR__ . '/controllers/AnaliticaController.php';
@@ -44,6 +45,17 @@ switch ($accion) {
         break;
     case 'logout':
         logout();
+        break;
+
+    // --- Mi perfil ---
+    case 'verPerfil':
+        verPerfil();
+        break;
+    case 'editarPerfil':
+        editarPerfil();
+        break;
+    case 'cambiarPass':
+        cambiarPass();
         break;
 
     // --- Items (catálogo) ---

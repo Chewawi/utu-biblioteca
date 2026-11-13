@@ -129,6 +129,12 @@ class Socio {
         return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono, $id]);
     }
 
+    /** Solo la dirección y el teléfono: lo que el socio cambia desde "Mi perfil". */
+    public static function actualizarContacto($pdo, $id, $direccion, $telefono) {
+        $stmt = $pdo->prepare("UPDATE socios SET direccion = ?, telefono = ? WHERE id = ?");
+        return $stmt->execute([$direccion, $telefono, $id]);
+    }
+
     public static function eliminar($pdo, $id) {
         $stmt = $pdo->prepare("DELETE FROM socios WHERE id = ?");
         return $stmt->execute([$id]);

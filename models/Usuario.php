@@ -72,6 +72,12 @@ class Usuario {
         return $stmt->execute([$email, $id]);
     }
 
+    /** $pass es el hash de la contraseña nueva, no el texto. */
+    public static function actualizarPass($pdo, $id, $pass) {
+        $stmt = $pdo->prepare("UPDATE usuarios SET pass = ? WHERE id = ?");
+        return $stmt->execute([$pass, $id]);
+    }
+
     public static function actualizarFoto($pdo, $id, $foto) {
         $stmt = $pdo->prepare("UPDATE usuarios SET foto = ? WHERE id = ?");
         return $stmt->execute([$foto, $id]);

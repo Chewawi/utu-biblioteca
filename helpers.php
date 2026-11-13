@@ -202,6 +202,24 @@ function calcularPaginacion($total, $pagina, $porPagina) {
     ];
 }
 
+/** true si $email tiene formato de correo (nombre@dominio.algo). */
+function emailValido($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+/**
+ * true si $telefono parece un teléfono: dígitos, espacios o guiones, con un +
+ * opcional adelante, y entre 8 y 15 dígitos (un fijo de Uruguay tiene 8, un
+ * celular 9 y con el código de país son más).
+ */
+function telefonoValido($telefono) {
+    if (!preg_match('/^\+?[0-9 -]+$/', $telefono)) {
+        return false;
+    }
+    $digitos = strlen(preg_replace('/[^0-9]/', '', $telefono));
+    return $digitos >= 8 && $digitos <= 15;
+}
+
 /** N° de socio para mostrar: el id del socio con ceros a la izquierda (7 -> "0007"). */
 function numeroSocio($id) {
     return str_pad($id, 4, '0', STR_PAD_LEFT);

@@ -22,6 +22,7 @@ require __DIR__ . '/../header.php';
 // si no, los datos guardados del socio (al editar) o vacío (al crear).
 $usuarioElegido = $_POST['usuario_id'] ?? (isset($socio) ? $socio->getUsuario()->getId() : '');
 $nombre    = $_POST['nombre'] ?? (isset($socio) ? $socio->getNombre() : '');
+$email     = $_POST['email'] ?? (isset($socio) ? $socio->getUsuario()->getEmail() : '');
 $direccion = $_POST['direccion'] ?? (isset($socio) ? $socio->getDireccion() : '');
 $telefono  = $_POST['telefono'] ?? (isset($socio) ? $socio->getTelefono() : '');
 $fotoActual = isset($socio) ? $socio->getUsuario()->getFoto() : AVATAR_POR_DEFECTO;
@@ -41,7 +42,9 @@ $fotoActual = isset($socio) ? $socio->getUsuario()->getFoto() : AVATAR_POR_DEFEC
         <select id="usuario_id" name="usuario_id" class="form-select" required>
           <option value="">-- Elegir usuario --</option>
           <?php foreach ($usuariosDisponibles as $u): ?>
-            <option value="<?= $u->getId() ?>" <?= $u->getId() == $usuarioElegido ? 'selected' : '' ?>>
+            <?php // data-email y data-foto: el script de abajo los copia al elegir el usuario. ?>
+            <option value="<?= $u->getId() ?>" <?= $u->getId() == $usuarioElegido ? 'selected' : '' ?>
+              data-email="<?= htmlspecialchars($u->getEmail()) ?>" data-foto="<?= htmlspecialchars($u->getFoto()) ?>">
               <?= htmlspecialchars($u->getEmail()) ?>
             </option>
           <?php endforeach; ?>
@@ -55,13 +58,20 @@ $fotoActual = isset($socio) ? $socio->getUsuario()->getFoto() : AVATAR_POR_DEFEC
       </div>
 
       <div class="mb-3">
-        <label class="form-label" for="direccion">Dirección</label>
-        <input type="text" id="direccion" name="direccion" class="form-control" required maxlength="255" value="<?= htmlspecialchars($direccion) ?>">
+        <label class="form-label" for="email">Correo</label>
+        <input type="email" id="email" name="email" class="form-control" required maxlength="100" value="<?= htmlspecialchars($email) ?>">
+        <div class="form-text">Es el de su cuenta: si lo cambiás, también cambia el email con el que inicia sesión.</div>
       </div>
 
       <div class="mb-3">
         <label class="form-label" for="telefono">Teléfono</label>
-        <input type="text" id="telefono" name="telefono" class="form-control" required maxlength="20" value="<?= htmlspecialchars($telefono) ?>">
+        <input type="tel" id="telefono" name="telefono" class="form-control" required maxlength="20" value="<?= htmlspecialchars($telefono) ?>">
+        <div class="form-text">Por ejemplo, 099 123 456 o 2900 1234.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="direccion">Dirección</label>
+        <input type="text" id="direccion" name="direccion" class="form-control" required maxlength="255" value="<?= htmlspecialchars($direccion) ?>">
       </div>
 
       <div class="mb-3">
@@ -85,6 +95,17 @@ $fotoActual = isset($socio) ? $socio->getUsuario()->getFoto() : AVATAR_POR_DEFEC
 </div>
 
 <script>
+  // Al elegir el usuario se completan su correo y su foto actual, para revisarlos o cambiarlos.
+  document.getElementById('usuario_id').addEventListener('change', function () {
+    var opcion = this.options[this.selectedIndex];
+    if (opcion.value !== '') {
+      document.getElementById('email').value = opcion.dataset.email;
+      if (document.getElementById('foto').files.length === 0) { // si ya eligieron una foto nueva, queda esa
+        document.getElementById('vista-previa').src = 'uploads/' + opcion.dataset.foto;
+      }
+    }
+  });
+
   // Vista previa: al elegir un archivo se muestra en el círculo, antes de guardar.
   document.getElementById('foto').addEventListener('change', function () {
     if (this.files.length > 0) {

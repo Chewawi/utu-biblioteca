@@ -67,6 +67,11 @@ class Usuario {
         return $stmt->execute([$rol, $email, $pass, $id]);
     }
 
+    public static function actualizarEmail($pdo, $id, $email) {
+        $stmt = $pdo->prepare("UPDATE usuarios SET email = ? WHERE id = ?");
+        return $stmt->execute([$email, $id]);
+    }
+
     public static function actualizarFoto($pdo, $id, $foto) {
         $stmt = $pdo->prepare("UPDATE usuarios SET foto = ? WHERE id = ?");
         return $stmt->execute([$foto, $id]);

@@ -88,8 +88,8 @@ function crearUsuario() {
         require __DIR__ . '/../views/usuarios/form.php';
         return;
     }
-    if (mb_strlen($email) > 100) {
-        $error = 'El email admite hasta 100 caracteres.';
+    if (mb_strlen($email) > 100 || !emailValido($email)) {
+        $error = 'Escribí un email válido, de hasta 100 caracteres (por ejemplo, nombre@correo.com).';
         require __DIR__ . '/../views/usuarios/form.php';
         return;
     }
@@ -142,8 +142,8 @@ function editarUsuario() {
     $error = '';
     if (($rol !== 'admin' && $rol !== 'socio') || $email === '') {
         $error = 'Completá el email y elegí un rol válido.';
-    } elseif (mb_strlen($email) > 100) {
-        $error = 'El email admite hasta 100 caracteres.';
+    } elseif (mb_strlen($email) > 100 || !emailValido($email)) {
+        $error = 'Escribí un email válido, de hasta 100 caracteres (por ejemplo, nombre@correo.com).';
     } elseif ($otro && $otro->getId() != $id) {
         $error = 'Ya existe otro usuario con ese email.';
     } elseif ($id == $_SESSION['usuario']['id'] && $rol !== 'admin') {

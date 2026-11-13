@@ -8,23 +8,52 @@ require_once __DIR__ . '/../models/Usuario.php';
 // ============================================================
 
 /**
- * Revisa los campos del formulario. Devuelve el mensaje de error, o '' si está todo bien.
+ * Revisa la dirección y el teléfono de un socio. La usan el formulario del
+ * admin y "Mi perfil". Devuelve el mensaje de error, o '' si está todo bien.
  * Los largos máximos son los de las columnas en database.sql.
  */
-function validarSocio($usuarioId, $nombre, $direccion, $telefono, $usuariosDisponibles) {
-    if ($usuarioId === '' || $nombre === '' || $direccion === '' || $telefono === '') {
+function validarContacto($direccion, $telefono) {
+    if ($direccion === '' || $telefono === '') {
+        return 'Completá la dirección y el teléfono.';
+    }
+    if (mb_strlen($direccion) > 255 || mb_strlen($telefono) > 20) {
+        return 'La dirección admite hasta 255 caracteres y el teléfono 20.';
+    }
+    if (!telefonoValido($telefono)) {
+        return 'El teléfono tiene que tener entre 8 y 15 números (podés separarlos con espacios o guiones).';
+    }
+    return '';
+}
+
+/**
+ * Revisa los campos del formulario. Devuelve el mensaje de error, o '' si está todo bien.
+ * $email es el de la cuenta del usuario elegido: se guarda en usuarios.
+ */
+function validarSocio($pdo, $usuarioId, $nombre, $email, $direccion, $telefono, $usuariosDisponibles) {
+    if ($usuarioId === '' || $nombre === '' || $email === '') {
         return 'Completá todos los campos y elegí un usuario.';
     }
-    if (mb_strlen($nombre) > 100 || mb_strlen($direccion) > 255 || mb_strlen($telefono) > 20) {
-        return 'El nombre admite hasta 100 caracteres, la dirección 255 y el teléfono 20.';
-    }
     // El usuario tiene que ser uno de la lista: rol socio y sin otro socio asociado.
+    $enLaLista = false;
     foreach ($usuariosDisponibles as $u) {
         if ($u->getId() == $usuarioId) {
-            return '';
+            $enLaLista = true;
         }
     }
-    return 'Elegí un usuario de la lista.';
+    if (!$enLaLista) {
+        return 'Elegí un usuario de la lista.';
+    }
+    if (mb_strlen($nombre) > 100) {
+        return 'El nombre admite hasta 100 caracteres.';
+    }
+    if (mb_strlen($email) > 100 || !emailValido($email)) {
+        return 'Escribí un correo válido, de hasta 100 caracteres (por ejemplo, nombre@correo.com).';
+    }
+    $otro = Usuario::buscarPorEmail($pdo, $email);
+    if ($otro && $otro->getId() != $usuarioId) {
+        return 'Ya existe otro usuario con ese correo.';
+    }
+    return validarContacto($direccion, $telefono);
 }
 
 function listarSocios() {
@@ -53,11 +82,12 @@ function crearSocio() {
 
     $usuarioId = $_POST['usuario_id'] ?? '';
     $nombre    = trim($_POST['nombre'] ?? '');
+    $email     = trim($_POST['email'] ?? '');
     $direccion = trim($_POST['direccion'] ?? '');
     $telefono  = trim($_POST['telefono'] ?? '');
 
     $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo);
-    $error = validarSocio($usuarioId, $nombre, $direccion, $telefono, $usuariosDisponibles);
+    $error = validarSocio($pdo, $usuarioId, $nombre, $email, $direccion, $telefono, $usuariosDisponibles);
     if ($error !== '') {
         require __DIR__ . '/../views/socios/form.php';
         return;
@@ -75,6 +105,7 @@ function crearSocio() {
     }
 
     Socio::crear($pdo, $usuarioId, $nombre, $direccion, $telefono);
+    Usuario::actualizarEmail($pdo, $usuarioId, $email);
     if ($fotoNueva !== null) {
         cambiarFotoDeUsuario($pdo, Usuario::buscarPorId($pdo, $usuarioId), $fotoNueva);
     }
@@ -110,11 +141,12 @@ function editarSocio() {
 
     $usuarioId = $_POST['usuario_id'] ?? '';
     $nombre    = trim($_POST['nombre'] ?? '');
+    $email     = trim($_POST['email'] ?? '');
     $direccion = trim($_POST['direccion'] ?? '');
     $telefono  = trim($_POST['telefono'] ?? '');
 
     $usuariosDisponibles = Usuario::listarDisponiblesParaSocio($pdo, $socio->getUsuario()->getId());
-    $error = validarSocio($usuarioId, $nombre, $direccion, $telefono, $usuariosDisponibles);
+    $error = validarSocio($pdo, $usuarioId, $nombre, $email, $direccion, $telefono, $usuariosDisponibles);
     if ($error !== '') {
         require __DIR__ . '/../views/socios/form.php';
         return;
@@ -132,6 +164,7 @@ function editarSocio() {
     }
 
     Socio::actualizar($pdo, $id, $usuarioId, $nombre, $direccion, $telefono);
+    Usuario::actualizarEmail($pdo, $usuarioId, $email);
     if ($fotoNueva !== null) {
         cambiarFotoDeUsuario($pdo, Usuario::buscarPorId($pdo, $usuarioId), $fotoNueva);
     }

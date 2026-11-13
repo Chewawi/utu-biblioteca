@@ -49,7 +49,7 @@ require __DIR__ . '/../header.php';
           <?php foreach ($socios as $socio): ?>
             <tr>
               <td class="columna-avatar">
-                <img src="uploads/<?= htmlspecialchars($socio->getFoto()) ?>" alt="" width="40" height="40"
+                <img src="uploads/<?= htmlspecialchars($socio->getUsuario()->getFoto()) ?>" alt="" width="40" height="40"
                   class="avatar">
               </td>
               <td class="fw-medium"><?= htmlspecialchars($socio->getNombre()) ?></td>

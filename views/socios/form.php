@@ -18,7 +18,7 @@ $usuarioElegido = $_POST['usuario_id'] ?? (isset($socio) ? $socio->getUsuario()-
 $nombre    = $_POST['nombre'] ?? (isset($socio) ? $socio->getNombre() : '');
 $direccion = $_POST['direccion'] ?? (isset($socio) ? $socio->getDireccion() : '');
 $telefono  = $_POST['telefono'] ?? (isset($socio) ? $socio->getTelefono() : '');
-$fotoActual = isset($socio) ? $socio->getFoto() : AVATAR_POR_DEFECTO;
+$fotoActual = isset($socio) ? $socio->getUsuario()->getFoto() : AVATAR_POR_DEFECTO;
 ?>
 
 <div class="card ancho-formulario">

@@ -30,6 +30,7 @@ function login() {
             'id'    => $usuario->getId(),
             'email' => $usuario->getEmail(),
             'rol'   => $usuario->getRol(),
+            'foto'  => $usuario->getFoto(), // para el avatar de la barra
         ];
         header('Location: index.php?accion=listarItems');
         exit;
@@ -44,6 +45,19 @@ function logout() {
     session_destroy();
     header('Location: index.php?accion=login');
     exit;
+}
+
+
+/**
+ * Pone $fotoNueva como foto de la cuenta $usuario y borra la anterior, que ya
+ * no la usa nadie. Si es la cuenta de quien está logueado, cambia también la de la barra.
+ */
+function cambiarFotoDeUsuario($pdo, $usuario, $fotoNueva) {
+    Usuario::actualizarFoto($pdo, $usuario->getId(), $fotoNueva);
+    borrarImagen($usuario->getFoto());
+    if ($_SESSION['usuario']['id'] == $usuario->getId()) {
+        $_SESSION['usuario']['foto'] = $fotoNueva;
+    }
 }
 
 
@@ -165,8 +179,9 @@ function eliminarUsuario() {
     requerirAdmin();
 
     $id = $_POST['id'] ?? '';
+    $usuario = Usuario::buscarPorId($pdo, $id);
 
-    if (!Usuario::buscarPorId($pdo, $id)) {
+    if (!$usuario) {
         flash('danger', 'Usuario no encontrado.');
         header('Location: index.php?accion=listarUsuarios');
         exit;
@@ -183,6 +198,7 @@ function eliminarUsuario() {
     }
 
     Usuario::eliminar($pdo, $id);
+    borrarImagen($usuario->getFoto());
     flash('success', 'Usuario eliminado.');
     header('Location: index.php?accion=listarUsuarios');
     exit;

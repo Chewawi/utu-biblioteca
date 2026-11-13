@@ -9,11 +9,13 @@ USE biblioteca;
 
 -- Cuentas de acceso. rol: 'admin' gestiona todo, 'socio' solo mira el
 -- catálogo y sus préstamos. "pass" guarda un hash, nunca texto plano.
+-- "foto" es la foto de perfil de la cuenta, sea admin o socio.
 CREATE TABLE IF NOT EXISTS usuarios (
     id      INT AUTO_INCREMENT PRIMARY KEY,
     rol     ENUM('admin', 'socio') NOT NULL DEFAULT 'socio',
     email   VARCHAR(100) NOT NULL UNIQUE,
-    pass    VARCHAR(255) NOT NULL
+    pass    VARCHAR(255) NOT NULL,
+    foto    VARCHAR(100) NOT NULL DEFAULT 'avatar.png'
 );
 
 -- Datos personales del socio, enganchado a una cuenta de usuarios. Para
@@ -24,7 +26,6 @@ CREATE TABLE IF NOT EXISTS socios (
     nombre      VARCHAR(100) NOT NULL,
     direccion   VARCHAR(255) NOT NULL,
     telefono    VARCHAR(20)  NOT NULL,
-    foto        VARCHAR(100) NOT NULL DEFAULT 'avatar.png',
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT
 );
 

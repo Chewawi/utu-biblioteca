@@ -13,15 +13,13 @@ class Socio {
     private $nombre;
     private $direccion;
     private $telefono;
-    private $foto;
 
-    public function __construct($id, $usuario, $nombre, $direccion, $telefono, $foto) {
+    public function __construct($id, $usuario, $nombre, $direccion, $telefono) {
         $this->id = $id;
         $this->usuario = $usuario;
         $this->nombre = $nombre;
         $this->direccion = $direccion;
         $this->telefono = $telefono;
-        $this->foto = $foto;
     }
 
     // --- getters ---
@@ -30,18 +28,18 @@ class Socio {
     public function getNombre() { return $this->nombre; }
     public function getDireccion() { return $this->direccion; }
     public function getTelefono() { return $this->telefono; }
-    public function getFoto() { return $this->foto; }
 
     // --- acceso a datos ---
 
-    // Cada socio con los datos de su cuenta: el JOIN los trae en la misma consulta.
+    // Cada socio con los datos de su cuenta (la foto también es de la cuenta):
+    // el JOIN los trae en la misma consulta.
     const DESDE = ' FROM socios s INNER JOIN usuarios u ON s.usuario_id = u.id';
-    const SELECT = 'SELECT s.*, u.rol, u.email, u.pass' . self::DESDE;
+    const SELECT = 'SELECT s.*, u.rol, u.email, u.pass, u.foto' . self::DESDE;
 
     /** Arma un Socio, con su Usuario, con una fila de SELECT. */
     private static function desdeFila($f) {
-        $usuario = new Usuario($f['usuario_id'], $f['rol'], $f['email'], $f['pass']);
-        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono'], $f['foto']);
+        $usuario = new Usuario($f['usuario_id'], $f['rol'], $f['email'], $f['pass'], $f['foto']);
+        return new Socio($f['id'], $usuario, $f['nombre'], $f['direccion'], $f['telefono']);
     }
 
     /**
@@ -107,18 +105,18 @@ class Socio {
         return $f ? self::desdeFila($f) : null;
     }
 
-    public static function crear($pdo, $usuarioId, $nombre, $direccion, $telefono, $foto) {
+    public static function crear($pdo, $usuarioId, $nombre, $direccion, $telefono) {
         $stmt = $pdo->prepare(
-            "INSERT INTO socios (usuario_id, nombre, direccion, telefono, foto) VALUES (?, ?, ?, ?, ?)"
+            "INSERT INTO socios (usuario_id, nombre, direccion, telefono) VALUES (?, ?, ?, ?)"
         );
-        return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono, $foto]);
+        return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono]);
     }
 
-    public static function actualizar($pdo, $id, $usuarioId, $nombre, $direccion, $telefono, $foto) {
+    public static function actualizar($pdo, $id, $usuarioId, $nombre, $direccion, $telefono) {
         $stmt = $pdo->prepare(
-            "UPDATE socios SET usuario_id = ?, nombre = ?, direccion = ?, telefono = ?, foto = ? WHERE id = ?"
+            "UPDATE socios SET usuario_id = ?, nombre = ?, direccion = ?, telefono = ? WHERE id = ?"
         );
-        return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono, $foto, $id]);
+        return $stmt->execute([$usuarioId, $nombre, $direccion, $telefono, $id]);
     }
 
     public static function eliminar($pdo, $id) {

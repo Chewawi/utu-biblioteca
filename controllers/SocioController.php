@@ -63,14 +63,21 @@ function crearSocio() {
         return;
     }
 
-    $foto = guardarImagen($_FILES['foto'] ?? [], AVATAR_POR_DEFECTO);
-    if ($foto === null) {
-        $error = 'La foto tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
-        require __DIR__ . '/../views/socios/form.php';
-        return;
+    // La foto es de la cuenta del socio. Si no suben una, queda la que ya tenía.
+    $fotoNueva = null;
+    if (!empty($_FILES['foto']['name'])) {
+        $fotoNueva = guardarImagen($_FILES['foto'], AVATAR_POR_DEFECTO);
+        if ($fotoNueva === null) {
+            $error = 'La foto tiene que ser JPG, PNG o WEBP, y pesar menos de 2 MB.';
+            require __DIR__ . '/../views/socios/form.php';
+            return;
+        }
     }
 
-    Socio::crear($pdo, $usuarioId, $nombre, $direccion, $telefono, $foto);
+    Socio::crear($pdo, $usuarioId, $nombre, $direccion, $telefono);
+    if ($fotoNueva !== null) {
+        cambiarFotoDeUsuario($pdo, Usuario::buscarPorId($pdo, $usuarioId), $fotoNueva);
+    }
     flash('success', 'Socio creado correctamente.');
     header('Location: index.php?accion=listarSocios');
     exit;
@@ -113,8 +120,8 @@ function editarSocio() {
         return;
     }
 
-    // Si no suben una foto nueva, conservamos la que ya tenía.
-    $foto = $socio->getFoto();
+    // La foto es de la cuenta del socio. Si no suben una nueva, queda la que ya tenía.
+    $fotoNueva = null;
     if (!empty($_FILES['foto']['name'])) {
         $fotoNueva = guardarImagen($_FILES['foto'], AVATAR_POR_DEFECTO);
         if ($fotoNueva === null) {
@@ -122,12 +129,11 @@ function editarSocio() {
             require __DIR__ . '/../views/socios/form.php';
             return;
         }
-        $foto = $fotoNueva;
     }
 
-    Socio::actualizar($pdo, $id, $usuarioId, $nombre, $direccion, $telefono, $foto);
-    if ($foto !== $socio->getFoto()) {
-        borrarImagen($socio->getFoto()); // la foto vieja ya no la usa nadie
+    Socio::actualizar($pdo, $id, $usuarioId, $nombre, $direccion, $telefono);
+    if ($fotoNueva !== null) {
+        cambiarFotoDeUsuario($pdo, Usuario::buscarPorId($pdo, $usuarioId), $fotoNueva);
     }
     flash('success', 'Socio actualizado correctamente.');
     header('Location: index.php?accion=listarSocios');
@@ -152,8 +158,8 @@ function eliminarSocio() {
         exit;
     }
 
+    // La foto no se borra: es de la cuenta, que sigue existiendo.
     Socio::eliminar($pdo, $id);
-    borrarImagen($socio->getFoto());
     flash('success', 'Socio eliminado.');
     header('Location: index.php?accion=listarSocios');
     exit;

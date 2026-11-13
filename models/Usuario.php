@@ -1,8 +1,8 @@
 <?php
 // ============================================================
 //  Modelo Usuario
-//  Representa una cuenta con email, contraseña (hasheada) y un
-//  rol ('admin' o 'socio').
+//  Representa una cuenta con email, contraseña (hasheada), un
+//  rol ('admin' o 'socio') y una foto de perfil.
 // ============================================================
 
 class Usuario {
@@ -10,12 +10,14 @@ class Usuario {
     private $rol;
     private $email;
     private $pass;
+    private $foto;
 
-    public function __construct($id, $rol, $email, $pass) {
+    public function __construct($id, $rol, $email, $pass, $foto) {
         $this->id = $id;
         $this->rol = $rol;
         $this->email = $email;
         $this->pass = $pass;
+        $this->foto = $foto;
     }
 
     // --- getters ---
@@ -23,12 +25,13 @@ class Usuario {
     public function getRol() { return $this->rol; }
     public function getEmail() { return $this->email; }
     public function getPass() { return $this->pass; }
+    public function getFoto() { return $this->foto; }
 
     // --- acceso a datos ---
 
     /** Arma un Usuario con una fila de la tabla. */
     private static function desdeFila($f) {
-        return new Usuario($f['id'], $f['rol'], $f['email'], $f['pass']);
+        return new Usuario($f['id'], $f['rol'], $f['email'], $f['pass'], $f['foto']);
     }
 
     public static function listar($pdo) {
@@ -62,6 +65,11 @@ class Usuario {
     public static function actualizar($pdo, $id, $rol, $email, $pass) {
         $stmt = $pdo->prepare("UPDATE usuarios SET rol = ?, email = ?, pass = ? WHERE id = ?");
         return $stmt->execute([$rol, $email, $pass, $id]);
+    }
+
+    public static function actualizarFoto($pdo, $id, $foto) {
+        $stmt = $pdo->prepare("UPDATE usuarios SET foto = ? WHERE id = ?");
+        return $stmt->execute([$foto, $id]);
     }
 
     public static function eliminar($pdo, $id) {

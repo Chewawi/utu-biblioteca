@@ -4,7 +4,13 @@ require __DIR__ . '/../header.php';
 ?>
 
 <div class="encabezado">
-  <h1 class="h3"><?= htmlspecialchars($tituloPagina) ?></h1>
+  <div>
+    <h1 class="h3"><?= htmlspecialchars($tituloPagina) ?></h1>
+    <p class="text-body-secondary small mb-0 mt-1">
+      <?php // El N° de socio lo pone la base al crearlo y no se edita. ?>
+      <?= isset($socio) ? 'N° de socio ' . numeroSocio($socio->getId()) : 'El N° de socio se asigna solo al guardar.' ?>
+    </p>
+  </div>
 </div>
 
 <?php if (isset($error)): ?>

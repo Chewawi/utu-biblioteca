@@ -80,7 +80,7 @@ function repartirEjemplares($pdo, $itemId) {
     $reparto = ['socios' => [], 'sin_aviso' => 0];
     foreach (Reserva::avanzarCola($pdo, $itemId) as $r) {
         $reparto['socios'][] = $r['socio_nombre'];
-        if (!enviarAvisoReservaLista($r['email'], $r['socio_nombre'], $r['item_titulo'], $r['fecha_vencimiento'])) {
+        if (!enviarAvisoReservaLista($r['email'], $r['socio_nombre'], $r['socio_id'], $r['item_titulo'], $r['fecha_vencimiento'])) {
             $reparto['sin_aviso']++;
         }
     }

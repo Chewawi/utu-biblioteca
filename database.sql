@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 
 -- Datos personales del socio, enganchado a una cuenta de usuarios. Para
 -- borrar la cuenta hay que borrar antes al socio (ON DELETE RESTRICT).
+-- El id es el N° de socio: lo pone la base y nunca se cambia.
 CREATE TABLE IF NOT EXISTS socios (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id  INT NOT NULL UNIQUE,

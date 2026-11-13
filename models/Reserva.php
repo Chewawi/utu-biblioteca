@@ -240,7 +240,7 @@ class Reserva {
      * pendientes más viejas pasan a 'lista' (una por ejemplar) y tienen
      * DIAS_PARA_RETIRAR días para retirarlo.
      * Devuelve las que pasaron a 'lista', para avisarles: filas con id,
-     * socio_nombre, email, item_titulo y fecha_vencimiento.
+     * socio_id, socio_nombre, email, item_titulo y fecha_vencimiento.
      */
     public static function avanzarCola($pdo, $itemId) {
         $item = Item::buscarPorId($pdo, $itemId);
@@ -250,7 +250,7 @@ class Reserva {
 
         // LIMIT es un entero que calculamos nosotros, por eso va directo en el SQL.
         $stmt = $pdo->prepare("
-            SELECT r.id, s.nombre AS socio_nombre, u.email, i.titulo AS item_titulo
+            SELECT r.id, s.id AS socio_id, s.nombre AS socio_nombre, u.email, i.titulo AS item_titulo
         " . self::DESDE . "
             INNER JOIN usuarios u ON s.usuario_id = u.id
             WHERE r.item_id = ? AND r.estado = 'pendiente'

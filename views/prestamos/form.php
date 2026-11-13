@@ -28,7 +28,7 @@ require __DIR__ . '/../header.php';
         <select id="socio_id" name="socio_id" class="form-select select2-buscable" required>
           <option value="">-- Elegir socio --</option>
           <?php foreach ($socios as $socio): ?>
-            <option value="<?= $socio->getId() ?>" <?= $socioId == $socio->getId() ? 'selected' : '' ?>><?= htmlspecialchars($socio->getNombre()) ?></option>
+            <option value="<?= $socio->getId() ?>" <?= $socioId == $socio->getId() ? 'selected' : '' ?>><?= numeroSocio($socio->getId()) ?> · <?= htmlspecialchars($socio->getNombre()) ?></option>
           <?php endforeach; ?>
         </select>
       </div>

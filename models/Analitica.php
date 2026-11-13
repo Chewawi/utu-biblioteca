@@ -179,7 +179,7 @@ class Analitica {
         // va en el ON y no en el WHERE: el WHERE los sacaría.
         [$on, $parametros] = self::filtrarPeriodo($desde, $hasta, ['p.socio_id = s.id'], ' ON ');
         $stmt = $pdo->prepare("
-            SELECT s.nombre, s.telefono,
+            SELECT s.id, s.nombre, s.telefono,
                    COUNT(p.id) AS prestamos,
                    COALESCE(SUM(p.estado = 'activo'), 0) AS activos,
                    COALESCE(SUM(" . Prestamo::VENCIDO . "), 0) AS vencidos,

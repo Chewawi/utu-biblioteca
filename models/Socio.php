@@ -45,7 +45,8 @@ class Socio {
     /**
      * Todos los socios, cada uno con su Usuario.
      * $filtros es un array con estas claves (todas opcionales):
-     *   q          -> texto que se busca en el nombre, el teléfono o el email,
+     *   q          -> texto que se busca en el nombre, el teléfono o el email;
+     *                 si son solo dígitos, también el N° de socio (0007 o 7),
      *   pagina     -> número de página (si está fuera de rango se corrige),
      *   por_pagina -> cuántos por página; 0 o sin poner = todos, sin paginar.
      * Devuelve ['filas' => socios de esa página, 'total' => cantidad de resultados,
@@ -56,7 +57,12 @@ class Socio {
 
         $condiciones = [];
         $parametros = [];
-        if ($filtros['q'] !== '') {
+        if (ctype_digit($filtros['q'])) {
+            // (int) le saca los ceros de adelante: "0007" busca el socio 7.
+            $condiciones[] = '(s.id = ? OR s.telefono LIKE ?)';
+            $parametros[] = (int) $filtros['q'];
+            $parametros[] = '%' . $filtros['q'] . '%';
+        } elseif ($filtros['q'] !== '') {
             $condiciones[] = '(s.nombre LIKE ? OR s.telefono LIKE ? OR u.email LIKE ?)';
             $parametros[] = '%' . $filtros['q'] . '%';
             $parametros[] = '%' . $filtros['q'] . '%';
@@ -85,9 +91,13 @@ class Socio {
         return ['filas' => $socios, 'total' => $total, 'pagina' => $paginacion['pagina'], 'paginas' => $paginacion['paginas']];
     }
 
-    /** Todos los socios como [id => nombre], para los desplegables de los filtros. */
+    /** Todos los socios como [id => "0007 · nombre"], para los desplegables de los filtros. */
     public static function nombres($pdo) {
-        return $pdo->query('SELECT id, nombre FROM socios ORDER BY nombre')->fetchAll(PDO::FETCH_KEY_PAIR);
+        $nombres = [];
+        foreach ($pdo->query('SELECT id, nombre FROM socios ORDER BY nombre') as $f) {
+            $nombres[$f['id']] = numeroSocio($f['id']) . ' · ' . $f['nombre'];
+        }
+        return $nombres;
     }
 
     public static function buscarPorId($pdo, $id) {

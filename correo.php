@@ -86,8 +86,8 @@ function textoCorreo($saludo, $parrafos, $lista = []) {
 }
 
 /** Le avisa al socio que se registró su préstamo y hasta cuándo lo tiene. */
-function enviarConfirmacionPrestamo($email, $nombre, $titulo, $fechaPrestamo, $fechaLimite) {
-    $saludo = 'Hola, ' . $nombre . ':';
+function enviarConfirmacionPrestamo($email, $nombre, $socioId, $titulo, $fechaPrestamo, $fechaLimite) {
+    $saludo = 'Hola, ' . $nombre . ' (N° de socio ' . numeroSocio($socioId) . '):';
     $parrafos = [
         'Registramos tu préstamo de «' . $titulo . '» el ' . formatoFecha($fechaPrestamo) . '.',
         'Tenés que devolverlo hasta el ' . formatoFecha($fechaLimite) . '.',
@@ -97,8 +97,8 @@ function enviarConfirmacionPrestamo($email, $nombre, $titulo, $fechaPrestamo, $f
 }
 
 /** Le avisa al socio que su reserva quedó lista y hasta cuándo le guardamos el ejemplar. */
-function enviarAvisoReservaLista($email, $nombre, $titulo, $fechaVencimiento) {
-    $saludo = 'Hola, ' . $nombre . ':';
+function enviarAvisoReservaLista($email, $nombre, $socioId, $titulo, $fechaVencimiento) {
+    $saludo = 'Hola, ' . $nombre . ' (N° de socio ' . numeroSocio($socioId) . '):';
     $parrafos = [
         'Tu reserva de «' . $titulo . '» está lista: te apartamos un ejemplar.',
         'Podés retirarlo en la biblioteca hasta el ' . formatoFecha($fechaVencimiento) . '. Después la reserva vence y el ejemplar queda libre para otro socio.',
@@ -123,8 +123,8 @@ function enviarRecordatoriosVencidos($pdo) {
     }
 
     $resultado = ['enviados' => 0, 'fallidos' => 0];
-    foreach ($porSocio as $socio) {
-        $saludo = 'Hola, ' . $socio['nombre'] . ':';
+    foreach ($porSocio as $socioId => $socio) {
+        $saludo = 'Hola, ' . $socio['nombre'] . ' (N° de socio ' . numeroSocio($socioId) . '):';
         $parrafos = [count($socio['items']) === 1
             ? 'Este préstamo ya pasó su fecha límite. Por favor, devolvelo lo antes posible en la biblioteca:'
             : 'Estos préstamos ya pasaron su fecha límite. Por favor, devolvelos lo antes posible en la biblioteca:'];

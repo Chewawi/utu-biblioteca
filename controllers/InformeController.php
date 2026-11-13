@@ -205,6 +205,7 @@ function informeSocios($pdo, $filtros) {
     $filas = [];
     foreach (Analitica::actividadSocios($pdo, $filtros['desde'], $filtros['hasta']) as $f) {
         $filas[] = [
+            numeroSocio($f['id']),
             $f['nombre'],
             $f['telefono'],
             (int) $f['prestamos'],
@@ -218,7 +219,7 @@ function informeSocios($pdo, $filtros) {
     return [
         'titulo'   => 'Actividad de socios',
         'detalle'  => textoPeriodo($filtros['desde'], $filtros['hasta']) . ' · según la fecha de préstamo',
-        'columnas' => ['Socio', 'Teléfono', 'Préstamos', 'Activos', 'Vencidos', 'Devueltos', 'Devueltos tarde', 'Último préstamo'],
+        'columnas' => ['N° de socio', 'Socio', 'Teléfono', 'Préstamos', 'Activos', 'Vencidos', 'Devueltos', 'Devueltos tarde', 'Último préstamo'],
         'filas'    => $filas,
         'totales'  => null,
     ];

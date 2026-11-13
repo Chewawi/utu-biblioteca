@@ -155,7 +155,7 @@ function crearPrestamo() {
     $socio = Socio::buscarPorId($pdo, $socioId);
     if (!correoConfigurado()) {
         flash('success', $mensaje);
-    } elseif (enviarConfirmacionPrestamo($socio->getUsuario()->getEmail(), $socio->getNombre(), $item->getTitulo(), $fecha, $fechaLimite)) {
+    } elseif (enviarConfirmacionPrestamo($socio->getUsuario()->getEmail(), $socio->getNombre(), $socio->getId(), $item->getTitulo(), $fecha, $fechaLimite)) {
         flash('success', $mensaje . ' Le avisamos al socio por correo.');
     } else {
         flash('warning', $mensaje . ' No se pudo enviar el correo al socio.');

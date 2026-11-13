@@ -12,7 +12,7 @@ require __DIR__ . '/../header.php';
   <input type="hidden" name="accion" value="listarSocios">
   <div class="input-group">
     <input type="search" name="q" class="form-control" aria-label="Buscar"
-      placeholder="Buscar por nombre, teléfono o email..."
+      placeholder="Buscar por nombre, N° de socio, teléfono o email..."
       value="<?= htmlspecialchars($filtros['q']) ?>">
     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
   </div>
@@ -25,7 +25,7 @@ require __DIR__ . '/../header.php';
   <div class="card estado-vacio">
     <?php if ($filtros['q'] !== ''): ?>
       <p class="titulo">Ningún socio coincide con la búsqueda.</p>
-      <p class="small mb-0">Probá con otro nombre, teléfono o email.</p>
+      <p class="small mb-0">Probá con otro nombre, N° de socio, teléfono o email.</p>
     <?php else: ?>
       <p class="titulo">No hay socios registrados todavía.</p>
       <p class="small mb-0">Agregá el primero con «Nuevo socio».</p>
@@ -38,6 +38,7 @@ require __DIR__ . '/../header.php';
         <thead>
           <tr>
             <th><span class="visually-hidden">Foto</span></th>
+            <th>N° de socio</th>
             <th>Nombre</th>
             <th>Dirección</th>
             <th>Teléfono</th>
@@ -52,6 +53,7 @@ require __DIR__ . '/../header.php';
                 <img src="uploads/<?= htmlspecialchars($socio->getUsuario()->getFoto()) ?>" alt="" width="40" height="40"
                   class="avatar">
               </td>
+              <td class="text-body-secondary"><?= numeroSocio($socio->getId()) ?></td>
               <td class="fw-medium"><?= htmlspecialchars($socio->getNombre()) ?></td>
               <td class="text-body-secondary"><?= htmlspecialchars($socio->getDireccion()) ?></td>
               <td class="text-body-secondary text-nowrap"><?= htmlspecialchars($socio->getTelefono()) ?></td>

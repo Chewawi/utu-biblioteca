@@ -202,6 +202,11 @@ function calcularPaginacion($total, $pagina, $porPagina) {
     ];
 }
 
+/** N° de socio para mostrar: el id del socio con ceros a la izquierda (7 -> "0007"). */
+function numeroSocio($id) {
+    return str_pad($id, 4, '0', STR_PAD_LEFT);
+}
+
 /** true si $fecha es una fecha real con formato AAAA-MM-DD. */
 function fechaValida($fecha) {
     $d = DateTime::createFromFormat('Y-m-d', $fecha);
